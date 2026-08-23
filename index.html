@@ -1,0 +1,1095 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แบบเฝ้าระวังการติดเชื้อ (ICC)</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Feather Icons -->
+    <script src="https://unpkg.com/feather-icons"></script>
+    
+    <!-- Google Fonts: Sarabun -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Sarabun', sans-serif;
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        
+        /* CSS สำหรับ Print Preview A4 */
+        .a4-page {
+            width: 210mm;
+            min-height: 297mm;
+            background: white;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            margin: 0 auto;
+            padding: 15mm;
+            position: relative;
+        }
+        
+        /* CSS สำหรับการพิมพ์จริง (Print) */
+        @media print {
+            body * { visibility: hidden; }
+            #preview-print-area, #preview-print-area * { visibility: visible; }
+            #preview-print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; display: block; }
+            .a4-page { box-shadow: none !important; margin: 0 !important; page-break-after: always; break-after: page; }
+            .no-print { display: none !important; }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 h-screen flex overflow-hidden">
+
+    <div class="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        <!-- Header Patient Info (แบบกรอกข้อมูล) -->
+        <div class="bg-white p-4 border-b border-gray-200 flex items-center justify-between shrink-0 shadow-sm z-10">
+            <div class="flex items-center gap-4 w-full">
+                <div class="w-14 h-14 bg-gray-100 rounded-full overflow-hidden border border-gray-200 flex items-center justify-center shrink-0">
+                   <i data-feather="user" class="text-gray-400 w-6 h-6"></i>
+                </div>
+                <div class="w-full flex-1">
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-4">
+                        <input type="text" placeholder="ระบุ ชื่อ-สกุลผู้ป่วย" class="text-xl font-bold text-gray-800 bg-transparent border-b-2 border-transparent focus:border-red-500 focus:outline-none px-1 py-0.5 min-w-[200px] w-full sm:w-auto placeholder:font-normal placeholder:text-gray-300">
+                        <div class="flex items-center gap-1">
+                            <span class="text-sm font-medium text-gray-500">อายุ</span>
+                            <input type="text" placeholder="ปี" class="text-sm font-medium bg-transparent border-b border-gray-300 focus:border-red-500 focus:outline-none w-10 text-center">
+                            <span class="text-sm font-medium text-gray-500">วัน</span>
+                        </div>
+                        <div class="flex items-center bg-red-50 border border-red-100 rounded-lg px-2 py-1">
+                            <span class="text-xs font-bold text-red-700 mr-1">AN</span>
+                            <input type="text" placeholder="ระบุ AN" class="text-sm font-medium bg-transparent text-red-700 placeholder-red-300 focus:outline-none w-24">
+                        </div>
+                        <div class="flex items-center bg-red-50 border border-red-100 rounded-lg px-2 py-1">
+                            <span class="text-xs font-bold text-red-700 mr-1">HN</span>
+                            <input type="text" placeholder="ระบุ HN" class="text-sm font-medium bg-transparent text-red-700 placeholder-red-300 focus:outline-none w-24">
+                        </div>
+                    </div>
+                    
+                    <div class="text-sm text-gray-500 mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
+                        <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
+                            หอผู้ป่วย:
+                            <input type="text" placeholder="ระบุหอผู้ป่วย" class="bg-transparent focus:outline-none px-1 w-32 placeholder:text-gray-400 font-medium text-gray-700"> 
+                            เตียง: 
+                            <input type="text" placeholder="ระบุเตียง" class="bg-transparent focus:outline-none px-1 w-16 placeholder:text-gray-400 font-medium text-gray-700">
+                        </span>
+                        <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
+                            Admit: 
+                            <input type="datetime-local" id="global-admit-date" onchange="calculateTransferDays()" class="bg-transparent focus:outline-none px-1 text-gray-700 cursor-pointer font-medium">
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Area -->
+        <div class="flex-1 p-4 sm:p-6 overflow-y-auto bg-gray-50">
+            
+            <div class="bg-white border border-gray-200 rounded-xl p-4 mb-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-red-600 w-1.5 h-10 rounded-full"></div>
+                    <div>
+                        <h3 class="font-bold text-lg text-gray-800">แบบเฝ้าระวังการติดเชื้อในโรงพยาบาล (FR-ICC-01_68)</h3>
+                    </div>
+                </div>
+                <div class="text-left sm:text-right flex items-center gap-2">
+                    <span class="text-sm text-gray-500">หน่วยงานที่กำลังบันทึก:</span>
+                    <input type="text" placeholder="ระบุหน่วยงาน" class="font-medium text-red-700 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 focus:outline-none focus:border-red-500 w-48 text-sm placeholder:text-red-300">
+                </div>
+            </div>
+
+            <!-- Two Column Layout for Form -->
+            <div class="flex flex-col lg:flex-row gap-4 h-[calc(100%-100px)] min-h-[700px]">
+                
+                <!-- Left Nav Index (แบ่งตามระบบ 13 แท็บ) -->
+                <div class="w-full lg:w-1/4 bg-white border border-gray-200 rounded-xl p-2 flex flex-col gap-1 shadow-sm h-full overflow-y-auto hide-scrollbar shrink-0">
+                    <div class="p-2 text-sm font-bold text-gray-500 border-b border-gray-100 mb-2 uppercase tracking-wide">เลือกระบบเฝ้าระวัง</div>
+                    
+                    <button onclick="switchTab('general')" id="nav-general" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-red-50 border-red-200 text-red-700">
+                        <div class="flex items-center gap-3"><i data-feather="file-text" class="w-4 h-4 icon-color text-red-500"></i><span class="font-medium text-sm font-bold nav-label">1. ข้อมูลทั่วไป</span></div>
+                    </button>
+                    <button onclick="switchTab('pneumonia')" id="nav-pneumonia" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="wind" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">2. Pneumonia</span></div>
+                    </button>
+                    <button onclick="switchTab('uti')" id="nav-uti" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="droplet" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">3. UTI</span></div>
+                    </button>
+                    <button onclick="switchTab('bsi')" id="nav-bsi" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="activity" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">4. Primary blood stream infection</span></div>
+                    </button>
+                    <button onclick="switchTab('surgery')" id="nav-surgery" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="scissors" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">5. Surgical Site Infection</span></div>
+                    </button>
+                    <button onclick="switchTab('endometritis')" id="nav-endometritis" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="heart" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">6. Endometritis (เยื่อบุมดลูกอักเสบ)</span></div>
+                    </button>
+                    <button onclick="switchTab('episiotomy')" id="nav-episiotomy" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="user" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">7. Episiotomy</span></div>
+                    </button>
+                    <button onclick="switchTab('skin')" id="nav-skin" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="target" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">8. Skin Infection</span></div>
+                    </button>
+                    <button onclick="switchTab('bedsore')" id="nav-bedsore" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="layers" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">9. Bed sore Infection</span></div>
+                    </button>
+                    <button onclick="switchTab('omphalitis')" id="nav-omphalitis" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="circle" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">10. Omphalitis</span></div>
+                    </button>
+                    <button onclick="switchTab('eye')" id="nav-eye" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="eye" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">11. ตา</span></div>
+                    </button>
+                    <button onclick="switchTab('other')" id="nav-other" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="plus-square" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">12. ระบบอื่น</span></div>
+                    </button>
+                    <button onclick="switchTab('labs')" id="nav-labs" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
+                        <div class="flex items-center gap-3"><i data-feather="file-plus" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">13. ผล Lab & สรุปผล</span></div>
+                    </button>
+                </div>
+
+                <!-- Right Content Area -->
+                <div class="w-full lg:w-3/4 bg-white border border-gray-200 rounded-xl shadow-sm flex flex-col relative overflow-hidden h-full">
+                    
+                    <!-- TAB 1: ข้อมูลทั่วไป -->
+                    <div id="tab-general" class="tab-content flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">1. ข้อมูลทั่วไป</h3>
+                        <div class="space-y-6">
+                            
+                            <!-- 1.1 การวินิจฉัยโรค (ย้ายมาบนสุด) -->
+                            <div>
+                                <label class="block text-sm font-bold text-gray-700 mb-2">1.1 การวินิจฉัยโรคแรกรับ</label>
+                                <div class="flex flex-col gap-4 text-sm">
+                                    <div>
+                                        <span class="text-gray-600">การวินิจฉัยแรกรับ:</span>
+                                        <textarea class="w-full border border-gray-300 rounded-lg p-2 mt-1 focus:border-red-500 focus:outline-none" rows="2"></textarea>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-600">อาการสำคัญแรกรับ:</span>
+                                        <textarea class="w-full border border-gray-300 rounded-lg p-2 mt-1 focus:border-red-500 focus:outline-none" rows="2"></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 1.1.1 เพิ่ม/เปลี่ยนแปลงวินิจฉัย -->
+                            <div class="pl-4 border-l-2 border-gray-200">
+                                <label class="block text-sm font-bold text-gray-700 mb-1">1.1.1 เพิ่ม/เปลี่ยนแปลงวินิจฉัย</label>
+                                <div class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                                    <input type="text" class="flex-1 border border-gray-300 rounded-lg p-2 focus:border-red-500 focus:outline-none text-sm min-w-[200px]">
+                                    <span class="text-sm text-gray-600">วันที่</span>
+                                    <input type="date" class="border border-gray-300 rounded-lg p-2 focus:border-red-500 focus:outline-none text-sm">
+                                </div>
+                            </div>
+
+                            <!-- 1.2 สถานะรับเข้าแรกรับ -->
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">1.2 สถานะรับเข้าแรกรับ</label>
+                                <div class="flex flex-col gap-3 text-sm">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="admit_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> 
+                                        รับใหม่ ตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48 px-1">
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="admit_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> 
+                                        รับ Refer จาก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1"> 
+                                        วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none px-1">
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- 1.3 สถานะรับเข้า-รับย้ายระหว่าง Admit -->
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <div class="flex items-center justify-between mb-2">
+                                    <label class="block text-sm font-bold text-gray-700">1.3 สถานะรับเข้า-รับย้ายระหว่าง Admit</label>
+                                    <button type="button" id="add-transfer-btn" class="text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium">
+                                        <i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ
+                                    </button>
+                                </div>
+                                <div class="space-y-3 text-sm flex flex-col" id="transfer-container">
+                                    <div class="flex items-center gap-2 flex-wrap transfer-row hover:bg-gray-100 p-1 -ml-1 rounded transition-colors">
+                                        <span class="font-medium text-gray-700 transfer-index">ครั้งที่ 1</span> 
+                                        รับย้ายจากตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1"> 
+                                        วันที่ <input type="date" onchange="calculateTransferDays()" class="transfer-date border-b border-gray-400 bg-transparent focus:outline-none px-1"> 
+                                        ไปตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1">
+                                        <span class="ml-1 font-medium text-gray-700">รวมนอน <input type="number" class="transfer-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน</span>
+                                        <button type="button" class="delete-transfer-btn text-gray-400 hover:text-red-500 p-1 ml-auto shrink-0 transition-colors" title="ลบรายการ">
+                                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-wrap transfer-row hover:bg-gray-100 p-1 -ml-1 rounded transition-colors">
+                                        <span class="font-medium text-gray-700 transfer-index">ครั้งที่ 2</span> 
+                                        รับย้ายจากตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1"> 
+                                        วันที่ <input type="date" onchange="calculateTransferDays()" class="transfer-date border-b border-gray-400 bg-transparent focus:outline-none px-1"> 
+                                        ไปตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1">
+                                        <span class="ml-1 font-medium text-gray-700">รวมนอน <input type="number" class="transfer-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน</span>
+                                        <button type="button" class="delete-transfer-btn text-gray-400 hover:text-red-500 p-1 ml-auto shrink-0 transition-colors" title="ลบรายการ">
+                                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-wrap transfer-row hover:bg-gray-100 p-1 -ml-1 rounded transition-colors">
+                                        <span class="font-medium text-gray-700 transfer-index">ครั้งที่ 3</span> 
+                                        รับย้ายจากตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1"> 
+                                        วันที่ <input type="date" onchange="calculateTransferDays()" class="transfer-date border-b border-gray-400 bg-transparent focus:outline-none px-1"> 
+                                        ไปตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1">
+                                        <span class="ml-1 font-medium text-gray-700">รวมนอน <input type="number" class="transfer-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน</span>
+                                        <button type="button" class="delete-transfer-btn text-gray-400 hover:text-red-500 p-1 ml-auto shrink-0 transition-colors" title="ลบรายการ">
+                                            <i data-feather="trash-2" class="w-4 h-4"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 1.4 สถานะจำหน่าย -->
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">1.4 สถานะจำหน่าย</label>
+                                <div class="flex flex-col gap-3 text-sm">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="dc_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> กลับบ้าน
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="dc_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Refer <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1">
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="dc_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่สมัครอยู่
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="dc_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ถึงแก่กรรม วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none px-1">
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- 1.5 ประวัติ 6 เดือนที่ผ่านมา -->
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <label class="block text-sm font-bold text-gray-700 mb-2">1.5 ในระยะเวลา 6 เดือนที่ผ่านมา ผู้ป่วยเคยเข้ารับการรักษาในโรงพยาบาลหรือไม่</label>
+                                <div class="flex flex-col gap-3 text-sm">
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="history6m" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ไม่เคย
+                                    </label>
+                                    <label class="flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" name="history6m" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> เคย ชื่อโรงพยาบาล <input type="text" class="border-b border-blue-400 bg-transparent focus:outline-none w-48 px-1"> ด้วยอาการ <input type="text" class="border-b border-blue-400 bg-transparent focus:outline-none w-48 px-1">
+                                    </label>
+                                </div>
+                                <div class="mt-4 pt-3 border-t border-blue-200 flex flex-col gap-3 text-sm">
+                                    <span class="font-medium text-gray-700">ขณะแรกรับมีการติดเชื้อ:</span>
+                                    <label class="flex items-center gap-2 ml-4 cursor-pointer">
+                                        <input type="checkbox" name="infect_admit" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ไม่มี
+                                    </label>
+                                    <label class="flex items-center gap-2 ml-4 cursor-pointer">
+                                        <input type="checkbox" name="infect_admit" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> มีที่อวัยวะ/ระบบ <input type="text" class="border-b border-blue-400 bg-transparent focus:outline-none w-64 px-1">
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: Pneumonia -->
+                    <div id="tab-pneumonia" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">2. Pneumonia</h3>
+                        
+                        <!-- 2.1 อุปกรณ์ช่วยหายใจ -->
+                        <div class="mb-6">
+                            <h4 class="font-bold text-sm text-gray-700 mb-3 flex items-center gap-2">2.1 อุปกรณ์ช่วยหายใจ</h4>
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> On ET</label>
+                                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> On TT</label>
+                                
+                                <div class="border border-gray-200 p-3 rounded-lg bg-gray-50 flex flex-col gap-2 mt-2">
+                                    <label class="flex items-center gap-2 font-bold cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> On ventilator (ครั้งที่ 1)</label>
+                                    <div class="flex items-center gap-2 ml-6 text-xs">วันที่เริ่ม: <input type="date" class="border-b border-gray-300 bg-transparent focus:outline-none"></div>
+                                    <div class="flex items-center gap-2 ml-6 text-xs">วันที่ถอด: <input type="date" class="border-b border-gray-300 bg-transparent focus:outline-none"></div>
+                                    <div class="flex items-center gap-2 ml-6 text-xs">รวม <input type="number" class="border-b border-gray-300 bg-transparent focus:outline-none w-12 text-center font-bold"> วัน</div>
+                                </div>
+                                
+                                <div class="border border-gray-200 p-3 rounded-lg bg-gray-50 flex flex-col gap-2">
+                                    <label class="flex items-center gap-2 font-bold cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> On ventilator (ครั้งที่ 2)</label>
+                                    <div class="flex items-center gap-2 ml-6 text-xs">วันที่เริ่ม: <input type="date" class="border-b border-gray-300 bg-transparent focus:outline-none"></div>
+                                    <div class="flex items-center gap-2 ml-6 text-xs">วันที่ถอด: <input type="date" class="border-b border-gray-300 bg-transparent focus:outline-none"></div>
+                                    <div class="flex items-center gap-2 ml-6 text-xs">รวม <input type="number" class="border-b border-gray-300 bg-transparent focus:outline-none w-12 text-center font-bold"> วัน</div>
+                                </div>
+                                
+                                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่ได้ On Ventilator</label>
+                            </div>
+                        </div>
+
+                        <!-- 2.2 อาการแสดง Pneumonia -->
+                        <div class="mb-6">
+                            <h4 class="font-bold text-sm text-gray-700 mb-3">2.2 อาการและอาการแสดง</h4>
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Sub temp.(<36) ในเด็กอายุ < 12 เดือน</label>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 ml-6 text-gray-600">
+                                    วันที่เริ่ม <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน
+                                </div>
+                                
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไอ</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> เหนื่อยหอบ</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> หยุดหายใจ</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> เสมหะเพิ่มมากขึ้น</label>
+                                <div class="ml-6 text-gray-600">วันที่เริ่ม: <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></div>
+
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> หัวใจเต้นช้า &lt;100 ครั้ง/นาที</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> หัวใจเต้นเร็ว &gt;170 ครั้ง/นาที</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> O2 desaturation &lt; 94%</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ระดับความรู้สึกตัวผิดปกติ</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> WBC &lt;4000/MM³</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> WBC &gt;12000/MM³</label>
+                                
+                                <label class="flex items-start gap-2 cursor-pointer mt-2 text-blue-900 font-medium">
+                                    <input type="checkbox" class="w-4 h-4 mt-0.5 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> 
+                                    <div class="flex flex-col">
+                                        ผล CXR พบ Infiltration, Consolidation, cavitation หรือ Pneumatoceles
+                                        <span class="font-normal mt-1 text-gray-600">วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none ml-1 w-32"></span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 2.3 Weaning Protocol -->
+                        <div class="pt-4 border-t border-gray-200">
+                            <span class="font-bold text-gray-700 block mb-3 text-sm">2.3 การใช้ Weaning protocol</span>
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" name="weaning" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ใช้ : </label>
+                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="wean_result" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Weaning สำเร็จ</label>
+                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="wean_result" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Weaning ไม่สำเร็จ</label>
+                                
+                                <label class="flex items-center gap-2 font-medium mt-2 cursor-pointer"><input type="checkbox" name="weaning" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่ใช้ โปรดระบุเหตุผลเนื่องจาก : </label>
+                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="no_wean_reason" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่เข้าเกณฑ์การ Weaning</label>
+                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="no_wean_reason" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ดุลยพินิจของแพทย์</label>
+                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="no_wean_reason" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่นๆ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: UTI -->
+                    <div id="tab-uti" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">3. UTI</h3>
+                        
+                        <div class="mb-6">
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 font-bold cursor-pointer"><input type="checkbox" class="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500"> Retained Foley's catheter</label>
+                                <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่เริ่ม: <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none"></div>
+                                <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่ถอด: <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none"></div>
+                                <div class="flex items-center gap-2 ml-6 text-gray-600">รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center font-bold"> วัน</div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 border-t border-gray-200 pt-4">
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Sub temp(&lt;36) ในเด็กอายุ &lt; 12 เดือน</label>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 ml-6 text-gray-600">
+                                    วันที่เริ่ม <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน
+                                </div>
+
+                                <label class="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะลำบาก</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะแสบขัด</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> กดเจ็บหัวเหน่า</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะขุ่น</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปวดหลัง costovertebral angle</label>
+                                
+                                <label class="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะบ่อย</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะกระปริบกระปรอย</label>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 ml-6 text-gray-600">
+                                    วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    ถึงวันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน
+                                </div>
+                                
+                                <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-4">
+                                    <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> 
+                                    Urine C/S พบจุลชีพ ≤ 2 ชนิด และ > 10⁵ โคโลนี
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 4: BSI -->
+                    <div id="tab-bsi" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">4. Primary blood stream infection</h3>
+                        
+                        <div class="mb-6">
+                            <div class="flex flex-col gap-4 text-sm">
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ให้ IV Fluid</label>
+                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ใส่ NSS Lock</label>
+                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                </div>
+                                
+                                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ใส่ Central venous catheter</label>
+                                
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> UVC</label>
+                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> VAC</label>
+                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Cut down</label>
+                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                </div>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่นๆระบุ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-20"></label>
+                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 border-t border-gray-200 pt-4">
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> Hemodialysis บริเวณที่ใส่ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></label>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 border-t border-gray-200 pt-4">
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปวด บวม แดง ร้อน</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Discharge / หนอง วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></label>
+                                
+                                <label class="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Sub temp.(<36) ในเด็กอายุ < 12 เดือน</label>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 ml-6 text-gray-600">
+                                    วันที่เริ่ม <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน
+                                </div>
+
+                                <label class="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> BP ต่ำ (systolic pressure ≤ 90 mmHg)</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะน้อย (&lt;20ml/hr)</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ในเด็กอายุ ≤ 12 เดือน หยุดหายใจเป็นพักๆ</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> หัวใจเต้นช้า โดยไม่พบสาเหตุอื่น วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></label>
+                                
+                                <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-2">
+                                    <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ผล C/S พบเชื้อจุลชีพ
+                                </label>
+                                
+                                <div class="flex items-center gap-2 text-gray-700 mt-2">
+                                    ทำ Hemodialysis ครั้งที่ <input type="number" class="border-b border-gray-400 bg-transparent focus:outline-none w-16 text-center">
+                                    วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 5: SSI -->
+                    <div id="tab-surgery" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">5. Surgical Site Infection</h3>
+                        
+                        <div class="mb-6">
+                            <div class="flex flex-col gap-4 text-sm">
+                                <div>การผ่าตัด <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-full max-w-md"></div>
+                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                    วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                    เวลาเริ่ม <input type="time" class="border-b border-gray-400 bg-transparent focus:outline-none"> 
+                                    เวลาสิ้นสุด <input type="time" class="border-b border-gray-400 bg-transparent focus:outline-none">
+                                </div>
+                                
+                                <div class="flex items-center gap-4 mt-2">
+                                    <span class="font-medium">ชนิดของการผ่าตัด</span>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="surg_type" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Elective</label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="surg_type" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Emergency</label>
+                                </div>
+                                
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <span>ASA Status <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-24"></span>
+                                    <span>แพทย์ที่ทำผ่าตัด <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></span>
+                                </div>
+                                <div>ชนิดของยาระงับความรู้สึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-full max-w-md"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 border-t border-gray-200 pt-4">
+                            <span class="font-bold text-gray-700 block mb-3 text-sm">ประเภทของแผลผ่าตัด</span>
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="wound_class" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Clean (ประเภท 1)</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="wound_class" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Clean-contaminated (ประเภท2)</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="wound_class" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Contaminate (ประเภท3)</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="wound_class" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Dirty(ประเภท4)</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 border-t border-gray-200 pt-4">
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> พบแผลผ่าตัดมี หนอง ฝี บวม แดง ร้อน แผลแยก มีหนองจาก drain อื่น ๆ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"> วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
+                                <label class="flex items-center gap-2 font-medium cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
+                                <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></div>
+                            </div>
+                        </div>
+
+                        <div class="mb-6 border-t border-gray-200 pt-4">
+                            <span class="font-bold text-gray-700 block mb-3 text-sm">Antibiotic Prophylaxis (Pre Med)</span>
+                            <div class="flex flex-col gap-3 text-sm">
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="pre_med" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ไม่ได้รับ</label>
+                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="pre_med" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ได้รับ</label>
+                                
+                                <div class="flex flex-col gap-2 mt-2">
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        ชื่อยา <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"> 
+                                        วันที่ให้ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                        เวลาเริ่มให้ยา <input type="time" class="border-b border-gray-400 bg-transparent focus:outline-none">
+                                    </div>
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        วันที่หยุดยา <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                        เวลาที่หยุดยา <input type="time" class="border-b border-gray-400 bg-transparent focus:outline-none"> 
+                                        รวม <input type="number" class="border-b border-gray-400 bg-transparent focus:outline-none w-12 text-center"> ครั้ง
+                                    </div>
+                                </div>
+                                <div class="flex flex-col gap-2 mt-4">
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        ชื่อยา <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"> 
+                                        วันที่ให้ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                        เวลาเริ่มให้ยา <input type="time" class="border-b border-gray-400 bg-transparent focus:outline-none">
+                                    </div>
+                                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                                        วันที่หยุดยา <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
+                                        เวลาที่หยุดยา <input type="time" class="border-b border-gray-400 bg-transparent focus:outline-none"> 
+                                        รวม <input type="number" class="border-b border-gray-400 bg-transparent focus:outline-none w-12 text-center"> ครั้ง
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 6: Endometritis -->
+                    <div id="tab-endometritis" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">6. Endometritis (เยื่อบุมดลูกอักเสบ)</h3>
+                        <div class="flex flex-col gap-3 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-pink-600 rounded border-gray-300 focus:ring-pink-500"> ปวดท้องหรือกดเจ็บบริเวณมดลูก</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-pink-600 rounded border-gray-300 focus:ring-pink-500"> มีหนองไหลจากมดลูก</label>
+                            
+                            <label class="flex items-center gap-2 font-medium cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
+                            <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></div>
+                            
+                            <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-4">
+                                <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> 
+                                ผล C/S จากของเหลวจากเยื่อบุมดลูก พบเชื้อจุลชีพ วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1">
+                            </label>
+                            
+                            <div class="mt-4">ประวัติการทำหัตถการในมดลูกระบุ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-full max-w-md"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 7: Episiotomy -->
+                    <div id="tab-episiotomy" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">7. Episiotomy</h3>
+                        <div class="text-sm mb-6 text-gray-700">คลอดและเย็บแผลฝีเย็บที่ รพ.ศรีสังวรสุโขทัย วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none"></div>
+                        
+                        <div class="flex flex-col gap-3 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ฝีเย็บบวมแดง</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> มีหนองที่แผลฝีเย็บ</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> มีฝีที่แผลฝีเย็บ</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> แผลแยก วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
+                            
+                            <label class="flex items-center gap-2 font-medium cursor-pointer mt-4"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> พบว่า ไข้ > 38°c</label>
+                            <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่เริ่ม <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 8: Skin -->
+                    <div id="tab-skin" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">8. Skin Infection</h3>
+                        
+                        <div class="flex flex-col gap-3 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> หนอง/ตุ่มหนอง</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ตุ่มน้ำ</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ฝี</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปวด</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> กดเจ็บ</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> บวม</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> แดง</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ร้อน</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ฝี วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
+                            
+                            <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-4"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ผล C/S พบเชื้อจุลชีพ</label>
+                            <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> แผล Hemoculture พบเชื้อจุลชีพ</label>
+                            <label class="flex items-center gap-2 font-medium text-green-700 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"> แพทย์วินิจฉัย ให้การรักษาด้วย Antibiotic</label>
+                        </div>
+                    </div>
+
+                    <!-- TAB 9: Bed sore -->
+                    <div id="tab-bedsore" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">9. Bed sore Infection</h3>
+                        
+                        <div class="flex flex-col gap-3 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> มีหนอง</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ตุ่มน้ำ</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ฝี</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> แดง</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปวด</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> กดเจ็บ</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ขอบแผลบวม</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> สี วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
+                            
+                            <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-4"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500" checked> ผล C/S พบเชื้อจุลชีพ</label>
+                            <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> Hemoculture พบเชื้อจุลชีพ</label>
+                        </div>
+                    </div>
+
+                    <!-- TAB 10: Omphalitis -->
+                    <div id="tab-omphalitis" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">10. Omphalitis</h3>
+                        <div class="text-sm mb-4 text-gray-700">เด็กคลอดในโรงพยาบาลศรีสังวรสุโขทัย ภายใน 30 วัน</div>
+                        
+                        <div class="flex flex-col gap-3 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> สะดือ มีหนอง</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ผื่นแดงรอบสะดือ</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Serous drainage วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
+                            
+                            <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-4"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ผล C/S หนอง/Serous drainage พบเชื้อจุลชีพ</label>
+                            <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ผล Hemoculture พบเชื้อจุลชีพ</label>
+                        </div>
+                    </div>
+
+                    <!-- TAB 11: Eye -->
+                    <div id="tab-eye" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">11. ตา</h3>
+                        
+                        <div class="flex flex-col gap-3 text-sm">
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"> ปวดตา ตาแดงบริเวณ conjunctiva หรือรอบ ๆ ตา</label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"> Discharge / หนอง วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
+                            <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500"> มองภาพไม่ชัด หรือมี Hypopyon วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
+                            
+                            <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-4"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ผลการตรวจ gram strain / C/S พบเชื้อจุลชีพ</label>
+                            <label class="flex items-center gap-2 font-medium text-green-700 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-green-600 rounded border-gray-300 focus:ring-green-500"> แพทย์ให้ ABO ภายใน 2 วันนับจากมีอาการ</label>
+                        </div>
+                    </div>
+
+                    <!-- TAB 12: Other -->
+                    <div id="tab-other" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">12. ระบบอื่น</h3>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">อาการและอาการแสดง</label>
+                        <textarea placeholder="ระบุอาการและอาการแสดง..." class="w-full border border-gray-300 rounded-lg p-3 text-sm focus:border-red-500 focus:outline-none" rows="6"></textarea>
+                    </div>
+
+                    <!-- TAB 13: Labs -->
+                    <div id="tab-labs" class="tab-content hidden flex-1 flex flex-col h-full overflow-y-auto p-6 bg-gray-50">
+                        <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">13. ผล Lab และสรุปผล</h3>
+                        
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+                            <h3 class="font-bold text-gray-800 text-sm mb-4">7. ผลการตรวจทางห้องปฏิบัติการที่เกี่ยวข้องกับการติดเชื้อ</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left border-collapse border border-gray-200">
+                                    <thead class="bg-gray-100 text-gray-700">
+                                        <tr>
+                                            <th class="border border-gray-200 p-2 w-32">วัน เดือน ปี</th>
+                                            <th class="border border-gray-200 p-2">ตัวอย่างที่ส่งตรวจ</th>
+                                            <th class="border border-gray-200 p-2">ผล</th>
+                                            <th class="border border-gray-200 p-2">หมายเหตุ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-5 mb-6">
+                            <h3 class="font-bold text-gray-800 text-sm mb-4">8. ผลการตรวจพิเศษอื่น ๆ (เฉพาะที่เกี่ยวข้องกับการติดเชื้อ เช่น U/S, X-ray, Pathology ฯลฯ)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm text-left border-collapse border border-gray-200">
+                                    <thead class="bg-gray-100 text-gray-700">
+                                        <tr>
+                                            <th class="border border-gray-200 p-2 w-32">วัน เดือน ปี</th>
+                                            <th class="border border-gray-200 p-2 w-1/4">ตรวจพิเศษ</th>
+                                            <th class="border border-gray-200 p-2">ผลการตรวจพิเศษ</th>
+                                            <th class="border border-gray-200 p-2 w-1/4">หมายเหตุ</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                            <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-50 rounded-xl shadow-sm border border-red-200 p-5 mt-auto">
+                            <h3 class="font-bold text-red-800 text-sm mb-4">9. การวินิจฉัยโรคติดเชื้อในโรงพยาบาล</h3>
+                            <div class="space-y-4">
+                                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-base font-bold bg-white p-4 rounded-lg border border-red-100">
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="conclusion" class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่ติดเชื้อ</label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="conclusion" class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500"> ติดเชื้อในชุมชน</label>
+                                    <label class="flex items-center gap-2 text-red-600 cursor-pointer"><input type="checkbox" name="conclusion" class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500"> ติดเชื้อในโรงพยาบาล</label>
+                                </div>
+                                <div class="flex flex-col gap-4 text-sm mt-4">
+                                    <div class="flex items-center gap-2">ระบบ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none flex-1"></div>
+                                    <div class="flex items-center gap-2">เดือนที่พบการติดเชื้อในโรงพยาบาล <input type="month" class="border-b border-gray-400 bg-transparent focus:outline-none flex-1 max-w-xs"></div>
+                                    <div class="flex items-center gap-2">หน่วยงาน / หอผู้ป่วยที่ติดเชื้อ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none flex-1"></div>
+                                </div>
+                                <div class="flex justify-end mt-4 pt-4 border-t border-red-200">
+                                    <div class="text-right">
+                                        <div class="text-sm text-gray-600 mb-1">ผู้สรุป</div>
+                                        <input type="text" placeholder="........................................................" class="border-none bg-transparent focus:outline-none text-center font-bold text-red-800 w-48">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <!-- Bottom Action Bar -->
+                    <div class="border-t border-gray-200 p-4 bg-white sm:bg-gray-50 rounded-b-xl flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto shrink-0 z-10 no-print">
+                        <div class="flex items-center gap-4 w-full sm:w-1/4">
+                            <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                <div class="bg-green-500 h-full rounded-full w-1/4 transition-all duration-500" id="progress-bar"></div>
+                            </div>
+                            <span class="text-xs text-gray-500 whitespace-nowrap" id="progress-text">Progress 25%</span>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full flex-1">
+                            
+                            <!-- ปุ่มจำนวนใบเฝ้าระวัง -->
+                            <button id="btn-form-history" class="px-3 py-2 bg-blue-50 text-blue-700 font-medium rounded-xl hover:bg-blue-100 transition-colors text-sm flex items-center gap-1.5 shadow-sm border border-blue-100">
+                                <i data-feather="layers" class="w-4 h-4"></i> ประวัติใบเฝ้าระวัง
+                            </button>
+                            
+                            <!-- ปุ่มพรีวิว -->
+                            <button id="btn-preview" class="px-3 py-2 bg-white border border-gray-300 text-gray-700 font-medium rounded-xl hover:bg-gray-50 transition-colors text-sm flex items-center gap-1.5 shadow-sm">
+                                <i data-feather="printer" class="w-4 h-4 text-gray-500"></i> พรีวิว & พิมพ์
+                            </button>
+
+                            <button class="flex-1 sm:flex-none px-4 py-2 bg-white border border-red-500 text-red-600 font-bold rounded-xl hover:bg-red-50 transition-colors text-sm sm:text-base shadow-sm">
+                                บันทึกแบบร่าง
+                            </button>
+                            <button class="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-[#02b371] hover:bg-green-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors text-sm sm:text-base">
+                                <i data-feather="check-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i> ประเมินเสร็จสิ้น
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal (ลบรายการรับย้าย) -->
+    <div id="confirm-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] backdrop-blur-sm transition-opacity no-print">
+        <div class="bg-white rounded-xl p-6 max-w-sm w-full mx-4 shadow-xl transform transition-transform">
+            <div class="flex items-center gap-3 mb-2">
+                <div class="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center text-red-600 shrink-0">
+                    <i data-feather="alert-circle" class="w-6 h-6"></i>
+                </div>
+                <h3 class="text-lg font-bold text-gray-800">ยืนยันการลบ</h3>
+            </div>
+            <p class="text-sm text-gray-600 mb-6 mt-1 ml-13">คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการรับย้ายนี้? (การคำนวณวันนอนจะถูกอัปเดตอัตโนมัติ)</p>
+            <div class="flex justify-end gap-3">
+                <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">ยกเลิก</button>
+                <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition-colors">ลบรายการ</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- History Modal (จำนวนใบเฝ้าระวัง) -->
+    <div id="history-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] backdrop-blur-sm transition-opacity no-print">
+        <div class="bg-white rounded-xl max-w-md w-full mx-4 shadow-xl overflow-hidden flex flex-col">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50">
+                <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-feather="layers" class="w-5 h-5 text-blue-600"></i> ประวัติใบเฝ้าระวัง (AN: 690011102)</h3>
+                <button id="close-history-btn" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-feather="x" class="w-5 h-5"></i></button>
+            </div>
+            <div class="p-4 flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
+                <div class="text-sm text-gray-500 mb-2">ระบบจะตัดยอดจำนวนใบเฝ้าระวังแยกตามหน่วยงานทุกวันสิ้นเดือน</div>
+                
+                <div class="border border-blue-200 bg-blue-50 p-3 rounded-lg flex justify-between items-center cursor-pointer hover:bg-blue-100 transition-colors">
+                    <div>
+                        <div class="font-bold text-blue-800 text-sm">ICU อายุรกรรม</div>
+                        <div class="text-xs text-blue-600 mt-1 flex items-center gap-1"><i data-feather="calendar" class="w-3 h-3"></i> ประจำเดือน สิงหาคม 2569</div>
+                    </div>
+                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-md font-medium shadow-sm">จำนวน 1 ใบ (ปัจจุบัน)</span>
+                </div>
+                
+                <div class="border border-gray-200 p-3 rounded-lg flex justify-between items-center opacity-70 bg-gray-50">
+                    <div>
+                        <div class="font-bold text-gray-600 text-sm">ตึกอายุรกรรมหญิง</div>
+                        <div class="text-xs text-gray-500 mt-1 flex items-center gap-1"><i data-feather="calendar" class="w-3 h-3"></i> ประจำเดือน กรกฎาคม 2569</div>
+                    </div>
+                    <span class="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-md font-medium">จำนวน 1 ใบ</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Modal (พรีวิวแบบ 2 หน้า A4) -->
+    <div id="preview-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] backdrop-blur-sm transition-opacity no-print">
+        <div class="bg-white rounded-xl w-full max-w-5xl h-[90vh] mx-4 shadow-xl flex flex-col overflow-hidden">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
+                <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-feather="printer" class="w-5 h-5 text-gray-600"></i> ตัวอย่างก่อนพิมพ์ (A4 - 2 หน้า)</h3>
+                <div class="flex items-center gap-2">
+                    <button id="print-preview-btn" class="px-4 py-2 bg-[#02b371] text-white rounded-lg hover:bg-green-600 text-sm font-bold transition-colors flex items-center gap-2 shadow-sm">
+                        <i data-feather="printer" class="w-4 h-4"></i> สั่งพิมพ์เอกสาร
+                    </button>
+                    <button id="close-preview-btn" class="text-gray-400 hover:bg-gray-200 rounded-lg transition-colors p-2"><i data-feather="x" class="w-5 h-5"></i></button>
+                </div>
+            </div>
+            
+            <!-- Document preview area (Scrollable) -->
+            <div class="p-8 overflow-y-auto flex-1 bg-gray-200 flex flex-col items-center gap-8">
+                
+                <div id="preview-print-area" class="w-full flex flex-col gap-8 items-center">
+                    
+                    <!-- หน้าที่ 1 (A4) -->
+                    <div class="a4-page flex flex-col text-sm text-gray-800">
+                        <div class="text-center font-bold text-lg mb-6 leading-tight">
+                            แบบเฝ้าระวังการติดเชื้อในโรงพยาบาลศรีสังวรสุโขทัย<br>
+                            <span class="text-sm font-normal">FR-ICC-01_68</span>
+                        </div>
+                        <div class="flex justify-between items-start border-b border-gray-300 pb-4 mb-4">
+                            <div class="space-y-2">
+                                <div>หอผู้ป่วยใน, ไตเทียม</div>
+                                <div>หอผู้ป่วย........................................................................... เตียง........................</div>
+                                <div>ชื่อ-สกุลผู้ป่วย.......................................................................... อายุ................ ปี................ วัน</div>
+                            </div>
+                            <div class="space-y-2 text-right">
+                                <div>HN........................................</div>
+                                <div>AN........................................</div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex-1 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center p-6 relative bg-gray-50/50">
+                            <div class="absolute top-0 left-0 bg-gray-200 text-gray-600 font-bold px-3 py-1 text-xs rounded-br-lg">เนื้อหาเอกสารหน้าที่ 1</div>
+                            <div class="bg-blue-50 p-6 rounded-full mb-4">
+                                <i data-feather="file-text" class="w-12 h-12 text-blue-400"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-600 text-lg mb-2">พื้นที่จำลองเอกสารหน้า 1 (ดึงข้อมูลอัตโนมัติ)</h4>
+                            <div class="text-sm text-gray-500 bg-white p-4 rounded border border-gray-200 text-left leading-loose w-3/4 shadow-sm">
+                                <ul class="list-none space-y-2">
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 1. ข้อมูลทั่วไป (รับใหม่, ย้าย, จำหน่าย, วินิจฉัยแรกรับ)</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 2. อาการแสดง: Pneumonia (อุปกรณ์หายใจ, CXR, Weaning)</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 3. อาการแสดง: UTI (สายสวนปัสสาวะ, อาการปัสสาวะ, Urine C/S)</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 4. อาการแสดง: Primary blood stream infection (สาย IV, Hemodialysis, C/S)</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- หน้าที่ 2 (A4) -->
+                    <div class="a4-page flex flex-col text-sm text-gray-800">
+                        <div class="flex-1 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center p-6 relative bg-gray-50/50">
+                            <div class="absolute top-0 left-0 bg-gray-200 text-gray-600 font-bold px-3 py-1 text-xs rounded-br-lg">เนื้อหาเอกสารหน้าที่ 2</div>
+                            <div class="bg-green-50 p-6 rounded-full mb-4">
+                                <i data-feather="file-text" class="w-12 h-12 text-green-400"></i>
+                            </div>
+                            <h4 class="font-bold text-gray-600 text-lg mb-2">พื้นที่จำลองเอกสารหน้า 2 (ดึงข้อมูลอัตโนมัติ)</h4>
+                            <div class="text-sm text-gray-500 bg-white p-4 rounded border border-gray-200 text-left leading-loose w-3/4 shadow-sm">
+                                <ul class="list-none space-y-2">
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 5. Surgical Site Infection (รายละเอียดผ่าตัด, แผล, Pre Med)</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 6. Endometritis &nbsp;|&nbsp; 7. Episiotomy</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 8. Skin Infection &nbsp;|&nbsp; 9. Bed sore Infection</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 10. Omphalitis &nbsp;|&nbsp; 11. ตา &nbsp;|&nbsp; 12. ระบบอื่น</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 7. ผลการตรวจทางห้องปฏิบัติการ (ตาราง)</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 8. ผลการตรวจพิเศษอื่นๆ (ตาราง)</li>
+                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 9. การวินิจฉัยโรคติดเชื้อในโรงพยาบาล และผู้สรุป</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Feather Icons
+        feather.replace();
+
+        // 1. Logic สำหรับคำนวณวันนอน และการเพิ่ม/ลบ แถวการรับย้าย
+        function calculateTransferDays() {
+            const admitDateInput = document.getElementById('global-admit-date');
+            const rows = document.querySelectorAll('.transfer-row');
+            
+            let previousDate = null;
+            if (admitDateInput && admitDateInput.value) {
+                previousDate = new Date(admitDateInput.value);
+                previousDate.setHours(0,0,0,0);
+            }
+
+            rows.forEach(row => {
+                const transferDateInput = row.querySelector('.transfer-date');
+                const daysInput = row.querySelector('.transfer-days');
+                
+                if (transferDateInput && transferDateInput.value) {
+                    const currentDate = new Date(transferDateInput.value);
+                    currentDate.setHours(0,0,0,0);
+                    
+                    if (previousDate) {
+                        const diffTime = Math.abs(currentDate - previousDate);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        daysInput.value = diffDays;
+                    }
+                    
+                    previousDate = currentDate; 
+                } else {
+                    daysInput.value = '';
+                }
+            });
+        }
+
+        const confirmModal = document.getElementById('confirm-modal');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+        const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+        let rowToDelete = null;
+
+        modalCancelBtn.addEventListener('click', () => {
+            confirmModal.classList.add('hidden');
+            confirmModal.classList.remove('flex');
+            rowToDelete = null;
+        });
+
+        modalConfirmBtn.addEventListener('click', () => {
+            if (rowToDelete) {
+                rowToDelete.remove();
+                reindexTransfers();
+                calculateTransferDays();
+                rowToDelete = null;
+            }
+            confirmModal.classList.add('hidden');
+            confirmModal.classList.remove('flex');
+        });
+
+        function reindexTransfers() {
+            const rows = document.querySelectorAll('.transfer-row');
+            rows.forEach((row, index) => {
+                const indexSpan = row.querySelector('.transfer-index');
+                if (indexSpan) {
+                    indexSpan.textContent = `ครั้งที่ ${index + 1}`;
+                }
+            });
+        }
+
+        document.getElementById('transfer-container').addEventListener('click', function(e) {
+            const deleteBtn = e.target.closest('.delete-transfer-btn');
+            if (deleteBtn) {
+                rowToDelete = deleteBtn.closest('.transfer-row');
+                confirmModal.classList.remove('hidden');
+                confirmModal.classList.add('flex');
+            }
+        });
+
+        const addTransferBtn = document.getElementById('add-transfer-btn');
+        if(addTransferBtn) {
+            addTransferBtn.addEventListener('click', function() {
+                const container = document.getElementById('transfer-container');
+                const rows = container.querySelectorAll('.transfer-row');
+                const newIndex = rows.length + 1;
+                
+                const newRow = document.createElement('div');
+                newRow.className = 'flex items-center gap-2 flex-wrap transfer-row hover:bg-gray-100 p-1 -ml-1 rounded transition-colors'; 
+                newRow.innerHTML = `
+                    <span class="font-medium text-gray-700 transfer-index">ครั้งที่ ${newIndex}</span> 
+                    รับย้ายจากตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1"> 
+                    วันที่ <input type="date" onchange="calculateTransferDays()" class="transfer-date border-b border-gray-400 bg-transparent focus:outline-none px-1"> 
+                    ไปตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1">
+                    <span class="ml-1 font-medium text-gray-700">รวมนอน <input type="number" class="transfer-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน</span>
+                    <button type="button" class="delete-transfer-btn text-gray-400 hover:text-red-500 p-1 ml-auto shrink-0 transition-colors" title="ลบรายการ">
+                        <i data-feather="trash-2" class="w-4 h-4"></i>
+                    </button>
+                `;
+                container.appendChild(newRow);
+                feather.replace();
+            });
+        }
+
+        // 2. Tab Switching Logic
+        function switchTab(tabId) {
+            const contents = document.querySelectorAll('.tab-content');
+            contents.forEach(el => el.classList.add('hidden'));
+
+            const selectedContent = document.getElementById('tab-' + tabId);
+            if(selectedContent) selectedContent.classList.remove('hidden');
+
+            const navBtns = document.querySelectorAll('.nav-btn');
+            navBtns.forEach(btn => {
+                btn.classList.remove('bg-red-50', 'border-red-200', 'text-red-700');
+                btn.classList.add('bg-white', 'border-transparent', 'text-gray-600', 'hover:bg-gray-50');
+                
+                const icon = btn.querySelector('.icon-color');
+                icon.classList.remove('text-red-500');
+                icon.classList.add('text-gray-400');
+
+                const label = btn.querySelector('.nav-label');
+                label.classList.remove('font-bold');
+            });
+
+            const activeBtn = document.getElementById('nav-' + tabId);
+            if(activeBtn) {
+                activeBtn.classList.remove('bg-white', 'border-transparent', 'text-gray-600', 'hover:bg-gray-50');
+                activeBtn.classList.add('bg-red-50', 'border-red-200', 'text-red-700');
+                
+                const icon = activeBtn.querySelector('.icon-color');
+                icon.classList.remove('text-gray-400');
+                icon.classList.add('text-red-500');
+
+                const label = activeBtn.querySelector('.nav-label');
+                label.classList.add('font-bold');
+            }
+        }
+
+        // 3. Modal Logic for History and Preview
+        const historyBtn = document.getElementById('btn-form-history');
+        const historyModal = document.getElementById('history-modal');
+        const closeHistoryBtn = document.getElementById('close-history-btn');
+
+        if(historyBtn && historyModal && closeHistoryBtn) {
+            historyBtn.addEventListener('click', () => {
+                historyModal.classList.remove('hidden');
+                historyModal.classList.add('flex');
+            });
+            closeHistoryBtn.addEventListener('click', () => {
+                historyModal.classList.add('hidden');
+                historyModal.classList.remove('flex');
+            });
+        }
+
+        const previewBtn = document.getElementById('btn-preview');
+        const previewModal = document.getElementById('preview-modal');
+        const closePreviewBtn = document.getElementById('close-preview-btn');
+        const printPreviewBtn = document.getElementById('print-preview-btn');
+
+        if(previewBtn && previewModal && closePreviewBtn) {
+            previewBtn.addEventListener('click', () => {
+                previewModal.classList.remove('hidden');
+                previewModal.classList.add('flex');
+            });
+            closePreviewBtn.addEventListener('click', () => {
+                previewModal.classList.add('hidden');
+                previewModal.classList.remove('flex');
+            });
+            if(printPreviewBtn) {
+                printPreviewBtn.addEventListener('click', () => {
+                    window.print();
+                });
+            }
+        }
+    </script>
+</body>
+</html>
