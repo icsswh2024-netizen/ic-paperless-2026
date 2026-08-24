@@ -1128,6 +1128,20 @@
             heads[1].textContent = num + '.' + (maxY + 2) + ' ' + heads[1].textContent;
         });
 
+        // 0a. เพิ่มช่อง "วันที่" ต่อท้ายรายการ checkbox (อาการ/ผลตรวจ) ที่ยังไม่มีวันที่
+        document.querySelectorAll('.tab-content label').forEach(function(lbl) {
+            const cbs = lbl.querySelectorAll('input[type="checkbox"]');
+            if (cbs.length !== 1) return;
+            if (cbs[0].name) return; // ข้ามกลุ่มตัวเลือกเชิงโครงสร้าง (มี name)
+            if (lbl.querySelector('input[type="date"], input[type="text"], input[type="number"], input[type="time"], textarea')) return; // มีช่องกรอกอยู่แล้ว
+            if (lbl.closest('.dr-row') || lbl.closest('.sd-clone') || lbl.closest('table')) return;
+            if (!lbl.textContent.trim()) return;
+            const span = document.createElement('span');
+            span.className = 'ml-2 text-gray-500 whitespace-nowrap';
+            span.innerHTML = 'วันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none">';
+            lbl.appendChild(span);
+        });
+
         // 0b. ปุ่ม "เพิ่มแถว" + ลบแถว (พร้อมยืนยัน) ให้ทุกตาราง (ผล Lab ข้อ 7/8 และแท็บสรุปผล)
         function tblDelCellHTML() {
             return '<td class="border border-gray-200 p-1 text-center align-middle w-10 no-print">' +
@@ -1182,6 +1196,7 @@
         document.querySelectorAll('input[type="date"]').forEach(function(inp) {
             if (inp.closest('.dr-row')) return;
             if (inp.classList.contains('transfer-date')) return;
+            if (inp.classList.contains('cb-date')) return;
             if (inp.closest('table')) return;
             if (inp.closest('.sd-clone')) return;
             const unit = inp.closest('label') || inp.closest('div');
