@@ -1046,6 +1046,68 @@
         // Initialize Feather Icons
         feather.replace();
 
+        // 0. แทรกตาราง "ผล Lab (ข้อ 7 + 8)" ไว้ท้ายทุกแท็บระบบเฝ้าระวัง
+        const labSectionHTML = `
+            <div class="lab-appended mt-8 pt-6 border-t-2 border-dashed border-gray-200">
+                <h4 class="font-bold text-gray-700 text-sm mb-4">ผล Lab / การตรวจ ประกอบการวินิจฉัย</h4>
+                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4 mb-4">
+                    <h5 class="font-bold text-gray-800 text-sm mb-3">7. ผลการตรวจทางห้องปฏิบัติการที่เกี่ยวข้องกับการติดเชื้อ</h5>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border-collapse border border-gray-200 bg-white">
+                            <thead class="bg-gray-100 text-gray-700">
+                                <tr>
+                                    <th class="border border-gray-200 p-2 w-32">วัน เดือน ปี</th>
+                                    <th class="border border-gray-200 p-2">ตัวอย่างที่ส่งตรวจ</th>
+                                    <th class="border border-gray-200 p-2">ผล</th>
+                                    <th class="border border-gray-200 p-2">หมายเหตุ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                </tr>
+                                <tr>
+                                    <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-xl border border-gray-200 p-4">
+                    <h5 class="font-bold text-gray-800 text-sm mb-3">8. ผลการตรวจพิเศษอื่น ๆ (เฉพาะที่เกี่ยวข้องกับการติดเชื้อ เช่น U/S, X-ray, Pathology ฯลฯ)</h5>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left border-collapse border border-gray-200 bg-white">
+                            <thead class="bg-gray-100 text-gray-700">
+                                <tr>
+                                    <th class="border border-gray-200 p-2 w-32">วัน เดือน ปี</th>
+                                    <th class="border border-gray-200 p-2 w-1/4">ตรวจพิเศษ</th>
+                                    <th class="border border-gray-200 p-2">ผลการตรวจพิเศษ</th>
+                                    <th class="border border-gray-200 p-2 w-1/4">หมายเหตุ</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                    <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>`;
+        ['pneumonia','uti','bsi','surgery','endometritis','episiotomy','skin','bedsore','omphalitis','eye','other'].forEach(function(id) {
+            const tab = document.getElementById('tab-' + id);
+            if (tab) tab.insertAdjacentHTML('beforeend', labSectionHTML);
+        });
+
         // 1. Logic สำหรับคำนวณวันนอน และการเพิ่ม/ลบ แถวการรับย้าย
         function calculateTransferDays() {
             const admitDateInput = document.getElementById('global-admit-date');
