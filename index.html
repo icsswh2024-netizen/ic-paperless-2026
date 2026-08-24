@@ -1128,10 +1128,36 @@
             heads[1].textContent = num + '.' + (maxY + 2) + ' ' + heads[1].textContent;
         });
 
-        // 0a. รายการ checkbox (อาการ/ผลตรวจ): จัด 3 คอลัมน์ = ข้อความ | วันที่..ถึงวันที่.. (กลาง) | เพิ่มสถานะ (ขวา)
-        function cbRangeHTML() {
-            return 'วันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">' +
-                   ' ถึงวันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">';
+        // 0a. รายการ checkbox (อาการ/ผลตรวจ): 3 คอลัมน์ = ข้อความ | ครั้งที่/วันที่..ถึงวันที่.. (กลาง ซ้อนกัน) | เพิ่มสถานะ (ขวา)
+        function cbReindex(rows) {
+            rows.querySelectorAll('.cb-rrow').forEach(function(r, i) {
+                const idx = r.querySelector('.cb-idx');
+                if (idx) idx.textContent = 'ครั้งที่ ' + (i + 1);
+            });
+        }
+        function cbMakeRow(withDelete) {
+            const row = document.createElement('div');
+            row.className = 'cb-rrow flex items-center gap-1 whitespace-nowrap';
+            row.innerHTML = '<span class="cb-idx text-xs font-medium text-gray-500 mr-1"></span>' +
+                'วันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">' +
+                ' ถึงวันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">';
+            if (withDelete) {
+                const rm = document.createElement('button');
+                rm.type = 'button';
+                rm.textContent = '×';
+                rm.title = 'ลบรายการ';
+                rm.className = 'cb-rrow-del text-gray-400 hover:text-red-500 text-lg leading-none px-1 shrink-0';
+                rm.addEventListener('click', function(ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    const rows = row.parentNode;
+                    pendingRemoveEl = row;
+                    pendingRemoveCb = function() { cbReindex(rows); };
+                    openConfirmModal('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?');
+                });
+                row.appendChild(rm);
+            }
+            return row;
         }
         document.querySelectorAll('.tab-content label').forEach(function(lbl) {
             const cbs = lbl.querySelectorAll('input[type="checkbox"]');
@@ -1151,13 +1177,14 @@
 
             lbl.style.display = 'grid';
             lbl.style.gridTemplateColumns = 'minmax(0,1fr) max-content max-content';
-            lbl.style.alignItems = 'center';
+            lbl.style.alignItems = 'start';
             lbl.style.gap = '0.75rem';
             lbl.style.width = '100%';
 
-            const dateCol = document.createElement('span');
-            dateCol.className = 'cb-datecol text-gray-500 whitespace-nowrap';
-            dateCol.innerHTML = cbRangeHTML();
+            const dateCol = document.createElement('div');
+            dateCol.className = 'cb-rows flex flex-col gap-1 text-gray-500';
+            dateCol.appendChild(cbMakeRow(false));
+            cbReindex(dateCol);
 
             const addCol = document.createElement('button');
             addCol.type = 'button';
@@ -1167,25 +1194,8 @@
             addCol.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                const extra = document.createElement('div');
-                extra.className = 'cb-extra flex items-center gap-2 text-gray-500 mt-1';
-                extra.style.marginLeft = '1.75rem';
-                extra.innerHTML = cbRangeHTML();
-                const rm = document.createElement('button');
-                rm.type = 'button';
-                rm.textContent = '×';
-                rm.title = 'ลบรายการ';
-                rm.className = 'cb-extra-del text-gray-400 hover:text-red-500 text-lg leading-none px-1 shrink-0';
-                rm.addEventListener('click', function(ev) {
-                    ev.preventDefault();
-                    ev.stopPropagation();
-                    pendingRemoveEl = extra;
-                    openConfirmModal('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?');
-                });
-                extra.appendChild(rm);
-                let anchor = lbl;
-                while (anchor.nextElementSibling && anchor.nextElementSibling.classList.contains('cb-extra')) anchor = anchor.nextElementSibling;
-                anchor.parentNode.insertBefore(extra, anchor.nextSibling);
+                dateCol.appendChild(cbMakeRow(true));
+                cbReindex(dateCol);
                 feather.replace();
             });
 
@@ -1334,6 +1344,7 @@
         let rowToDelete = null;
         let pendingDrRow = null;
         let pendingRemoveEl = null;
+        let pendingRemoveCb = null;
         const confirmModalMsg = document.getElementById('confirm-modal-msg');
 
         function openConfirmModal(message) {
@@ -1351,6 +1362,7 @@
             rowToDelete = null;
             pendingDrRow = null;
             pendingRemoveEl = null;
+            pendingRemoveCb = null;
         });
 
         modalConfirmBtn.addEventListener('click', () => {
@@ -1375,8 +1387,11 @@
                 pendingDrRow = null;
             }
             if (pendingRemoveEl) {
+                const cb = pendingRemoveCb;
                 pendingRemoveEl.remove();
                 pendingRemoveEl = null;
+                pendingRemoveCb = null;
+                if (cb) cb();
             }
             closeConfirmModal();
         });
