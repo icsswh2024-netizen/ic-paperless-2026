@@ -699,7 +699,7 @@
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ร้อน</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> แผลแยก</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> มีหนองจาก drain</label>
-                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่น ๆ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></label>
+                                <label class="cb-withtext flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่น ๆ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></label>
                                 <label class="flex items-center gap-2 font-medium cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
                                 <div class="dr-group ml-6">
                                     <div class="dr-container flex flex-col gap-2">
@@ -1215,7 +1215,8 @@
             const cbs = lbl.querySelectorAll('input[type="checkbox"]');
             if (cbs.length !== 1) return;
             if (cbs[0].name) return; // ข้ามกลุ่มตัวเลือกเชิงโครงสร้าง (มี name)
-            if (lbl.querySelector('input[type="text"], input[type="number"], input[type="time"], textarea')) return; // มีช่องกรอกชนิดอื่น (โครงสร้าง/ชื่อยา) → ข้าม
+            if (lbl.querySelector('input[type="number"], input[type="time"], textarea')) return; // มีช่องตัวเลข/เวลา/textarea → ข้าม
+            if (lbl.querySelector('input[type="text"]') && !lbl.classList.contains('cb-withtext')) return; // มีช่องข้อความ (ยกเว้นที่กำกับ cb-withtext ให้ได้คอลัมน์วันที่ด้วย)
             if (lbl.closest('.dr-row') || lbl.closest('.sd-clone') || lbl.closest('table')) return;
             if (lbl.closest('.dr-group')) return; // ข้ามบล็อกอุปกรณ์ (มีแถววันที่ใส่/ถอด/รวมวัน ของตัวเอง)
             if (!lbl.textContent.trim()) return;
