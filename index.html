@@ -1128,7 +1128,11 @@
             heads[1].textContent = num + '.' + (maxY + 2) + ' ' + heads[1].textContent;
         });
 
-        // 0a. เพิ่มช่อง "วันที่" ต่อท้ายรายการ checkbox (อาการ/ผลตรวจ) ที่ยังไม่มีวันที่
+        // 0a. รายการ checkbox (อาการ/ผลตรวจ): จัด 3 คอลัมน์ = ข้อความ | วันที่..ถึงวันที่.. (กลาง) | เพิ่มสถานะ (ขวา)
+        function cbRangeHTML() {
+            return 'วันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">' +
+                   ' ถึงวันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">';
+        }
         document.querySelectorAll('.tab-content label').forEach(function(lbl) {
             const cbs = lbl.querySelectorAll('input[type="checkbox"]');
             if (cbs.length !== 1) return;
@@ -1136,17 +1140,60 @@
             if (lbl.querySelector('input[type="date"], input[type="text"], input[type="number"], input[type="time"], textarea')) return; // มีช่องกรอกอยู่แล้ว
             if (lbl.closest('.dr-row') || lbl.closest('.sd-clone') || lbl.closest('table')) return;
             if (!lbl.textContent.trim()) return;
-            lbl.classList.add('w-full');
-            lbl.style.width = '100%';
-            lbl.style.display = 'flex';
+
+            // ห่อ checkbox + ข้อความ เป็นคอลัมน์ซ้าย
+            const textWrap = document.createElement('span');
+            textWrap.className = 'flex items-center gap-2 min-w-0';
+            textWrap.style.display = 'flex';
+            textWrap.style.alignItems = 'center';
+            textWrap.style.gap = '0.5rem';
+            while (lbl.firstChild) textWrap.appendChild(lbl.firstChild);
+
+            lbl.style.display = 'grid';
+            lbl.style.gridTemplateColumns = 'minmax(0,1fr) max-content max-content';
             lbl.style.alignItems = 'center';
-            lbl.style.gap = '0.5rem';
-            const span = document.createElement('span');
-            span.className = 'ml-auto pl-4 shrink-0 text-gray-500 whitespace-nowrap';
-            span.style.marginLeft = 'auto';
-            span.innerHTML = 'วันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none">';
-            lbl.appendChild(span);
+            lbl.style.gap = '0.75rem';
+            lbl.style.width = '100%';
+
+            const dateCol = document.createElement('span');
+            dateCol.className = 'cb-datecol text-gray-500 whitespace-nowrap';
+            dateCol.innerHTML = cbRangeHTML();
+
+            const addCol = document.createElement('button');
+            addCol.type = 'button';
+            addCol.className = 'cb-add text-xs inline-flex items-center gap-1 bg-red-50 text-red-700 px-2 py-0.5 rounded hover:bg-red-100 border border-red-200 transition-colors font-medium whitespace-nowrap';
+            addCol.style.justifySelf = 'end';
+            addCol.innerHTML = '<i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ';
+            addCol.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const extra = document.createElement('div');
+                extra.className = 'cb-extra flex items-center gap-2 text-gray-500 mt-1';
+                extra.style.marginLeft = '1.75rem';
+                extra.innerHTML = cbRangeHTML();
+                const rm = document.createElement('button');
+                rm.type = 'button';
+                rm.textContent = '×';
+                rm.title = 'ลบรายการ';
+                rm.className = 'cb-extra-del text-gray-400 hover:text-red-500 text-lg leading-none px-1 shrink-0';
+                rm.addEventListener('click', function(ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    pendingRemoveEl = extra;
+                    openConfirmModal('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?');
+                });
+                extra.appendChild(rm);
+                let anchor = lbl;
+                while (anchor.nextElementSibling && anchor.nextElementSibling.classList.contains('cb-extra')) anchor = anchor.nextElementSibling;
+                anchor.parentNode.insertBefore(extra, anchor.nextSibling);
+                feather.replace();
+            });
+
+            lbl.appendChild(textWrap);
+            lbl.appendChild(dateCol);
+            lbl.appendChild(addCol);
         });
+        feather.replace();
 
         // 0b. ปุ่ม "เพิ่มแถว" + ลบแถว (พร้อมยืนยัน) ให้ทุกตาราง (ผล Lab ข้อ 7/8 และแท็บสรุปผล)
         function tblDelCellHTML() {
@@ -1242,6 +1289,12 @@
             unit.parentNode.insertBefore(add, unit.nextSibling);
         });
         feather.replace();
+
+        // 0d. แท็บ 2-12: ลบปุ่ม "เพิ่มสถานะ" เดิม (dr-group / วันที่เดี่ยว) ให้เหลือแบบคอลัมน์ใหม่
+        ['pneumonia','uti','bsi','surgery','endometritis','episiotomy','skin','bedsore','omphalitis','eye','other'].forEach(function(id) {
+            const t = document.getElementById('tab-' + id);
+            if (t) t.querySelectorAll('.dr-add, .sd-add').forEach(function(b) { b.remove(); });
+        });
 
         // 1. Logic สำหรับคำนวณวันนอน และการเพิ่ม/ลบ แถวการรับย้าย
         function calculateTransferDays() {
