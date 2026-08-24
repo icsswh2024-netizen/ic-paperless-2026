@@ -1128,9 +1128,25 @@
             heads[1].textContent = num + '.' + (maxY + 2) + ' ' + heads[1].textContent;
         });
 
-        // 0b. ปุ่ม "เพิ่มแถว" ให้ทุกตาราง (ผล Lab ข้อ 7/8 และแท็บสรุปผล)
+        // 0b. ปุ่ม "เพิ่มแถว" + ลบแถว (พร้อมยืนยัน) ให้ทุกตาราง (ผล Lab ข้อ 7/8 และแท็บสรุปผล)
+        function tblDelCellHTML() {
+            return '<td class="border border-gray-200 p-1 text-center align-middle w-10 no-print">' +
+                   '<button type="button" class="tbl-del text-gray-400 hover:text-red-500 p-1" title="ลบแถว">' +
+                   '<i data-feather="trash-2" class="w-4 h-4 inline"></i></button></td>';
+        }
         document.querySelectorAll('.tab-content table').forEach(function(tbl) {
             const wrap = tbl.closest('.overflow-x-auto') || tbl;
+            // เพิ่มคอลัมน์หัวตารางสำหรับปุ่มลบ
+            const headRow = tbl.querySelector('thead tr');
+            if (headRow) {
+                const th = document.createElement('th');
+                th.className = 'border border-gray-200 p-2 w-10 no-print';
+                headRow.appendChild(th);
+            }
+            // เพิ่มปุ่มลบให้ทุกแถวที่มีอยู่
+            tbl.querySelectorAll('tbody tr').forEach(function(tr) {
+                tr.insertAdjacentHTML('beforeend', tblDelCellHTML());
+            });
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = 'tbl-add-row mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium';
@@ -1141,8 +1157,25 @@
                 const clone = last.cloneNode(true);
                 clone.querySelectorAll('input').forEach(function(i) { i.value = ''; });
                 tbody.appendChild(clone);
+                feather.replace();
             });
             wrap.parentNode.insertBefore(btn, wrap.nextSibling);
+        });
+
+        // ลบแถวตาราง (เด้ง modal ยืนยัน, คงเหลืออย่างน้อย 1 แถว)
+        document.addEventListener('click', function(e) {
+            const delRow = e.target.closest('.tbl-del');
+            if (delRow) {
+                e.preventDefault();
+                const tr = delRow.closest('tr');
+                const tbody = tr.closest('tbody');
+                if (tbody.rows.length > 1) {
+                    pendingRemoveEl = tr;
+                    openConfirmModal('คุณแน่ใจหรือไม่ว่าต้องการลบแถวนี้?');
+                } else {
+                    tr.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+                }
+            }
         });
 
         // 0c. วันที่เดี่ยว (นอกกลุ่มช่วงวันที่/ตาราง): ปุ่ม + โคลนทั้งบรรทัด/หัวข้อที่ติดกับวันที่
@@ -1179,7 +1212,8 @@
                 rm.addEventListener('click', function(ev) {
                     ev.preventDefault();
                     ev.stopPropagation();
-                    container.remove();
+                    pendingRemoveEl = container;
+                    openConfirmModal('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?');
                 });
                 container.appendChild(rm);
                 unit.parentNode.insertBefore(container, add);
@@ -1225,6 +1259,7 @@
         const modalConfirmBtn = document.getElementById('modal-confirm-btn');
         let rowToDelete = null;
         let pendingDrRow = null;
+        let pendingRemoveEl = null;
         const confirmModalMsg = document.getElementById('confirm-modal-msg');
 
         function openConfirmModal(message) {
@@ -1241,6 +1276,7 @@
             closeConfirmModal();
             rowToDelete = null;
             pendingDrRow = null;
+            pendingRemoveEl = null;
         });
 
         modalConfirmBtn.addEventListener('click', () => {
@@ -1263,6 +1299,10 @@
                 }
                 drReindex(container);
                 pendingDrRow = null;
+            }
+            if (pendingRemoveEl) {
+                pendingRemoveEl.remove();
+                pendingRemoveEl = null;
             }
             closeConfirmModal();
         });
