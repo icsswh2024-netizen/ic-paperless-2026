@@ -925,7 +925,7 @@
                 </div>
                 <h3 class="text-lg font-bold text-gray-800">ยืนยันการลบ</h3>
             </div>
-            <p class="text-sm text-gray-600 mb-6 mt-1 ml-13">คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการรับย้ายนี้? (การคำนวณวันนอนจะถูกอัปเดตอัตโนมัติ)</p>
+            <p id="confirm-modal-msg" class="text-sm text-gray-600 mb-6 mt-1 ml-13">คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการรับย้ายนี้? (การคำนวณวันนอนจะถูกอัปเดตอัตโนมัติ)</p>
             <div class="flex justify-end gap-3">
                 <button id="modal-cancel-btn" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 text-sm font-medium transition-colors">ยกเลิก</button>
                 <button id="modal-confirm-btn" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-medium transition-colors">ลบรายการ</button>
@@ -1082,11 +1082,23 @@
         const modalCancelBtn = document.getElementById('modal-cancel-btn');
         const modalConfirmBtn = document.getElementById('modal-confirm-btn');
         let rowToDelete = null;
+        let pendingDrRow = null;
+        const confirmModalMsg = document.getElementById('confirm-modal-msg');
 
-        modalCancelBtn.addEventListener('click', () => {
+        function openConfirmModal(message) {
+            if (confirmModalMsg && message) confirmModalMsg.textContent = message;
+            confirmModal.classList.remove('hidden');
+            confirmModal.classList.add('flex');
+        }
+        function closeConfirmModal() {
             confirmModal.classList.add('hidden');
             confirmModal.classList.remove('flex');
+        }
+
+        modalCancelBtn.addEventListener('click', () => {
+            closeConfirmModal();
             rowToDelete = null;
+            pendingDrRow = null;
         });
 
         modalConfirmBtn.addEventListener('click', () => {
@@ -1096,8 +1108,21 @@
                 calculateTransferDays();
                 rowToDelete = null;
             }
-            confirmModal.classList.add('hidden');
-            confirmModal.classList.remove('flex');
+            if (pendingDrRow) {
+                const container = pendingDrRow.closest('.dr-container');
+                const rows = container.querySelectorAll('.dr-row');
+                if (rows.length > 1) {
+                    pendingDrRow.remove();
+                } else {
+                    pendingDrRow.querySelectorAll('input').forEach(i => {
+                        if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
+                        else i.value = '';
+                    });
+                }
+                drReindex(container);
+                pendingDrRow = null;
+            }
+            closeConfirmModal();
         });
 
         function reindexTransfers() {
@@ -1114,8 +1139,7 @@
             const deleteBtn = e.target.closest('.delete-transfer-btn');
             if (deleteBtn) {
                 rowToDelete = deleteBtn.closest('.transfer-row');
-                confirmModal.classList.remove('hidden');
-                confirmModal.classList.add('flex');
+                openConfirmModal('คุณแน่ใจหรือไม่ว่าต้องการลบประวัติการรับย้ายนี้? (การคำนวณวันนอนจะถูกอัปเดตอัตโนมัติ)');
             }
         });
 
@@ -1245,17 +1269,8 @@
             }
             const delBtn = e.target.closest('.dr-del');
             if (delBtn) {
-                const container = delBtn.closest('.dr-container');
-                const rows = container.querySelectorAll('.dr-row');
-                if (rows.length > 1) {
-                    delBtn.closest('.dr-row').remove();
-                } else {
-                    delBtn.closest('.dr-row').querySelectorAll('input').forEach(i => {
-                        if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
-                        else i.value = '';
-                    });
-                }
-                drReindex(container);
+                pendingDrRow = delBtn.closest('.dr-row');
+                openConfirmModal('คุณแน่ใจหรือไม่ว่าต้องการลบรายการนี้?');
             }
         });
 
