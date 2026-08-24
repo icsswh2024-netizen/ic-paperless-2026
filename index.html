@@ -371,15 +371,18 @@
                         <!-- 2.3 Weaning Protocol -->
                         <div class="pt-4 border-t border-gray-200">
                             <span class="font-bold text-gray-700 block mb-3 text-sm sub-head">1.3 การใช้ Weaning protocol</span>
-                            <div class="flex flex-col gap-3 text-sm comp-indent">
-                                <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" name="weaning" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ใช้ : </label>
-                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="wean_result" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Weaning สำเร็จ</label>
-                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="wean_result" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Weaning ไม่สำเร็จ</label>
-                                
-                                <label class="flex items-center gap-2 font-medium mt-2 cursor-pointer"><input type="checkbox" name="weaning" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่ใช้ โปรดระบุเหตุผลเนื่องจาก : </label>
-                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="no_wean_reason" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่เข้าเกณฑ์การ Weaning</label>
-                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="no_wean_reason" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ดุลยพินิจของแพทย์</label>
-                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" name="no_wean_reason" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่นๆ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></label>
+                            <div class="flex flex-col gap-4 text-sm comp-indent">
+                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col gap-2">
+                                    <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" name="weaning" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ใช้ Weaning protocol</label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Weaning สำเร็จ</label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Weaning ไม่สำเร็จ</label>
+                                </div>
+                                <div class="bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col gap-2">
+                                    <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" name="weaning" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่ใช้ โปรดระบุเหตุผลเนื่องจาก :</label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่เข้าเกณฑ์การ Weaning</label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ดุลยพินิจของแพทย์</label>
+                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่นๆ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></label>
+                                </div>
                             </div>
                         </div>
                     </div>
