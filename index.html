@@ -1145,52 +1145,48 @@
             wrap.parentNode.insertBefore(btn, wrap.nextSibling);
         });
 
-        // 0c. วันที่เดี่ยว (นอกกลุ่มช่วงวันที่/ตาราง) เพิ่มได้หลายวันด้วยปุ่ม +
+        // 0c. วันที่เดี่ยว (นอกกลุ่มช่วงวันที่/ตาราง): ปุ่ม + โคลนทั้งบรรทัด/หัวข้อที่ติดกับวันที่
         document.querySelectorAll('input[type="date"]').forEach(function(inp) {
             if (inp.closest('.dr-row')) return;
             if (inp.classList.contains('transfer-date')) return;
             if (inp.closest('table')) return;
-            if (inp.closest('.sd-wrap')) return;
-            const wrap = document.createElement('span');
-            wrap.className = 'sd-wrap inline-flex flex-wrap items-center gap-1 align-middle';
-            inp.parentNode.insertBefore(wrap, inp);
-            wrap.appendChild(inp);
+            if (inp.closest('.sd-clone')) return;
+            const unit = inp.closest('label') || inp.closest('div');
+            if (!unit || unit.dataset.sdDone) return;
+            unit.dataset.sdDone = '1';
+
             const add = document.createElement('button');
             add.type = 'button';
-            add.textContent = '+';
-            add.title = 'เพิ่มวันที่';
-            add.className = 'sd-add w-5 h-5 flex items-center justify-center text-red-600 hover:bg-red-50 border border-red-200 rounded text-sm font-bold leading-none shrink-0';
-            wrap.appendChild(add);
-        });
-
-        document.addEventListener('click', function(e) {
-            const addSd = e.target.closest('.sd-add');
-            if (addSd) {
+            add.innerHTML = '<i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ';
+            add.className = 'sd-add mt-1 text-xs inline-flex items-center gap-1 bg-red-50 text-red-700 px-2 py-0.5 rounded hover:bg-red-100 border border-red-200 transition-colors font-medium';
+            add.addEventListener('click', function(e) {
                 e.preventDefault();
                 e.stopPropagation();
-                const wrap = addSd.closest('.sd-wrap');
-                const proto = wrap.querySelector('input[type="date"]');
-                const grp = document.createElement('span');
-                grp.className = 'inline-flex items-center gap-1';
-                const ni = proto.cloneNode(false);
-                ni.value = '';
+                const container = document.createElement('div');
+                container.className = 'sd-clone flex items-start gap-1 mt-1';
+                const clone = unit.cloneNode(true);
+                delete clone.dataset.sdDone;
+                clone.querySelectorAll('input, textarea').forEach(function(i) {
+                    if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
+                    else i.value = '';
+                });
+                container.appendChild(clone);
                 const rm = document.createElement('button');
                 rm.type = 'button';
                 rm.textContent = '×';
-                rm.title = 'ลบวันที่';
-                rm.className = 'sd-del w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-500 text-base leading-none shrink-0';
-                grp.appendChild(ni);
-                grp.appendChild(rm);
-                wrap.insertBefore(grp, addSd);
-                return;
-            }
-            const delSd = e.target.closest('.sd-del');
-            if (delSd) {
-                e.preventDefault();
-                e.stopPropagation();
-                delSd.parentNode.remove();
-            }
+                rm.title = 'ลบรายการ';
+                rm.className = 'sd-del text-gray-400 hover:text-red-500 text-lg leading-none px-1 shrink-0';
+                rm.addEventListener('click', function(ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    container.remove();
+                });
+                container.appendChild(rm);
+                unit.parentNode.insertBefore(container, add);
+            });
+            unit.parentNode.insertBefore(add, unit.nextSibling);
         });
+        feather.replace();
 
         // 1. Logic สำหรับคำนวณวันนอน และการเพิ่ม/ลบ แถวการรับย้าย
         function calculateTransferDays() {
