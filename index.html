@@ -1162,10 +1162,22 @@
             const cbs = lbl.querySelectorAll('input[type="checkbox"]');
             if (cbs.length !== 1) return;
             if (cbs[0].name) return; // ข้ามกลุ่มตัวเลือกเชิงโครงสร้าง (มี name)
-            if (lbl.querySelector('input[type="date"], input[type="text"], input[type="number"], input[type="time"], textarea')) return; // มีช่องกรอกอยู่แล้ว
+            if (lbl.querySelector('input[type="text"], input[type="number"], input[type="time"], textarea')) return; // มีช่องกรอกชนิดอื่น (โครงสร้าง/ชื่อยา) → ข้าม
             if (lbl.closest('.dr-row') || lbl.closest('.sd-clone') || lbl.closest('table')) return;
             if (lbl.closest('.dr-group')) return; // ข้ามบล็อกอุปกรณ์ (มีแถววันที่ใส่/ถอด/รวมวัน ของตัวเอง)
             if (!lbl.textContent.trim()) return;
+
+            // ถ้ามีวันที่ฝังในข้อความอยู่แล้ว → ลบทิ้ง แล้วแทนด้วยคอลัมน์ช่วงวันที่ (ปรับรูปแบบให้เหมือนกัน)
+            const embedded = lbl.querySelectorAll('input[type="date"]');
+            if (embedded.length) {
+                embedded.forEach(function(d) { d.remove(); });
+                const walker = document.createTreeWalker(lbl, NodeFilter.SHOW_TEXT, null);
+                const texts = []; let tn;
+                while ((tn = walker.nextNode())) texts.push(tn);
+                texts.forEach(function(t) {
+                    t.nodeValue = t.nodeValue.replace(/ถึงวันที่|วันที่|ถึง/g, '').replace(/[:：]/g, '').replace(/\s+/g, ' ');
+                });
+            }
 
             // ห่อ checkbox + ข้อความ เป็นคอลัมน์ซ้าย
             const textWrap = document.createElement('span');
