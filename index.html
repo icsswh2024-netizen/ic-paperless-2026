@@ -1165,6 +1165,7 @@
             if (cbs[0].name) return; // ข้ามกลุ่มตัวเลือกเชิงโครงสร้าง (มี name)
             if (lbl.querySelector('input[type="date"], input[type="text"], input[type="number"], input[type="time"], textarea')) return; // มีช่องกรอกอยู่แล้ว
             if (lbl.closest('.dr-row') || lbl.closest('.sd-clone') || lbl.closest('table')) return;
+            if (lbl.closest('.dr-group')) return; // ข้ามบล็อกอุปกรณ์ (มีแถววันที่ใส่/ถอด/รวมวัน ของตัวเอง)
             if (!lbl.textContent.trim()) return;
 
             // ห่อ checkbox + ข้อความ เป็นคอลัมน์ซ้าย
@@ -1307,9 +1308,8 @@
             t.querySelectorAll('.dr-group').forEach(function(g) {
                 if (!g.querySelector('input[type="checkbox"]')) {
                     g.remove(); // บล็อกช่วงวันที่ล้วน (ซ้ำกับคอลัมน์ใหม่) → ลบทิ้ง
-                } else {
-                    g.querySelectorAll('.dr-add').forEach(function(b) { b.remove(); }); // บล็อกอุปกรณ์ที่มี checkbox → คงไว้ แต่เอาปุ่มเพิ่มออก
                 }
+                // บล็อกอุปกรณ์ที่มี checkbox → คงไว้ทั้งหมด (ใช้ปุ่มเพิ่ม/ลบ วันที่ใส่-ถอด-รวมวัน ของตัวเอง)
             });
             t.querySelectorAll('.sd-add').forEach(function(b) { b.remove(); });
         });
