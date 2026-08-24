@@ -1300,10 +1300,18 @@
         });
         feather.replace();
 
-        // 0d. แท็บ 2-12: ลบปุ่ม "เพิ่มสถานะ" เดิม (dr-group / วันที่เดี่ยว) ให้เหลือแบบคอลัมน์ใหม่
+        // 0d. แท็บ 2-12: ลบบล็อกช่วงวันที่เดิม (dr-group ที่ไม่มี checkbox) และปุ่มเพิ่มสถานะเดิมทั้งหมด
         ['pneumonia','uti','bsi','surgery','endometritis','episiotomy','skin','bedsore','omphalitis','eye','other'].forEach(function(id) {
             const t = document.getElementById('tab-' + id);
-            if (t) t.querySelectorAll('.dr-add, .sd-add').forEach(function(b) { b.remove(); });
+            if (!t) return;
+            t.querySelectorAll('.dr-group').forEach(function(g) {
+                if (!g.querySelector('input[type="checkbox"]')) {
+                    g.remove(); // บล็อกช่วงวันที่ล้วน (ซ้ำกับคอลัมน์ใหม่) → ลบทิ้ง
+                } else {
+                    g.querySelectorAll('.dr-add').forEach(function(b) { b.remove(); }); // บล็อกอุปกรณ์ที่มี checkbox → คงไว้ แต่เอาปุ่มเพิ่มออก
+                }
+            });
+            t.querySelectorAll('.sd-add').forEach(function(b) { b.remove(); });
         });
 
         // 1. Logic สำหรับคำนวณวันนอน และการเพิ่ม/ลบ แถวการรับย้าย
