@@ -1136,8 +1136,14 @@
             if (lbl.querySelector('input[type="date"], input[type="text"], input[type="number"], input[type="time"], textarea')) return; // มีช่องกรอกอยู่แล้ว
             if (lbl.closest('.dr-row') || lbl.closest('.sd-clone') || lbl.closest('table')) return;
             if (!lbl.textContent.trim()) return;
+            lbl.classList.add('w-full');
+            lbl.style.width = '100%';
+            lbl.style.display = 'flex';
+            lbl.style.alignItems = 'center';
+            lbl.style.gap = '0.5rem';
             const span = document.createElement('span');
-            span.className = 'ml-2 text-gray-500 whitespace-nowrap';
+            span.className = 'ml-auto pl-4 shrink-0 text-gray-500 whitespace-nowrap';
+            span.style.marginLeft = 'auto';
             span.innerHTML = 'วันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none">';
             lbl.appendChild(span);
         });
