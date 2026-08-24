@@ -1128,6 +1128,70 @@
             heads[1].textContent = num + '.' + (maxY + 2) + ' ' + heads[1].textContent;
         });
 
+        // 0b. ปุ่ม "เพิ่มแถว" ให้ทุกตาราง (ผล Lab ข้อ 7/8 และแท็บสรุปผล)
+        document.querySelectorAll('.tab-content table').forEach(function(tbl) {
+            const wrap = tbl.closest('.overflow-x-auto') || tbl;
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'tbl-add-row mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium';
+            btn.innerHTML = '<i data-feather="plus" class="w-3 h-3"></i> เพิ่มแถว';
+            btn.addEventListener('click', function() {
+                const tbody = tbl.querySelector('tbody');
+                const last = tbody.rows[tbody.rows.length - 1];
+                const clone = last.cloneNode(true);
+                clone.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+                tbody.appendChild(clone);
+            });
+            wrap.parentNode.insertBefore(btn, wrap.nextSibling);
+        });
+
+        // 0c. วันที่เดี่ยว (นอกกลุ่มช่วงวันที่/ตาราง) เพิ่มได้หลายวันด้วยปุ่ม +
+        document.querySelectorAll('input[type="date"]').forEach(function(inp) {
+            if (inp.closest('.dr-row')) return;
+            if (inp.classList.contains('transfer-date')) return;
+            if (inp.closest('table')) return;
+            if (inp.closest('.sd-wrap')) return;
+            const wrap = document.createElement('span');
+            wrap.className = 'sd-wrap inline-flex flex-wrap items-center gap-1 align-middle';
+            inp.parentNode.insertBefore(wrap, inp);
+            wrap.appendChild(inp);
+            const add = document.createElement('button');
+            add.type = 'button';
+            add.textContent = '+';
+            add.title = 'เพิ่มวันที่';
+            add.className = 'sd-add w-5 h-5 flex items-center justify-center text-red-600 hover:bg-red-50 border border-red-200 rounded text-sm font-bold leading-none shrink-0';
+            wrap.appendChild(add);
+        });
+
+        document.addEventListener('click', function(e) {
+            const addSd = e.target.closest('.sd-add');
+            if (addSd) {
+                e.preventDefault();
+                e.stopPropagation();
+                const wrap = addSd.closest('.sd-wrap');
+                const proto = wrap.querySelector('input[type="date"]');
+                const grp = document.createElement('span');
+                grp.className = 'inline-flex items-center gap-1';
+                const ni = proto.cloneNode(false);
+                ni.value = '';
+                const rm = document.createElement('button');
+                rm.type = 'button';
+                rm.textContent = '×';
+                rm.title = 'ลบวันที่';
+                rm.className = 'sd-del w-5 h-5 flex items-center justify-center text-gray-400 hover:text-red-500 text-base leading-none shrink-0';
+                grp.appendChild(ni);
+                grp.appendChild(rm);
+                wrap.insertBefore(grp, addSd);
+                return;
+            }
+            const delSd = e.target.closest('.sd-del');
+            if (delSd) {
+                e.preventDefault();
+                e.stopPropagation();
+                delSd.parentNode.remove();
+            }
+        });
+
         // 1. Logic สำหรับคำนวณวันนอน และการเพิ่ม/ลบ แถวการรับย้าย
         function calculateTransferDays() {
             const admitDateInput = document.getElementById('global-admit-date');
