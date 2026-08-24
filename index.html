@@ -300,20 +300,24 @@
                                 <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> On ET</label>
                                 <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> On TT</label>
                                 
-                                <div class="border border-gray-200 p-3 rounded-lg bg-gray-50 flex flex-col gap-2 mt-2">
-                                    <label class="flex items-center gap-2 font-bold cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> On ventilator (ครั้งที่ 1)</label>
-                                    <div class="flex items-center gap-2 ml-6 text-xs">วันที่เริ่ม: <input type="date" class="border-b border-gray-300 bg-transparent focus:outline-none"></div>
-                                    <div class="flex items-center gap-2 ml-6 text-xs">วันที่ถอด: <input type="date" class="border-b border-gray-300 bg-transparent focus:outline-none"></div>
-                                    <div class="flex items-center gap-2 ml-6 text-xs">รวม <input type="number" class="border-b border-gray-300 bg-transparent focus:outline-none w-12 text-center font-bold"> วัน</div>
+                                <div class="dr-group border border-gray-200 p-3 rounded-lg bg-gray-50 mt-2">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="font-bold text-sm text-gray-700">On ventilator</span>
+                                        <button type="button" class="dr-add text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                    </div>
+                                    <div class="dr-container flex flex-col gap-2">
+                                        <div class="dr-row border border-gray-200 bg-white rounded-lg p-2 flex flex-col gap-2">
+                                            <div class="flex items-center justify-between">
+                                                <span class="dr-index font-medium text-gray-700 text-xs">ครั้งที่ 1</span>
+                                                <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                            </div>
+                                            <div class="flex items-center gap-2 ml-2 text-xs">วันที่เริ่ม: <input type="date" class="dr-start border-b border-gray-300 bg-transparent focus:outline-none"></div>
+                                            <div class="flex items-center gap-2 ml-2 text-xs">วันที่ถอด: <input type="date" class="dr-end border-b border-gray-300 bg-transparent focus:outline-none"></div>
+                                            <div class="flex items-center gap-2 ml-2 text-xs">รวม <input type="number" class="dr-days border-b border-gray-300 bg-transparent focus:outline-none w-12 text-center font-bold text-red-600" readonly placeholder="-"> วัน</div>
+                                        </div>
+                                    </div>
                                 </div>
-                                
-                                <div class="border border-gray-200 p-3 rounded-lg bg-gray-50 flex flex-col gap-2">
-                                    <label class="flex items-center gap-2 font-bold cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> On ventilator (ครั้งที่ 2)</label>
-                                    <div class="flex items-center gap-2 ml-6 text-xs">วันที่เริ่ม: <input type="date" class="border-b border-gray-300 bg-transparent focus:outline-none"></div>
-                                    <div class="flex items-center gap-2 ml-6 text-xs">วันที่ถอด: <input type="date" class="border-b border-gray-300 bg-transparent focus:outline-none"></div>
-                                    <div class="flex items-center gap-2 ml-6 text-xs">รวม <input type="number" class="border-b border-gray-300 bg-transparent focus:outline-none w-12 text-center font-bold"> วัน</div>
-                                </div>
-                                
+
                                 <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่ได้ On Ventilator</label>
                             </div>
                         </div>
@@ -324,10 +328,17 @@
                             <div class="flex flex-col gap-3 text-sm">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Sub temp.(<36) ในเด็กอายุ < 12 เดือน</label>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 ml-6 text-gray-600">
-                                    วันที่เริ่ม <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
-                                    ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
-                                    รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน
+                                <div class="dr-group ml-6">
+                                    <div class="dr-container flex flex-col gap-2">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่เริ่ม <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                            ถึง <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                            รวม <input type="number" class="dr-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="dr-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
                                 </div>
                                 
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไอ</label>
@@ -376,9 +387,20 @@
                         <div class="mb-6">
                             <div class="flex flex-col gap-3 text-sm">
                                 <label class="flex items-center gap-2 font-bold cursor-pointer"><input type="checkbox" class="w-4 h-4 text-orange-600 rounded border-gray-300 focus:ring-orange-500"> Retained Foley's catheter</label>
-                                <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่เริ่ม: <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none"></div>
-                                <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่ถอด: <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none"></div>
-                                <div class="flex items-center gap-2 ml-6 text-gray-600">รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center font-bold"> วัน</div>
+                                <div class="dr-group ml-6">
+                                    <div class="dr-container flex flex-col gap-2">
+                                        <div class="dr-row border border-gray-200 bg-gray-50 rounded-lg p-2 flex flex-col gap-2">
+                                            <div class="flex items-center justify-between">
+                                                <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                                <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                            </div>
+                                            <div class="flex items-center gap-2 text-gray-600">วันที่เริ่ม: <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none"></div>
+                                            <div class="flex items-center gap-2 text-gray-600">วันที่ถอด: <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none"></div>
+                                            <div class="flex items-center gap-2 text-gray-600">รวม <input type="number" class="dr-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center font-bold text-red-600" readonly placeholder="-"> วัน</div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="dr-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                </div>
                             </div>
                         </div>
 
@@ -386,10 +408,17 @@
                             <div class="flex flex-col gap-3 text-sm">
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Sub temp(&lt;36) ในเด็กอายุ &lt; 12 เดือน</label>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 ml-6 text-gray-600">
-                                    วันที่เริ่ม <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
-                                    ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
-                                    รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน
+                                <div class="dr-group ml-6">
+                                    <div class="dr-container flex flex-col gap-2">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่เริ่ม <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                            ถึง <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                            รวม <input type="number" class="dr-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="dr-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
                                 </div>
 
                                 <label class="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะลำบาก</label>
@@ -400,10 +429,17 @@
                                 
                                 <label class="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะบ่อย</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ปัสสาวะกระปริบกระปรอย</label>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 ml-6 text-gray-600">
-                                    วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
-                                    ถึงวันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
-                                    รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน
+                                <div class="dr-group ml-6">
+                                    <div class="dr-container flex flex-col gap-2">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                            ถึงวันที่ <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                            รวม <input type="number" class="dr-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="dr-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
                                 </div>
                                 
                                 <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-4">
@@ -420,32 +456,86 @@
                         
                         <div class="mb-6">
                             <div class="flex flex-col gap-4 text-sm">
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ให้ IV Fluid</label>
-                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                <div class="dr-group">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ให้ IV Fluid</label>
+                                        <button type="button" class="dr-add text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium ml-auto"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                    </div>
+                                    <div class="dr-container flex flex-col gap-1">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 ml-6 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่ใส่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ใส่ NSS Lock</label>
-                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                <div class="dr-group">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ใส่ NSS Lock</label>
+                                        <button type="button" class="dr-add text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium ml-auto"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                    </div>
+                                    <div class="dr-container flex flex-col gap-1">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 ml-6 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่ใส่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
                                 
                                 <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ใส่ Central venous catheter</label>
                                 
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> UVC</label>
-                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                <div class="dr-group">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> UVC</label>
+                                        <button type="button" class="dr-add text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium ml-auto"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                    </div>
+                                    <div class="dr-container flex flex-col gap-1">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 ml-6 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่ใส่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> VAC</label>
-                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                <div class="dr-group">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> VAC</label>
+                                        <button type="button" class="dr-add text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium ml-auto"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                    </div>
+                                    <div class="dr-container flex flex-col gap-1">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 ml-6 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่ใส่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Cut down</label>
-                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                <div class="dr-group">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Cut down</label>
+                                        <button type="button" class="dr-add text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium ml-auto"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                    </div>
+                                    <div class="dr-container flex flex-col gap-1">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 ml-6 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่ใส่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2">
-                                    <label class="flex items-center gap-2 font-medium cursor-pointer w-48"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่นๆระบุ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-20"></label>
-                                    <span class="text-gray-600">วันที่ใส่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน</span>
+                                <div class="dr-group">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่นๆระบุ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-20"></label>
+                                        <button type="button" class="dr-add text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium ml-auto"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                    </div>
+                                    <div class="dr-container flex flex-col gap-1">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 ml-6 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่ใส่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> วันที่ถอด <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-10 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -463,10 +553,17 @@
                                 
                                 <label class="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
                                 <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> Sub temp.(<36) ในเด็กอายุ < 12 เดือน</label>
-                                <div class="flex flex-col sm:flex-row sm:items-center gap-2 ml-6 text-gray-600">
-                                    วันที่เริ่ม <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
-                                    ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> 
-                                    รวม <input type="number" class="w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center"> วัน
+                                <div class="dr-group ml-6">
+                                    <div class="dr-container flex flex-col gap-2">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่เริ่ม <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                            ถึง <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32">
+                                            รวม <input type="number" class="dr-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="dr-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
                                 </div>
 
                                 <label class="flex items-center gap-2 cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> BP ต่ำ (systolic pressure ≤ 90 mmHg)</label>
@@ -527,7 +624,16 @@
                             <div class="flex flex-col gap-3 text-sm">
                                 <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> พบแผลผ่าตัดมี หนอง ฝี บวม แดง ร้อน แผลแยก มีหนองจาก drain อื่น ๆ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"> วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
                                 <label class="flex items-center gap-2 font-medium cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
-                                <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></div>
+                                <div class="dr-group ml-6">
+                                    <div class="dr-container flex flex-col gap-2">
+                                        <div class="dr-row flex flex-wrap items-center gap-2 text-gray-600">
+                                            <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                            วันที่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                            <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="dr-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                </div>
                             </div>
                         </div>
 
@@ -573,7 +679,16 @@
                             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-pink-600 rounded border-gray-300 focus:ring-pink-500"> มีหนองไหลจากมดลูก</label>
                             
                             <label class="flex items-center gap-2 font-medium cursor-pointer mt-2"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไข้ > 38°c</label>
-                            <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></div>
+                            <div class="dr-group ml-6">
+                                <div class="dr-container flex flex-col gap-2">
+                                    <div class="dr-row flex flex-wrap items-center gap-2 text-gray-600">
+                                        <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                        วันที่ <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง วันที่ <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                        <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                                <button type="button" class="dr-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                            </div>
                             
                             <label class="flex items-center gap-2 font-medium text-blue-900 cursor-pointer mt-4">
                                 <input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> 
@@ -596,7 +711,16 @@
                             <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> แผลแยก วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 ml-1"></label>
                             
                             <label class="flex items-center gap-2 font-medium cursor-pointer mt-4"><input type="checkbox" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> พบว่า ไข้ > 38°c</label>
-                            <div class="flex items-center gap-2 ml-6 text-gray-600">วันที่เริ่ม <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></div>
+                            <div class="dr-group ml-6">
+                                <div class="dr-container flex flex-col gap-2">
+                                    <div class="dr-row flex flex-wrap items-center gap-2 text-gray-600">
+                                        <span class="dr-index text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                        วันที่เริ่ม <input type="date" class="dr-start border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึง <input type="date" class="dr-end border-b border-gray-400 bg-transparent focus:outline-none w-32"> รวม <input type="number" class="dr-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน
+                                        <button type="button" class="dr-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                    </div>
+                                </div>
+                                <button type="button" class="dr-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                            </div>
                         </div>
                     </div>
 
@@ -1069,6 +1193,71 @@
                 historyModal.classList.remove('flex');
             });
         }
+
+        // 4. Generic "เพิ่มสถานะ" (date-range) groups
+        // ใช้กับทุกบล็อกที่มี .dr-group / .dr-container / .dr-row
+        function drCalcDays(row) {
+            if (!row) return;
+            const start = row.querySelector('.dr-start');
+            const end = row.querySelector('.dr-end');
+            const days = row.querySelector('.dr-days');
+            if (!days) return;
+            if (start && end && start.value && end.value) {
+                const a = new Date(start.value); a.setHours(0,0,0,0);
+                const b = new Date(end.value); b.setHours(0,0,0,0);
+                const diff = Math.round((b - a) / (1000 * 60 * 60 * 24));
+                days.value = diff >= 0 ? diff : '';
+            } else {
+                days.value = '';
+            }
+        }
+
+        document.addEventListener('change', function(e) {
+            if (e.target.classList && (e.target.classList.contains('dr-start') || e.target.classList.contains('dr-end'))) {
+                drCalcDays(e.target.closest('.dr-row'));
+            }
+        });
+
+        function drReindex(container) {
+            if (!container) return;
+            const rows = container.querySelectorAll('.dr-row');
+            rows.forEach((row, idx) => {
+                const label = row.querySelector('.dr-index');
+                if (label) label.textContent = 'ครั้งที่ ' + (idx + 1);
+            });
+        }
+
+        document.addEventListener('click', function(e) {
+            const addBtn = e.target.closest('.dr-add');
+            if (addBtn) {
+                const group = addBtn.closest('.dr-group');
+                const container = group.querySelector('.dr-container');
+                const rows = container.querySelectorAll('.dr-row');
+                const clone = rows[rows.length - 1].cloneNode(true);
+                clone.querySelectorAll('input').forEach(i => {
+                    if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
+                    else i.value = '';
+                });
+                container.appendChild(clone);
+                drReindex(container);
+                feather.replace();
+                return;
+            }
+            const delBtn = e.target.closest('.dr-del');
+            if (delBtn) {
+                const container = delBtn.closest('.dr-container');
+                const rows = container.querySelectorAll('.dr-row');
+                if (rows.length > 1) {
+                    delBtn.closest('.dr-row').remove();
+                } else {
+                    delBtn.closest('.dr-row').querySelectorAll('input').forEach(i => {
+                        if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
+                        else i.value = '';
+                    });
+                }
+                drReindex(container);
+            }
+        });
 
         const previewBtn = document.getElementById('btn-preview');
         const previewModal = document.getElementById('preview-modal');
