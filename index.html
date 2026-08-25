@@ -1048,9 +1048,13 @@
     <div id="preview-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white rounded-xl w-full max-w-5xl h-[90vh] mx-4 shadow-xl flex flex-col overflow-hidden">
             <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
-                <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-feather="printer" class="w-5 h-5 text-gray-600"></i> ตัวอย่างก่อนพิมพ์ (A4 - 2 หน้า)</h3>
+                <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-feather="printer" class="w-5 h-5 text-gray-600"></i> ตัวอย่างก่อนพิมพ์</h3>
                 <div class="flex items-center gap-2">
-                    <button id="print-preview-btn" class="px-4 py-2 bg-[#02b371] text-white rounded-lg hover:bg-green-600 text-sm font-bold transition-colors flex items-center gap-2 shadow-sm">
+                    <div class="flex rounded-lg overflow-hidden border border-gray-300 text-sm no-print">
+                        <button id="pv-mode-full" type="button" class="px-3 py-2 font-medium bg-[#02b371] text-white">แบบเต็ม</button>
+                        <button id="pv-mode-brief" type="button" class="px-3 py-2 font-medium bg-white text-gray-700">แบบย่อ</button>
+                    </div>
+                    <button id="print-preview-btn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-bold transition-colors flex items-center gap-2 shadow-sm">
                         <i data-feather="printer" class="w-4 h-4"></i> สั่งพิมพ์เอกสาร
                     </button>
                     <button id="close-preview-btn" class="text-gray-400 hover:bg-gray-200 rounded-lg transition-colors p-2"><i data-feather="x" class="w-5 h-5"></i></button>
@@ -1060,66 +1064,7 @@
             <!-- Document preview area (Scrollable) -->
             <div class="p-8 overflow-y-auto flex-1 bg-gray-200 flex flex-col items-center gap-8">
                 
-                <div id="preview-print-area" class="w-full flex flex-col gap-8 items-center">
-                    
-                    <!-- หน้าที่ 1 (A4) -->
-                    <div class="a4-page flex flex-col text-sm text-gray-800">
-                        <div class="text-center font-bold text-lg mb-6 leading-tight">
-                            แบบเฝ้าระวังการติดเชื้อในโรงพยาบาลศรีสังวรสุโขทัย<br>
-                            <span class="text-sm font-normal">FR-ICC-01_68</span>
-                        </div>
-                        <div class="flex justify-between items-start border-b border-gray-300 pb-4 mb-4">
-                            <div class="space-y-2">
-                                <div>หอผู้ป่วยใน, ไตเทียม</div>
-                                <div>หอผู้ป่วย........................................................................... เตียง........................</div>
-                                <div>ชื่อ-สกุลผู้ป่วย.......................................................................... อายุ................ ปี................ วัน</div>
-                            </div>
-                            <div class="space-y-2 text-right">
-                                <div>HN........................................</div>
-                                <div>AN........................................</div>
-                            </div>
-                        </div>
-                        
-                        <div class="flex-1 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center p-6 relative bg-gray-50/50">
-                            <div class="absolute top-0 left-0 bg-gray-200 text-gray-600 font-bold px-3 py-1 text-xs rounded-br-lg">เนื้อหาเอกสารหน้าที่ 1</div>
-                            <div class="bg-blue-50 p-6 rounded-full mb-4">
-                                <i data-feather="file-text" class="w-12 h-12 text-blue-400"></i>
-                            </div>
-                            <h4 class="font-bold text-gray-600 text-lg mb-2">พื้นที่จำลองเอกสารหน้า 1 (ดึงข้อมูลอัตโนมัติ)</h4>
-                            <div class="text-sm text-gray-500 bg-white p-4 rounded border border-gray-200 text-left leading-loose w-3/4 shadow-sm">
-                                <ul class="list-none space-y-2">
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 1. ข้อมูลทั่วไป (รับใหม่, ย้าย, จำหน่าย, วินิจฉัยแรกรับ)</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 2. อาการแสดง: Pneumonia (อุปกรณ์หายใจ, CXR, Weaning)</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 3. อาการแสดง: UTI (สายสวนปัสสาวะ, อาการปัสสาวะ, Urine C/S)</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 4. อาการแสดง: Primary blood stream infection (สาย IV, Hemodialysis, C/S)</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- หน้าที่ 2 (A4) -->
-                    <div class="a4-page flex flex-col text-sm text-gray-800">
-                        <div class="flex-1 border-2 border-dashed border-gray-200 rounded-lg flex flex-col items-center justify-center p-6 relative bg-gray-50/50">
-                            <div class="absolute top-0 left-0 bg-gray-200 text-gray-600 font-bold px-3 py-1 text-xs rounded-br-lg">เนื้อหาเอกสารหน้าที่ 2</div>
-                            <div class="bg-green-50 p-6 rounded-full mb-4">
-                                <i data-feather="file-text" class="w-12 h-12 text-green-400"></i>
-                            </div>
-                            <h4 class="font-bold text-gray-600 text-lg mb-2">พื้นที่จำลองเอกสารหน้า 2 (ดึงข้อมูลอัตโนมัติ)</h4>
-                            <div class="text-sm text-gray-500 bg-white p-4 rounded border border-gray-200 text-left leading-loose w-3/4 shadow-sm">
-                                <ul class="list-none space-y-2">
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 5. Surgical Site Infection (รายละเอียดผ่าตัด, แผล, Pre Med)</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 6. Endometritis &nbsp;|&nbsp; 7. Episiotomy</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 8. Skin Infection &nbsp;|&nbsp; 9. Bed sore Infection</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 10. Omphalitis &nbsp;|&nbsp; 11. ตา &nbsp;|&nbsp; 12. ระบบอื่น</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 7. ผลการตรวจทางห้องปฏิบัติการ (ตาราง)</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 8. ผลการตรวจพิเศษอื่นๆ (ตาราง)</li>
-                                    <li><i data-feather="check-square" class="w-4 h-4 inline text-gray-400 mr-2"></i> 9. การวินิจฉัยโรคติดเชื้อในโรงพยาบาล และผู้สรุป</li>
-                                </ul>
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
+                <div id="preview-print-area" class="bg-white shadow-lg text-sm text-gray-800" style="width:210mm;min-height:297mm;padding:15mm;margin:0 auto;"></div>
             </div>
         </div>
     </div>
@@ -1745,9 +1690,131 @@
         const previewModal = document.getElementById('preview-modal');
         const closePreviewBtn = document.getElementById('close-preview-btn');
         const printPreviewBtn = document.getElementById('print-preview-btn');
+        const pvArea = document.getElementById('preview-print-area');
+        const pvModeFullBtn = document.getElementById('pv-mode-full');
+        const pvModeBriefBtn = document.getElementById('pv-mode-brief');
 
-        if(previewBtn && previewModal && closePreviewBtn) {
+        const PV_SYS = ['general','pneumonia','uti','bsi','surgery','endometritis','episiotomy','skin','bedsore','omphalitis','eye','other'];
+
+        function pvGet(ph) { const el = document.querySelector('input[placeholder="' + ph + '"]'); return el ? (el.value || '').trim() : ''; }
+        function pvFmtDate(v, type) {
+            if (!v) return '';
+            if (type === 'date') { const a = v.split('-'); if (a.length === 3) return a[2] + '/' + a[1] + '/' + a[0]; }
+            if (type === 'month') { const b = v.split('-'); if (b.length === 2) return b[1] + '/' + b[0]; }
+            return v;
+        }
+        function pvStaticize(clone, src) {
+            const S = src.querySelectorAll('input, textarea, select');
+            const C = clone.querySelectorAll('input, textarea, select');
+            S.forEach(function(s, i) {
+                const c = C[i]; if (!c) return;
+                if (s.type === 'checkbox' || s.type === 'radio') {
+                    if (s.checked) c.setAttribute('checked', 'checked'); else c.removeAttribute('checked');
+                    c.setAttribute('disabled', 'disabled');
+                } else {
+                    const v = (s.value || '').trim();
+                    const span = document.createElement('span');
+                    if (v !== '') {
+                        span.className = 'pv-filled';
+                        span.style.borderBottom = '1px solid #374151';
+                        span.style.padding = '0 4px';
+                        span.textContent = (s.type === 'date' || s.type === 'month') ? pvFmtDate(v, s.type) : v;
+                    } else {
+                        span.style.borderBottom = '1px solid #cbd5e1';
+                        span.style.display = 'inline-block';
+                        span.style.minWidth = '70px';
+                        span.innerHTML = '&nbsp;';
+                    }
+                    c.replaceWith(span);
+                }
+            });
+        }
+        function pvHasData(el) {
+            if (el.querySelector && el.querySelector('.pv-filled')) return true;
+            if (el.querySelectorAll) {
+                const cbs = el.querySelectorAll('input[type=checkbox], input[type=radio]');
+                for (let i = 0; i < cbs.length; i++) if (cbs[i].hasAttribute('checked')) return true;
+            }
+            return false;
+        }
+        function pvCleanCommon(root) {
+            root.querySelectorAll('button, .nav-dot, .no-print').forEach(function(e) { e.remove(); });
+        }
+        function pvPruneEmpty(root, aggressive) {
+            root.querySelectorAll('tbody tr').forEach(function(tr) { if (!pvHasData(tr)) tr.remove(); });
+            root.querySelectorAll('table').forEach(function(t) { if (!t.querySelector('tbody tr')) { const card = t.closest('.bg-white') || t.parentElement; (card || t).remove(); } });
+            if (!aggressive) return;
+            root.querySelectorAll('.lab-appended').forEach(function(la) { if (!pvHasData(la)) la.remove(); });
+            let changed = true, guard = 0;
+            while (changed && guard++ < 25) {
+                changed = false;
+                root.querySelectorAll('label, .cb-rrow, .dr-row, .wg-row, .transfer-row, div').forEach(function(el) {
+                    if (el === root || !root.contains(el)) return;
+                    if (el.querySelector('.sub-head, .minor-head, h3, h4, h5, table')) return;
+                    const hasField = el.querySelector('.pv-filled, [style*="border-bottom"], input[type=checkbox], input[type=radio]');
+                    if (!hasField) return;
+                    if (!pvHasData(el)) { el.remove(); changed = true; }
+                });
+            }
+            root.querySelectorAll('.cb-rows, .dr-container, .wg-container, .dr-group, .weangroup').forEach(function(g) { if (!pvHasData(g)) g.remove(); });
+            Array.prototype.forEach.call(root.querySelectorAll('.sub-head, .minor-head'), function(h) {
+                let sib = h.nextElementSibling, found = false;
+                while (sib && !sib.classList.contains('sub-head')) { if (pvHasData(sib)) { found = true; break; } sib = sib.nextElementSibling; }
+                if (!found) h.remove();
+            });
+        }
+        function buildPreview(mode) {
+            if (!pvArea) return;
+            pvArea.innerHTML = '';
+            const hdr = document.createElement('div');
+            hdr.innerHTML =
+                '<div style="text-align:center;font-weight:700;font-size:1.1rem;margin-bottom:12px;line-height:1.25">แบบเฝ้าระวังการติดเชื้อในโรงพยาบาลศรีสังวรสุโขทัย<br><span style="font-size:.8rem;font-weight:400">FR-ICC-01_68 · ' + (mode === 'brief' ? 'สรุปย่อ (เฉพาะข้อมูลที่บันทึก)' : 'แบบเต็ม') + '</span></div>' +
+                '<div style="display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #9ca3af;padding-bottom:8px;margin-bottom:14px;font-size:.85rem">' +
+                '<div><div>ชื่อ-สกุล: <b>' + (pvGet('ระบุ ชื่อ-สกุลผู้ป่วย') || '.....................') + '</b> &nbsp; อายุ ' + (pvGet('ปี') || '....') + ' ปี</div>' +
+                '<div>หอผู้ป่วย: ' + (pvGet('ระบุหอผู้ป่วย') || '............') + ' &nbsp; เตียง: ' + (pvGet('ระบุเตียง') || '......') + '</div>' +
+                '<div>หน่วยงานที่บันทึก: ' + (pvGet('ระบุหน่วยงาน') || '............') + '</div></div>' +
+                '<div style="text-align:right"><div>HN: ' + (pvGet('ระบุ HN') || '............') + '</div><div>AN: ' + (pvGet('ระบุ AN') || '............') + '</div></div></div>';
+            pvArea.appendChild(hdr);
+
+            PV_SYS.forEach(function(id) {
+                const src = document.getElementById('tab-' + id);
+                if (!src) return;
+                if (mode === 'brief' && id !== 'general' && !tabHasData(src)) return;
+                const clone = src.cloneNode(true);
+                pvStaticize(clone, src);
+                pvCleanCommon(clone);
+                if (mode === 'full') clone.querySelectorAll('.lab-appended').forEach(function(e) { e.remove(); }); // ตัด lab ที่ซ้ำ
+                if (mode === 'brief') pvPruneEmpty(clone, true);
+                const sec = document.createElement('div');
+                sec.style.marginBottom = '14px';
+                while (clone.firstChild) sec.appendChild(clone.firstChild);
+                if (mode === 'brief' && id !== 'general' && !pvHasData(sec)) return;
+                pvArea.appendChild(sec);
+            });
+
+            const labs = document.getElementById('tab-labs');
+            if (labs) {
+                const clone = labs.cloneNode(true);
+                pvStaticize(clone, labs);
+                pvCleanCommon(clone);
+                if (mode === 'brief') pvPruneEmpty(clone, false);
+                const sec = document.createElement('div');
+                while (clone.firstChild) sec.appendChild(clone.firstChild);
+                pvArea.appendChild(sec);
+            }
+        }
+        function pvSetMode(mode) {
+            if (pvModeFullBtn && pvModeBriefBtn) {
+                const on = 'bg-[#02b371] text-white', off = 'bg-white text-gray-700';
+                pvModeFullBtn.className = 'px-3 py-2 font-medium ' + (mode === 'full' ? on : off);
+                pvModeBriefBtn.className = 'px-3 py-2 font-medium ' + (mode === 'brief' ? on : off);
+            }
+            buildPreview(mode);
+        }
+
+        if (previewBtn && previewModal && closePreviewBtn) {
             previewBtn.addEventListener('click', () => {
+                pvSetMode('full');
                 previewModal.classList.remove('hidden');
                 previewModal.classList.add('flex');
             });
@@ -1755,11 +1822,9 @@
                 previewModal.classList.add('hidden');
                 previewModal.classList.remove('flex');
             });
-            if(printPreviewBtn) {
-                printPreviewBtn.addEventListener('click', () => {
-                    window.print();
-                });
-            }
+            if (pvModeFullBtn) pvModeFullBtn.addEventListener('click', () => pvSetMode('full'));
+            if (pvModeBriefBtn) pvModeBriefBtn.addEventListener('click', () => pvSetMode('brief'));
+            if (printPreviewBtn) printPreviewBtn.addEventListener('click', () => window.print());
         }
     </script>
 </body>
