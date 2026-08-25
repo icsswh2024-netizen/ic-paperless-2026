@@ -574,9 +574,23 @@
 
                         <div class="mb-6 border-t border-gray-200 pt-4">
                             <div class="flex flex-col gap-3 text-sm comp-indent">
-                                <label class="cb-withtext flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> Hemodialysis บริเวณที่ใส่ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></label>
-                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ด้านซ้าย (Left)</label>
-                                <label class="flex items-center gap-2 ml-6 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ด้านขวา (Right)</label>
+                                <div class="weangroup">
+                                    <div class="wg-container flex flex-col gap-3">
+                                        <div class="wg-row bg-gray-50 p-3 rounded-lg border border-gray-200 flex flex-col gap-2">
+                                            <div class="flex items-center justify-between">
+                                                <span class="wg-idx text-xs font-medium text-gray-500">ครั้งที่ 1</span>
+                                                <button type="button" class="wg-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors" title="ลบรายการ"><i data-feather="trash-2" class="w-4 h-4"></i></button>
+                                            </div>
+                                            <label class="flex items-center gap-2 font-medium cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> Hemodialysis บริเวณที่ใส่ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48"></label>
+                                            <div class="flex items-center gap-4 ml-6">
+                                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ด้านซ้าย (Left)</label>
+                                                <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ด้านขวา (Right)</label>
+                                            </div>
+                                            <div class="flex flex-wrap items-center gap-2 ml-6 text-gray-600">วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"> ถึงวันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none w-32"></div>
+                                        </div>
+                                    </div>
+                                    <button type="button" class="wg-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะ</button>
+                                </div>
                                 <div class="weangroup">
                                     <div class="wg-container flex flex-col gap-2">
                                         <div class="wg-row flex items-center gap-2 flex-wrap text-gray-700">
@@ -1230,6 +1244,7 @@
             if (lbl.querySelector('input[type="text"]') && !lbl.classList.contains('cb-withtext')) return; // มีช่องข้อความ (ยกเว้นที่กำกับ cb-withtext ให้ได้คอลัมน์วันที่ด้วย)
             if (lbl.closest('.dr-row') || lbl.closest('.sd-clone') || lbl.closest('table')) return;
             if (lbl.closest('.dr-group')) return; // ข้ามบล็อกอุปกรณ์ (มีแถววันที่ใส่/ถอด/รวมวัน ของตัวเอง)
+            if (lbl.closest('.weangroup')) return; // ข้ามรายการในกล่องโคลนทั้งก้อน
             if (!lbl.textContent.trim()) return;
 
             // ถ้ามีวันที่ฝังในข้อความอยู่แล้ว → ลบทิ้ง แล้วแทนด้วยคอลัมน์ช่วงวันที่ (ปรับรูปแบบให้เหมือนกัน)
