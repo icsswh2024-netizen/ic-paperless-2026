@@ -31,6 +31,25 @@
         .minor-head { padding-left: 0.6rem; border-left: 3px solid #cbd5e1; }
         .comp-indent { padding-left: 1rem; margin-left: 0.25rem; border-left: 2px solid #f1f5f9; }
 
+        /* สไตล์เอกสารทางการสำหรับพรีวิว */
+        .pv-doc { font-family: 'Sarabun', sans-serif; color: #111827; line-height: 1.55; font-size: 13px; }
+        .pv-doc h3 { font-size: 15px; font-weight: 700; border-bottom: 1.5px solid #374151; padding-bottom: 3px; margin: 16px 0 8px; }
+        .pv-doc .sub-head { font-weight: 700; font-size: 13.5px; margin: 10px 0 4px; border-left: none !important; padding-left: 0 !important; }
+        .pv-doc .minor-head { font-weight: 600; margin: 6px 0 3px; border-left: none !important; padding-left: 0 !important; }
+        .pv-doc .comp-indent { border-left: none !important; margin-left: 0 !important; padding-left: 1.1rem !important; }
+        .pv-doc [class*="bg-gray-50"], .pv-doc [class*="bg-blue-50"], .pv-doc [class*="bg-red-50"], .pv-doc [class*="bg-white"] { background: transparent !important; }
+        .pv-doc [class*="rounded"] { border-radius: 0 !important; }
+        .pv-doc [class*="shadow"] { box-shadow: none !important; }
+        .pv-doc [class*="bg-"][class*="border"] { border: none !important; }
+        .pv-doc .weangroup .wg-row, .pv-doc .dr-row, .pv-doc .cb-rrow { border: none !important; background: transparent !important; padding-left: 0 !important; }
+        .pv-doc label { display: flex !important; grid-template-columns: none !important; align-items: baseline; gap: 6px; margin: 1px 0; }
+        .pv-doc input[type=checkbox], .pv-doc input[type=radio] { width: 12px; height: 12px; accent-color: #111827; }
+        .pv-doc .cb-rows { margin-left: 6px; }
+        .pv-doc table { border-collapse: collapse; width: 100%; margin: 4px 0; }
+        .pv-doc th, .pv-doc td { border: 1px solid #6b7280 !important; padding: 4px 6px; }
+        .pv-doc thead { background: #f3f4f6 !important; }
+        .pv-doc .wg-idx, .pv-doc .dr-index, .pv-doc .cb-idx { color: #6b7280; }
+
         /* หน้า A4 สำหรับพรีวิว/พิมพ์ */
         .pdf-page {
             width: 794px;
@@ -1780,7 +1799,7 @@
         function pvPaginate(headerEl, sections) {
             pvArea.innerHTML = '';
             const USABLE = 1041; // 1123 - (34+48) padding
-            let page = document.createElement('div'); page.className = 'pdf-page';
+            let page = document.createElement('div'); page.className = 'pdf-page pv-doc';
             pvArea.appendChild(page);
             let used = 0;
             if (headerEl) { page.appendChild(headerEl); used += headerEl.offsetHeight; }
@@ -1788,7 +1807,7 @@
                 page.appendChild(sec);
                 const h = sec.offsetHeight;
                 if (used > 0 && used + h > USABLE) {
-                    page = document.createElement('div'); page.className = 'pdf-page';
+                    page = document.createElement('div'); page.className = 'pdf-page pv-doc';
                     pvArea.appendChild(page);
                     page.appendChild(sec);
                     used = sec.offsetHeight;
