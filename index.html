@@ -30,6 +30,19 @@
         .sub-head { padding-left: 0.6rem; border-left: 4px solid #ef4444; }
         .minor-head { padding-left: 0.6rem; border-left: 3px solid #cbd5e1; }
         .comp-indent { padding-left: 1rem; margin-left: 0.25rem; border-left: 2px solid #f1f5f9; }
+
+        /* หน้า A4 สำหรับพรีวิว/พิมพ์ */
+        .pdf-page {
+            width: 794px;
+            min-height: 1123px;
+            background: #fff;
+            padding: 34px 40px 48px;
+            margin: 0 auto;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
         
         /* CSS สำหรับ Print Preview A4 */
         .a4-page {
@@ -48,6 +61,7 @@
             #preview-print-area, #preview-print-area * { visibility: visible; }
             #preview-print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; display: block; }
             .a4-page { box-shadow: none !important; margin: 0 !important; page-break-after: always; break-after: page; }
+            .pdf-page { box-shadow: none !important; margin: 0 !important; page-break-after: always; break-after: page; }
             .no-print { display: none !important; }
         }
     </style>
@@ -1064,7 +1078,7 @@
             <!-- Document preview area (Scrollable) -->
             <div class="p-8 overflow-y-auto flex-1 bg-gray-200 flex flex-col items-center gap-8">
                 
-                <div id="preview-print-area" class="bg-white shadow-lg text-sm text-gray-800" style="width:210mm;min-height:297mm;padding:15mm;margin:0 auto;"></div>
+                <div id="preview-print-area" class="text-sm text-gray-800" style="display:flex;flex-direction:column;align-items:center;gap:16px;"></div>
             </div>
         </div>
     </div>
@@ -1763,6 +1777,26 @@
                 if (!found) h.remove();
             });
         }
+        function pvPaginate(headerEl, sections) {
+            pvArea.innerHTML = '';
+            const USABLE = 1041; // 1123 - (34+48) padding
+            let page = document.createElement('div'); page.className = 'pdf-page';
+            pvArea.appendChild(page);
+            let used = 0;
+            if (headerEl) { page.appendChild(headerEl); used += headerEl.offsetHeight; }
+            sections.forEach(function(sec) {
+                page.appendChild(sec);
+                const h = sec.offsetHeight;
+                if (used > 0 && used + h > USABLE) {
+                    page = document.createElement('div'); page.className = 'pdf-page';
+                    pvArea.appendChild(page);
+                    page.appendChild(sec);
+                    used = sec.offsetHeight;
+                } else {
+                    used += h;
+                }
+            });
+        }
         function buildPreview(mode) {
             if (!pvArea) return;
             pvArea.innerHTML = '';
@@ -1774,7 +1808,7 @@
                 '<div>หอผู้ป่วย: ' + (pvGet('ระบุหอผู้ป่วย') || '............') + ' &nbsp; เตียง: ' + (pvGet('ระบุเตียง') || '......') + '</div>' +
                 '<div>หน่วยงานที่บันทึก: ' + (pvGet('ระบุหน่วยงาน') || '............') + '</div></div>' +
                 '<div style="text-align:right"><div>HN: ' + (pvGet('ระบุ HN') || '............') + '</div><div>AN: ' + (pvGet('ระบุ AN') || '............') + '</div></div></div>';
-            pvArea.appendChild(hdr);
+            const pvSections = [];
 
             PV_SYS.forEach(function(id) {
                 const src = document.getElementById('tab-' + id);
@@ -1789,7 +1823,7 @@
                 sec.style.marginBottom = '14px';
                 while (clone.firstChild) sec.appendChild(clone.firstChild);
                 if (mode === 'brief' && id !== 'general' && !pvHasData(sec)) return;
-                pvArea.appendChild(sec);
+                pvSections.push(sec);
             });
 
             const labs = document.getElementById('tab-labs');
@@ -1800,8 +1834,9 @@
                 if (mode === 'brief') pvPruneEmpty(clone, false);
                 const sec = document.createElement('div');
                 while (clone.firstChild) sec.appendChild(clone.firstChild);
-                pvArea.appendChild(sec);
+                pvSections.push(sec);
             }
+            pvPaginate(hdr, pvSections);
         }
         function pvSetMode(mode) {
             if (pvModeFullBtn && pvModeBriefBtn) {
@@ -1814,9 +1849,9 @@
 
         if (previewBtn && previewModal && closePreviewBtn) {
             previewBtn.addEventListener('click', () => {
-                pvSetMode('full');
                 previewModal.classList.remove('hidden');
                 previewModal.classList.add('flex');
+                pvSetMode('full');
             });
             closePreviewBtn.addEventListener('click', () => {
                 previewModal.classList.add('hidden');
