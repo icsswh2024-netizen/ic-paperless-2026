@@ -994,23 +994,36 @@
                         </div>
 
                         <div class="bg-red-50 rounded-xl shadow-sm border border-red-200 p-5 mt-auto">
-                            <h3 class="font-bold text-red-800 text-sm mb-4">9. การวินิจฉัยโรคติดเชื้อในโรงพยาบาล</h3>
-                            <div class="space-y-4">
-                                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 text-base font-bold bg-white p-4 rounded-lg border border-red-100">
-                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="conclusion" class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500"> ไม่ติดเชื้อ</label>
-                                    <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="conclusion" class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500"> ติดเชื้อในชุมชน</label>
-                                    <label class="flex items-center gap-2 text-red-600 cursor-pointer"><input type="checkbox" name="conclusion" class="w-5 h-5 text-red-600 rounded border-gray-300 focus:ring-red-500"> ติดเชื้อในโรงพยาบาล</label>
-                                </div>
-                                <div class="flex flex-col gap-4 text-sm mt-4">
-                                    <div class="flex items-center gap-2">ระบบ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none flex-1"></div>
-                                    <div class="flex items-center gap-2">เดือนที่พบการติดเชื้อในโรงพยาบาล <input type="month" class="border-b border-gray-400 bg-transparent focus:outline-none flex-1 max-w-xs"></div>
-                                    <div class="flex items-center gap-2">หน่วยงาน / หอผู้ป่วยที่ติดเชื้อ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none flex-1"></div>
-                                </div>
-                                <div class="flex justify-end mt-4 pt-4 border-t border-red-200">
-                                    <div class="text-right">
-                                        <div class="text-sm text-gray-600 mb-1">ผู้สรุป</div>
-                                        <input type="text" placeholder="........................................................" class="border-none bg-transparent focus:outline-none text-center font-bold text-red-800 w-48">
-                                    </div>
+                            <h3 class="font-bold text-red-800 text-sm mb-4">9. การวินิจฉัยโรคติดเชื้อในโรงพยาบาล (สรุปแต่ละระบบ)</h3>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm border-collapse">
+                                    <thead>
+                                        <tr class="bg-red-100 text-gray-700">
+                                            <th class="border border-red-200 p-2 text-left w-56">ระบบ</th>
+                                            <th class="border border-red-200 p-2 text-left w-56">ผลการวินิจฉัย</th>
+                                            <th class="border border-red-200 p-2 text-left w-40">เดือนที่พบ</th>
+                                            <th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr><td class="border border-red-200 p-2 font-medium">1. Pneumonia</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">2. UTI</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">3. BSI</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">4. Surgical Site (SSI)</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">5. Endometritis</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">6. Episiotomy</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">7. Skin & Soft Tissue</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">8. Bedsore (แผลกดทับ)</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">9. Omphalitis</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">10. Eye (ตา)</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                        <tr><td class="border border-red-200 p-2 font-medium">11. ระบบอื่น ๆ</td><td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1"><option value=""></option><option>ไม่ติดเชื้อ</option><option>ติดเชื้อในชุมชน</option><option>ติดเชื้อในโรงพยาบาล</option></select></td><td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td><td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="flex justify-end mt-4 pt-4 border-t border-red-200">
+                                <div class="text-right">
+                                    <div class="text-sm text-gray-600 mb-1">ผู้สรุป</div>
+                                    <input type="text" placeholder="........................................................" class="border-none bg-transparent focus:outline-none text-center font-bold text-red-800 w-48">
                                 </div>
                             </div>
                         </div>
