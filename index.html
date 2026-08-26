@@ -121,8 +121,28 @@
                             <input type="text" placeholder="ระบุเตียง" class="bg-transparent focus:outline-none px-1 w-16 placeholder:text-gray-400 font-medium text-gray-700">
                         </span>
                         <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
-                            Admit: 
+                            Admit:
                             <input type="datetime-local" id="global-admit-date" onchange="calculateTransferDays()" class="bg-transparent focus:outline-none px-1 text-gray-700 cursor-pointer font-medium">
+                        </span>
+                    </div>
+                    <div class="text-sm text-gray-500 mt-2 flex flex-wrap items-center gap-2 sm:gap-4">
+                        <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
+                            โรคประจำตัว:
+                            <input type="text" placeholder="ระบุโรคประจำตัว" class="bg-transparent focus:outline-none px-1 w-40 placeholder:text-gray-400 font-medium text-gray-700">
+                        </span>
+                        <span class="flex items-center gap-1 bg-gray-100 px-2 py-1 rounded-md">
+                            BMI:
+                            <input type="number" step="0.1" placeholder="ระบุ BMI" class="bg-transparent focus:outline-none px-1 w-20 placeholder:text-gray-400 font-medium text-gray-700">
+                        </span>
+                        <span class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
+                            ดื่มเหล้า:
+                            <label class="flex items-center gap-1"><input type="radio" name="global-alcohol" value="ดื่ม"> ดื่ม</label>
+                            <label class="flex items-center gap-1"><input type="radio" name="global-alcohol" value="ไม่ดื่ม"> ไม่ดื่ม</label>
+                        </span>
+                        <span class="flex items-center gap-2 bg-gray-100 px-2 py-1 rounded-md">
+                            สูบบุหรี่:
+                            <label class="flex items-center gap-1"><input type="radio" name="global-smoke" value="สูบ"> สูบ</label>
+                            <label class="flex items-center gap-1"><input type="radio" name="global-smoke" value="ไม่สูบ"> ไม่สูบ</label>
                         </span>
                     </div>
                 </div>
@@ -1730,6 +1750,7 @@
         const PV_SYS = ['general','pneumonia','uti','bsi','surgery','endometritis','episiotomy','skin','bedsore','omphalitis','eye','other'];
 
         function pvGet(ph) { const el = document.querySelector('input[placeholder="' + ph + '"]'); return el ? (el.value || '').trim() : ''; }
+        function pvRadio(name) { const el = document.querySelector('input[name="' + name + '"]:checked'); return el ? el.value : ''; }
         function pvFmtDate(v, type) {
             if (!v) return '';
             if (type === 'date') { const a = v.split('-'); if (a.length === 3) return a[2] + '/' + a[1] + '/' + a[0]; }
@@ -1825,7 +1846,9 @@
                 '<div style="display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #9ca3af;padding-bottom:8px;margin-bottom:14px;font-size:.85rem">' +
                 '<div><div>ชื่อ-สกุล: <b>' + (pvGet('ระบุ ชื่อ-สกุลผู้ป่วย') || '.....................') + '</b> &nbsp; อายุ ' + (pvGet('ปี') || '....') + ' ปี</div>' +
                 '<div>หอผู้ป่วย: ' + (pvGet('ระบุหอผู้ป่วย') || '............') + ' &nbsp; เตียง: ' + (pvGet('ระบุเตียง') || '......') + '</div>' +
-                '<div>หน่วยงานที่บันทึก: ' + (pvGet('ระบุหน่วยงาน') || '............') + '</div></div>' +
+                '<div>หน่วยงานที่บันทึก: ' + (pvGet('ระบุหน่วยงาน') || '............') + '</div>' +
+                '<div>โรคประจำตัว: ' + (pvGet('ระบุโรคประจำตัว') || '............') + ' &nbsp; BMI: ' + (pvGet('ระบุ BMI') || '......') + '</div>' +
+                '<div>ดื่มเหล้า: ' + (pvRadio('global-alcohol') || '............') + ' &nbsp; สูบบุหรี่: ' + (pvRadio('global-smoke') || '............') + '</div></div>' +
                 '<div style="text-align:right"><div>HN: ' + (pvGet('ระบุ HN') || '............') + '</div><div>AN: ' + (pvGet('ระบุ AN') || '............') + '</div></div></div>';
             const pvSections = [];
 
