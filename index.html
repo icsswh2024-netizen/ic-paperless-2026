@@ -33,7 +33,8 @@
 
         /* สไตล์เอกสารทางการสำหรับพรีวิว */
         .pv-doc { font-family: 'Sarabun', sans-serif; color: #111827; line-height: 1.3; font-size: 12.5px; }
-        .pv-doc h3 { font-size: 14px; font-weight: 700; border-bottom: 1.5px solid #374151; padding-bottom: 2px; margin: 10px 0 5px; }
+        .pv-doc h3 { font-size: 14px; font-weight: 700; border-bottom: 1.5px solid #374151; padding-bottom: 2px; margin: 4px 0 5px; }
+        .pv-doc > *:first-child, .pv-doc h3:first-child { margin-top: 0 !important; }
         .pv-doc .sub-head { font-weight: 700; font-size: 13px; margin: 6px 0 2px; border-left: none !important; padding-left: 0 !important; }
         .pv-doc .minor-head { font-weight: 600; margin: 4px 0 2px; border-left: none !important; padding-left: 0 !important; }
         .pv-doc .comp-indent { border-left: none !important; margin-left: 0 !important; padding-left: 0.8rem !important; }
@@ -1877,7 +1878,7 @@
                 if (mode === 'full') clone.querySelectorAll('.lab-appended').forEach(function(e) { e.remove(); }); // ตัด lab ที่ซ้ำ
                 if (mode === 'brief') pvPruneEmpty(clone, true);
                 const sec = document.createElement('div');
-                sec.style.marginBottom = '14px';
+                sec.style.marginBottom = '6px';
                 while (clone.firstChild) sec.appendChild(clone.firstChild);
                 if (mode === 'brief' && id !== 'general' && !pvHasData(sec)) return;
                 pvSections.push(sec);
