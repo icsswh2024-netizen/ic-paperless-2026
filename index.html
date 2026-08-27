@@ -1205,7 +1205,8 @@
                 '<thead><tr class="bg-red-100 text-gray-700">' +
                 '<th class="border border-red-200 p-2 text-left w-56">ผลการวินิจฉัย</th>' +
                 '<th class="border border-red-200 p-2 text-left w-40">เดือนที่พบ</th>' +
-                '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th></tr></thead>' +
+                '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th>' +
+                '<th class="border border-red-200 p-2 text-center">สถานะ</th></tr></thead>' +
                 '<tbody><tr>' +
                 '<td class="border border-red-200 p-1"><div class="flex flex-wrap items-center gap-3">' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-ci w-4 h-4 rounded border-gray-300"> CI</label>' +
@@ -1213,13 +1214,13 @@
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-nohai w-4 h-4 rounded border-gray-300"> NoHAI</label></div></td>' +
                 '<td class="border border-red-200 p-1"><input type="month" class="dx-month w-full bg-transparent focus:outline-none px-1"></td>' +
                 '<td class="border border-red-200 p-1"><input type="text" class="dx-unit w-full bg-transparent focus:outline-none px-1"></td>' +
-                '</tr></tbody></table></div>' +
-                '<div class="flex flex-wrap items-center gap-2 mt-3">' +
+                '<td class="border border-red-200 p-1"><div class="flex flex-wrap items-center gap-2">' +
                 '<button type="button" class="hai-btn hai-gray" data-v="ไม่ติดเชื้อ">ไม่ติดเชื้อ</button>' +
                 '<button type="button" class="hai-btn hai-yellow" data-v="สงสัยการติดเชื้อใน รพ.">สงสัยติดเชื้อใน รพ.</button>' +
                 '<button type="button" class="hai-btn hai-green" data-v="รายงาน ICN">รายงาน ICN</button>' +
                 '<button type="button" class="hai-btn hai-red" data-v="ยืนยันการติดเชื้อในโรงพยาบาล">ยืนยันติดเชื้อใน รพ.</button>' +
-                '</div></div>';
+                '</div></td>' +
+                '</tr></tbody></table></div></div>';
             tab.insertAdjacentHTML('beforeend', html);
         });
 
