@@ -1197,22 +1197,23 @@
             const seq = num + '.' + (maxY + 1);
             const html =
                 '<div class="dx-summary mt-8 pt-6 border-t-2 border-dashed border-gray-200" data-sys="' + id + '">' +
-                '<h3 class="font-bold text-red-800 text-sm mb-3">' + seq + ' สรุปการวินิจฉัย (' + sysName[id] + ')</h3>' +
-                '<div class="dx-statusbar flex flex-wrap items-center gap-2 mb-3">' +
-                '<button type="button" class="hai-btn hai-yellow" data-v="สงสัยการติดเชื้อใน รพ.">สงสัยการติดเชื้อใน รพ.</button>' +
-                '<button type="button" class="hai-btn hai-green" data-v="รายงาน ICN">รายงาน ICN</button>' +
-                '<button type="button" class="hai-btn hai-red" data-v="ยืนยันการติดเชื้อในโรงพยาบาล">ยืนยันการติดเชื้อในโรงพยาบาล</button>' +
-                '<span class="dx-status-label text-xs font-semibold ml-2"></span></div>' +
-                '<div class="overflow-x-auto"><table class="w-full text-sm border-collapse">' +
+                '<h3 class="font-bold text-red-800 text-sm mb-3">' + seq + ' สรุปการวินิจฉัย (' + sysName[id] + ') <span class="dx-status-label text-xs font-semibold ml-2"></span></h3>' +
+                '<div class="dx-statusbar overflow-x-auto"><table class="w-full text-sm border-collapse">' +
                 '<thead><tr class="bg-red-100 text-gray-700">' +
-                '<th class="border border-red-200 p-2 text-left w-56">ผลการวินิจฉัย</th>' +
-                '<th class="border border-red-200 p-2 text-left w-40">เดือนที่พบ</th>' +
+                '<th class="border border-red-200 p-2 text-left w-48">ผลการวินิจฉัย</th>' +
+                '<th class="border border-red-200 p-2 text-center w-36">สงสัยติดเชื้อใน รพ.</th>' +
+                '<th class="border border-red-200 p-2 text-center w-28">รายงาน ICN</th>' +
+                '<th class="border border-red-200 p-2 text-center w-40">ยืนยันติดเชื้อใน รพ.</th>' +
+                '<th class="border border-red-200 p-2 text-left w-32">เดือนที่พบ</th>' +
                 '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th></tr></thead>' +
                 '<tbody><tr>' +
                 '<td class="border border-red-200 p-1"><div class="flex flex-wrap items-center gap-3">' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-ci w-4 h-4 rounded border-gray-300"> CI</label>' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-hai w-4 h-4 rounded border-gray-300"> HAI</label>' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-nohai w-4 h-4 rounded border-gray-300"> NoHAI</label></div></td>' +
+                '<td class="border border-red-200 p-1 text-center"><button type="button" class="hai-btn hai-yellow w-full" data-v="สงสัยการติดเชื้อใน รพ.">เลือก</button></td>' +
+                '<td class="border border-red-200 p-1 text-center"><button type="button" class="hai-btn hai-green w-full" data-v="รายงาน ICN">เลือก</button></td>' +
+                '<td class="border border-red-200 p-1 text-center"><button type="button" class="hai-btn hai-red w-full" data-v="ยืนยันการติดเชื้อในโรงพยาบาล">เลือก</button></td>' +
                 '<td class="border border-red-200 p-1"><input type="month" class="dx-month w-full bg-transparent focus:outline-none px-1"></td>' +
                 '<td class="border border-red-200 p-1"><input type="text" class="dx-unit w-full bg-transparent focus:outline-none px-1"></td>' +
                 '</tr></tbody></table></div></div>';
@@ -1224,7 +1225,7 @@
         document.addEventListener('click', function (e) {
             const btn = e.target.closest ? e.target.closest('.hai-btn') : null;
             if (!btn) return;
-            const bar = btn.closest('.dx-statusbar');
+            const bar = btn.closest('.dx-summary');
             if (!bar) return;
             const wasActive = btn.classList.contains('active');
             bar.querySelectorAll('.hai-btn').forEach(function (b) { b.classList.remove('active'); });
