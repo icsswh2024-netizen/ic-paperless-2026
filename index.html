@@ -1170,6 +1170,31 @@
             heads[1].textContent = num + '.' + (maxY + 2) + ' ' + heads[1].textContent;
         });
 
+        // 0a'. ตารางสรุปการวินิจฉัยเฉพาะระบบ ต่อท้ายแต่ละระบบ 1-11
+        const sysName = { pneumonia:'Pneumonia', uti:'UTI', bsi:'BSI', surgery:'Surgical Site (SSI)', endometritis:'Endometritis', episiotomy:'Episiotomy', skin:'Skin & Soft Tissue', bedsore:'Bedsore (แผลกดทับ)', omphalitis:'Omphalitis', eye:'Eye (ตา)', other:'ระบบอื่น ๆ' };
+        Object.keys(labTabNo).forEach(function(id) {
+            const tab = document.getElementById('tab-' + id);
+            if (!tab) return;
+            const num = labTabNo[id];
+            const html =
+                '<div class="dx-summary mt-8 pt-6 border-t-2 border-dashed border-gray-200">' +
+                '<h3 class="font-bold text-red-800 text-sm mb-3">สรุปการวินิจฉัย: ' + num + '. ' + sysName[id] + '</h3>' +
+                '<div class="overflow-x-auto"><table class="w-full text-sm border-collapse">' +
+                '<thead><tr class="bg-red-100 text-gray-700">' +
+                '<th class="border border-red-200 p-2 text-left w-56">ผลการวินิจฉัย</th>' +
+                '<th class="border border-red-200 p-2 text-left w-40">เดือนที่พบ</th>' +
+                '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th></tr></thead>' +
+                '<tbody><tr>' +
+                '<td class="border border-red-200 p-1"><div class="flex flex-wrap items-center gap-3">' +
+                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="w-4 h-4 rounded border-gray-300"> CI</label>' +
+                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="w-4 h-4 rounded border-gray-300"> HAI</label>' +
+                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="w-4 h-4 rounded border-gray-300"> NoHAI</label></div></td>' +
+                '<td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td>' +
+                '<td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td>' +
+                '</tr></tbody></table></div></div>';
+            tab.insertAdjacentHTML('beforeend', html);
+        });
+
         // 0a. รายการ checkbox (อาการ/ผลตรวจ): 3 คอลัมน์ = ข้อความ | ครั้งที่/วันที่..ถึงวันที่.. (กลาง ซ้อนกัน) | เพิ่มสถานะ (ขวา)
         function cbReindex(rows) {
             rows.querySelectorAll('.cb-rrow').forEach(function(r, i) {
@@ -1766,6 +1791,7 @@
             root.querySelectorAll('table').forEach(function(t) { if (!t.querySelector('tbody tr')) { const card = t.closest('.bg-white') || t.parentElement; (card || t).remove(); } });
             if (!aggressive) return;
             root.querySelectorAll('.lab-appended').forEach(function(la) { if (!pvHasData(la)) la.remove(); });
+            root.querySelectorAll('.dx-summary').forEach(function(d) { if (!pvHasData(d)) d.remove(); });
             let changed = true, guard = 0;
             while (changed && guard++ < 25) {
                 changed = false;
