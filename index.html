@@ -58,6 +58,21 @@
         .pv-doc thead { background: #f3f4f6 !important; }
         .pv-doc .wg-idx, .pv-doc .dr-index, .pv-doc .cb-idx { color: #6b7280; }
 
+        /* ปุ่มสถานะการวินิจฉัย (เรืองแสง) */
+        .hai-btn { font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 9999px; border: 1.5px solid transparent; cursor: pointer; transition: all .25s ease; opacity: .8; }
+        .hai-yellow { background: #fef9c3; color: #854d0e; border-color: #fde047; }
+        .hai-green  { background: #dcfce7; color: #166534; border-color: #86efac; }
+        .hai-red    { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+        .hai-btn:hover { opacity: 1; transform: translateY(-1px); }
+        .hai-btn.active { opacity: 1; color: #fff; }
+        .hai-yellow.active { background: #eab308; border-color: #fde047; animation: glowY 1.6s ease-in-out infinite; }
+        .hai-green.active  { background: #22c55e; border-color: #86efac; animation: glowG 1.6s ease-in-out infinite; }
+        .hai-red.active    { background: #ef4444; border-color: #fca5a5; animation: glowR 1.6s ease-in-out infinite; }
+        @keyframes glowY { 0%,100% { box-shadow: 0 0 5px #eab30899; } 50% { box-shadow: 0 0 16px #eab308, 0 0 26px #facc15aa; } }
+        @keyframes glowG { 0%,100% { box-shadow: 0 0 5px #22c55e99; } 50% { box-shadow: 0 0 16px #22c55e, 0 0 26px #4ade80aa; } }
+        @keyframes glowR { 0%,100% { box-shadow: 0 0 5px #ef444499; } 50% { box-shadow: 0 0 16px #ef4444, 0 0 26px #f87171aa; } }
+        .pv-doc .hai-btn { animation: none !important; box-shadow: none !important; }
+
         /* หน้า A4 สำหรับพรีวิว/พิมพ์ */
         .pdf-page {
             width: 794px;
@@ -1183,6 +1198,11 @@
             const html =
                 '<div class="dx-summary mt-8 pt-6 border-t-2 border-dashed border-gray-200" data-sys="' + id + '">' +
                 '<h3 class="font-bold text-red-800 text-sm mb-3">' + seq + ' สรุปการวินิจฉัย (' + sysName[id] + ')</h3>' +
+                '<div class="dx-statusbar flex flex-wrap items-center gap-2 mb-3">' +
+                '<button type="button" class="hai-btn hai-yellow" data-v="สงสัยการติดเชื้อใน รพ.">สงสัยการติดเชื้อใน รพ.</button>' +
+                '<button type="button" class="hai-btn hai-green" data-v="รายงาน ICN">รายงาน ICN</button>' +
+                '<button type="button" class="hai-btn hai-red" data-v="ยืนยันการติดเชื้อในโรงพยาบาล">ยืนยันการติดเชื้อในโรงพยาบาล</button>' +
+                '<span class="dx-status-label text-xs font-semibold ml-2"></span></div>' +
                 '<div class="overflow-x-auto"><table class="w-full text-sm border-collapse">' +
                 '<thead><tr class="bg-red-100 text-gray-700">' +
                 '<th class="border border-red-200 p-2 text-left w-56">ผลการวินิจฉัย</th>' +
@@ -1197,6 +1217,29 @@
                 '<td class="border border-red-200 p-1"><input type="text" class="dx-unit w-full bg-transparent focus:outline-none px-1"></td>' +
                 '</tr></tbody></table></div></div>';
             tab.insertAdjacentHTML('beforeend', html);
+        });
+
+        // ปุ่มสถานะการวินิจฉัย: คลิกเพื่อเลือก (เลือกได้ทีละสถานะ / คลิกซ้ำเพื่อยกเลิก)
+        const haiColor = { 'hai-yellow': '#854d0e', 'hai-green': '#166534', 'hai-red': '#b91c1c' };
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest ? e.target.closest('.hai-btn') : null;
+            if (!btn) return;
+            const bar = btn.closest('.dx-statusbar');
+            if (!bar) return;
+            const wasActive = btn.classList.contains('active');
+            bar.querySelectorAll('.hai-btn').forEach(function (b) { b.classList.remove('active'); });
+            const label = bar.querySelector('.dx-status-label');
+            if (wasActive) {
+                if (label) { label.textContent = ''; label.classList.remove('pv-filled'); }
+            } else {
+                btn.classList.add('active');
+                if (label) {
+                    const cls = ['hai-yellow', 'hai-green', 'hai-red'].find(function (c) { return btn.classList.contains(c); });
+                    label.textContent = 'สถานะ: ' + (btn.getAttribute('data-v') || '');
+                    label.style.color = haiColor[cls] || '#374151';
+                    label.classList.add('pv-filled');
+                }
+            }
         });
 
         // 0a''. เมนู "สรุปผล": ตารางวินิจฉัยลิงก์ข้อมูลจากสรุปแต่ละระบบ (นับจำนวน) + สรุปจำนวนวันใส่อุปกรณ์
