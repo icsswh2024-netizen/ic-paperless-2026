@@ -1176,9 +1176,13 @@
             const tab = document.getElementById('tab-' + id);
             if (!tab) return;
             const num = labTabNo[id];
+            // หาเลขหัวข้อย่อยสูงสุด (num.Y) เพื่อใส่ลำดับต่อเนื่อง
+            let maxY = 0; const re = new RegExp('(?:^|[^0-9])' + num + '\\.(\\d+)', 'g'); let m; const txt = tab.textContent;
+            while ((m = re.exec(txt)) !== null) { const y = parseInt(m[1], 10); if (y > maxY) maxY = y; }
+            const seq = num + '.' + (maxY + 1);
             const html =
-                '<div class="dx-summary mt-8 pt-6 border-t-2 border-dashed border-gray-200">' +
-                '<h3 class="font-bold text-red-800 text-sm mb-3">สรุปการวินิจฉัย: ' + num + '. ' + sysName[id] + '</h3>' +
+                '<div class="dx-summary mt-8 pt-6 border-t-2 border-dashed border-gray-200" data-sys="' + id + '">' +
+                '<h3 class="font-bold text-red-800 text-sm mb-3">' + seq + ' สรุปการวินิจฉัย (' + sysName[id] + ')</h3>' +
                 '<div class="overflow-x-auto"><table class="w-full text-sm border-collapse">' +
                 '<thead><tr class="bg-red-100 text-gray-700">' +
                 '<th class="border border-red-200 p-2 text-left w-56">ผลการวินิจฉัย</th>' +
@@ -1186,14 +1190,132 @@
                 '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th></tr></thead>' +
                 '<tbody><tr>' +
                 '<td class="border border-red-200 p-1"><div class="flex flex-wrap items-center gap-3">' +
-                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="w-4 h-4 rounded border-gray-300"> CI</label>' +
-                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="w-4 h-4 rounded border-gray-300"> HAI</label>' +
-                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="w-4 h-4 rounded border-gray-300"> NoHAI</label></div></td>' +
-                '<td class="border border-red-200 p-1"><input type="month" class="w-full bg-transparent focus:outline-none px-1"></td>' +
-                '<td class="border border-red-200 p-1"><input type="text" class="w-full bg-transparent focus:outline-none px-1"></td>' +
+                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-ci w-4 h-4 rounded border-gray-300"> CI</label>' +
+                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-hai w-4 h-4 rounded border-gray-300"> HAI</label>' +
+                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-nohai w-4 h-4 rounded border-gray-300"> NoHAI</label></div></td>' +
+                '<td class="border border-red-200 p-1"><input type="month" class="dx-month w-full bg-transparent focus:outline-none px-1"></td>' +
+                '<td class="border border-red-200 p-1"><input type="text" class="dx-unit w-full bg-transparent focus:outline-none px-1"></td>' +
                 '</tr></tbody></table></div></div>';
             tab.insertAdjacentHTML('beforeend', html);
         });
+
+        // 0a''. เมนู "สรุปผล": ตารางวินิจฉัยลิงก์ข้อมูลจากสรุปแต่ละระบบ (นับจำนวน) + สรุปจำนวนวันใส่อุปกรณ์
+        (function () {
+            const labsTab = document.getElementById('tab-labs');
+            if (!labsTab) return;
+            const ids = Object.keys(labTabNo);
+            function fld(v) { const s = (v || '').trim(); return s ? '<span class="pv-filled">' + s + '</span>' : ''; }
+            function mark(on) { return on ? '<span class="pv-filled" style="color:#dc2626;font-weight:700">✔</span>' : '<span class="text-gray-300">–</span>'; }
+
+            // (7) ตารางวินิจฉัย: แทนที่ของเดิมด้วยตารางสรุปที่ลิงก์ข้อมูล
+            const dxTable = labsTab.querySelector('table');
+            if (dxTable) {
+                dxTable.innerHTML =
+                    '<thead><tr class="bg-red-100 text-gray-700">' +
+                    '<th class="border border-red-200 p-2 text-left w-16">ลำดับ</th>' +
+                    '<th class="border border-red-200 p-2 text-left">ระบบ</th>' +
+                    '<th class="border border-red-200 p-2 text-center w-14">CI</th>' +
+                    '<th class="border border-red-200 p-2 text-center w-14">HAI</th>' +
+                    '<th class="border border-red-200 p-2 text-center w-16">NoHAI</th>' +
+                    '<th class="border border-red-200 p-2 text-left w-32">เดือนที่พบ</th>' +
+                    '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th></tr></thead>' +
+                    '<tbody id="dxSumBody"></tbody>' +
+                    '<tfoot><tr class="bg-red-50 font-bold"><td class="border border-red-200 p-2" colspan="2">รวม (จำนวน)</td>' +
+                    '<td class="border border-red-200 p-2 text-center" id="dxTotCI">0</td>' +
+                    '<td class="border border-red-200 p-2 text-center" id="dxTotHAI">0</td>' +
+                    '<td class="border border-red-200 p-2 text-center" id="dxTotNoHAI">0</td>' +
+                    '<td class="border border-red-200 p-2" colspan="2"></td></tr></tfoot>';
+            }
+            const dxBody = document.getElementById('dxSumBody');
+            function syncDx() {
+                if (!dxBody) return;
+                let rows = '', tCI = 0, tHAI = 0, tNo = 0;
+                ids.forEach(function (id) {
+                    const dx = document.querySelector('.dx-summary[data-sys="' + id + '"]');
+                    let ci = false, hai = false, no = false, mo = '', un = '';
+                    if (dx) {
+                        ci = !!(dx.querySelector('.dx-ci') || {}).checked;
+                        hai = !!(dx.querySelector('.dx-hai') || {}).checked;
+                        no = !!(dx.querySelector('.dx-nohai') || {}).checked;
+                        mo = (dx.querySelector('.dx-month') || {}).value || '';
+                        un = (dx.querySelector('.dx-unit') || {}).value || '';
+                    }
+                    if (ci) tCI++; if (hai) tHAI++; if (no) tNo++;
+                    rows += '<tr>' +
+                        '<td class="border border-red-200 p-2">' + labTabNo[id] + '</td>' +
+                        '<td class="border border-red-200 p-2 font-medium">' + sysName[id] + '</td>' +
+                        '<td class="border border-red-200 p-2 text-center">' + mark(ci) + '</td>' +
+                        '<td class="border border-red-200 p-2 text-center">' + mark(hai) + '</td>' +
+                        '<td class="border border-red-200 p-2 text-center">' + mark(no) + '</td>' +
+                        '<td class="border border-red-200 p-2">' + fld(mo) + '</td>' +
+                        '<td class="border border-red-200 p-2">' + fld(un) + '</td></tr>';
+                });
+                dxBody.innerHTML = rows;
+                const set = function (i, v) { const e = document.getElementById(i); if (e) e.textContent = v; };
+                set('dxTotCI', tCI); set('dxTotHAI', tHAI); set('dxTotNoHAI', tNo);
+            }
+
+            // (8) ตารางสรุปจำนวนวันใส่อุปกรณ์: รวมจาก .dr-days ในแต่ละระบบ
+            const devCard = document.createElement('div');
+            devCard.className = 'bg-blue-50 rounded-xl shadow-sm border border-blue-200 p-5 mt-6';
+            devCard.innerHTML =
+                '<h3 class="font-bold text-blue-800 text-sm mb-4">8. สรุปจำนวนวันใส่อุปกรณ์ต่าง ๆ</h3>' +
+                '<div class="overflow-x-auto"><table class="w-full text-sm border-collapse">' +
+                '<thead><tr class="bg-blue-100 text-gray-700">' +
+                '<th class="border border-blue-200 p-2 text-left w-16">ลำดับ</th>' +
+                '<th class="border border-blue-200 p-2 text-left">ระบบ / อุปกรณ์</th>' +
+                '<th class="border border-blue-200 p-2 text-center w-32">จำนวนวัน (รวม)</th></tr></thead>' +
+                '<tbody id="devBody"></tbody>' +
+                '<tfoot><tr class="bg-blue-50 font-bold"><td class="border border-blue-200 p-2" colspan="2">รวมทั้งหมด</td>' +
+                '<td class="border border-blue-200 p-2 text-center" id="devTot">0</td></tr></tfoot></table></div>';
+            labsTab.appendChild(devCard);
+            const devBody = document.getElementById('devBody');
+
+            function drLabel(g) {
+                let el = g;
+                while (el && el !== labsTab && el.tagName !== 'BODY') {
+                    let s = el.previousElementSibling;
+                    while (s) {
+                        if (s.matches && s.matches('.sub-head, .minor-head, h3, h4, h5')) {
+                            const t = (s.textContent || '').trim(); if (t) return t.slice(0, 70);
+                        }
+                        s = s.previousElementSibling;
+                    }
+                    el = el.parentElement;
+                }
+                return 'อุปกรณ์';
+            }
+            function syncDev() {
+                if (!devBody) return;
+                let rows = '', total = 0;
+                ids.forEach(function (id) {
+                    const tab = document.getElementById('tab-' + id);
+                    if (!tab) return;
+                    const groups = tab.querySelectorAll('.dr-group');
+                    groups.forEach(function (g) {
+                        let sum = 0, any = false;
+                        g.querySelectorAll('.dr-days').forEach(function (d) {
+                            const v = parseInt(d.value, 10); if (!isNaN(v)) { sum += v; any = true; }
+                        });
+                        if (!any) return;
+                        total += sum;
+                        rows += '<tr>' +
+                            '<td class="border border-blue-200 p-2">' + labTabNo[id] + '</td>' +
+                            '<td class="border border-blue-200 p-2">' + sysName[id] + ' — ' + drLabel(g) + '</td>' +
+                            '<td class="border border-blue-200 p-2 text-center"><span class="pv-filled" style="font-weight:700;color:#2563eb">' + sum + '</span> วัน</td></tr>';
+                    });
+                });
+                if (!rows) rows = '<tr><td class="border border-blue-200 p-2 text-gray-400 text-center" colspan="3">— ยังไม่มีข้อมูลวันใส่อุปกรณ์ —</td></tr>';
+                devBody.innerHTML = rows;
+                const t = document.getElementById('devTot'); if (t) t.textContent = total;
+            }
+
+            function syncAll() { syncDx(); syncDev(); }
+            document.addEventListener('input', syncAll);
+            document.addEventListener('change', syncAll);
+            window.__syncSummaries = syncAll;
+            syncAll();
+        })();
 
         // 0a. รายการ checkbox (อาการ/ผลตรวจ): 3 คอลัมน์ = ข้อความ | ครั้งที่/วันที่..ถึงวันที่.. (กลาง ซ้อนกัน) | เพิ่มสถานะ (ขวา)
         function cbReindex(rows) {
@@ -1696,6 +1818,7 @@
         document.addEventListener('change', function(e) {
             if (e.target.classList && (e.target.classList.contains('dr-start') || e.target.classList.contains('dr-end'))) {
                 drCalcDays(e.target.closest('.dr-row'));
+                if (window.__syncSummaries) window.__syncSummaries();
             }
         });
 
