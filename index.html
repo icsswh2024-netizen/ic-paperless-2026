@@ -1366,7 +1366,8 @@
             row.className = 'cb-rrow flex items-center gap-1 whitespace-nowrap';
             row.innerHTML = '<span class="cb-idx text-xs font-medium text-gray-500 mr-1"></span>' +
                 'วันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">' +
-                ' ถึงวันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">';
+                ' ถึงวันที่ <input type="date" class="cb-date border-b border-gray-400 bg-transparent focus:outline-none w-32">' +
+                ' <span class="cb-total text-xs font-medium text-gray-500 ml-1">รวม <span class="cb-total-n font-bold text-red-600">-</span> วัน</span>';
             if (withDelete) {
                 const rm = document.createElement('button');
                 rm.type = 'button';
@@ -1385,6 +1386,24 @@
             }
             return row;
         }
+        function cbCalcTotal(row) {
+            if (!row) return;
+            const n = row.querySelector('.cb-total-n');
+            if (!n) return;
+            const ds = row.querySelectorAll('.cb-date');
+            if (ds.length >= 2 && ds[0].value && ds[1].value) {
+                const a = new Date(ds[0].value), b = new Date(ds[1].value);
+                const d = Math.round((b - a) / 86400000);
+                n.textContent = d >= 0 ? d : '-';
+            } else {
+                n.textContent = '-';
+            }
+        }
+        document.addEventListener('change', function(e) {
+            if (e.target.classList && e.target.classList.contains('cb-date')) {
+                cbCalcTotal(e.target.closest('.cb-rrow'));
+            }
+        });
         document.querySelectorAll('.tab-content label').forEach(function(lbl) {
             const cbs = lbl.querySelectorAll('input[type="checkbox"]');
             if (cbs.length !== 1) return;
