@@ -1264,9 +1264,11 @@
                 '<thead><tr class="bg-blue-100 text-gray-700">' +
                 '<th class="border border-blue-200 p-2 text-left w-16">ลำดับ</th>' +
                 '<th class="border border-blue-200 p-2 text-left">ระบบ / อุปกรณ์</th>' +
-                '<th class="border border-blue-200 p-2 text-center w-32">จำนวนวัน (รวม)</th></tr></thead>' +
+                '<th class="border border-blue-200 p-2 text-center w-16">ครั้ง</th>' +
+                '<th class="border border-blue-200 p-2 text-left w-72">ช่วงเวลา</th>' +
+                '<th class="border border-blue-200 p-2 text-center w-28">จำนวนวัน (รวม)</th></tr></thead>' +
                 '<tbody id="devBody"></tbody>' +
-                '<tfoot><tr class="bg-blue-50 font-bold"><td class="border border-blue-200 p-2" colspan="2">รวมทั้งหมด</td>' +
+                '<tfoot><tr class="bg-blue-50 font-bold"><td class="border border-blue-200 p-2" colspan="4">รวมทั้งหมด</td>' +
                 '<td class="border border-blue-200 p-2 text-center" id="devTot">0</td></tr></tfoot></table></div>';
             labsTab.appendChild(devCard);
             const devBody = document.getElementById('devBody');
@@ -1305,44 +1307,58 @@
                 const d = Math.round((b - a) / 86400000);
                 return d >= 0 ? d : null;
             }
+            function fmtD(v) {
+                if (!v) return '?';
+                const p = v.split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : v;
+            }
             function syncDev() {
                 if (!devBody) return;
                 let rows = '', total = 0;
-                function addRow(id, label, days) {
-                    total += days;
+                // entries = [{s,e,days}]
+                function addRow(id, label, entries) {
+                    let sum = 0;
+                    const spans = entries.map(function (en) {
+                        sum += en.days;
+                        return '<span class="pv-filled">' + fmtD(en.s) + ' – ' + fmtD(en.e) + ' (' + en.days + ' วัน)</span>';
+                    });
+                    total += sum;
                     rows += '<tr>' +
-                        '<td class="border border-blue-200 p-2">' + labTabNo[id] + '</td>' +
-                        '<td class="border border-blue-200 p-2">' + sysName[id] + ' — ' + label + '</td>' +
-                        '<td class="border border-blue-200 p-2 text-center"><span class="pv-filled" style="font-weight:700;color:#2563eb">' + days + '</span> วัน</td></tr>';
+                        '<td class="border border-blue-200 p-2 align-top">' + labTabNo[id] + '</td>' +
+                        '<td class="border border-blue-200 p-2 align-top">' + sysName[id] + ' — ' + label + '</td>' +
+                        '<td class="border border-blue-200 p-2 text-center align-top"><span class="pv-filled">' + entries.length + '</span></td>' +
+                        '<td class="border border-blue-200 p-2 align-top">' + spans.join('<br>') + '</td>' +
+                        '<td class="border border-blue-200 p-2 text-center align-top"><span class="pv-filled" style="font-weight:700;color:#2563eb">' + sum + '</span> วัน</td></tr>';
                 }
                 ids.forEach(function (id) {
                     const tab = document.getElementById('tab-' + id);
                     if (!tab) return;
-                    // (ก) ช่วงวันที่ใส่-ถอด แบบ .dr-group
+                    // (ก) ช่วงวันที่ใส่-ถอด แบบ .dr-group (แต่ละ .dr-row = 1 ครั้ง)
                     tab.querySelectorAll('.dr-group').forEach(function (g) {
-                        let sum = 0, any = false;
-                        g.querySelectorAll('.dr-days').forEach(function (d) {
-                            const v = parseInt(d.value, 10); if (!isNaN(v)) { sum += v; any = true; }
+                        const entries = [];
+                        g.querySelectorAll('.dr-row').forEach(function (r) {
+                            const s = r.querySelector('.dr-start'), e = r.querySelector('.dr-end');
+                            const d = (s && e) ? daysBetween(s.value, e.value) : null;
+                            if (d !== null) entries.push({ s: s.value, e: e.value, days: d });
                         });
-                        if (any) addRow(id, drLabel(g), sum);
+                        if (entries.length) addRow(id, drLabel(g), entries);
                     });
-                    // (ข) อุปกรณ์ในหมวด "หัตถการ/อุปกรณ์" ที่บันทึกวันที่แบบ checkbox (.cb-date)
+                    // (ข) อุปกรณ์ในหมวด "หัตถการ/อุปกรณ์" ที่บันทึกวันที่แบบ checkbox (แต่ละ .cb-rrow = 1 ครั้ง)
                     tab.querySelectorAll('label').forEach(function (lbl) {
                         if (!lbl.querySelector('.cb-rows')) return;
                         if (!devRe.test(nearestSubHead(lbl))) return;
-                        let sum = 0, any = false;
+                        const entries = [];
                         lbl.querySelectorAll('.cb-rrow').forEach(function (r) {
                             const ds = r.querySelectorAll('.cb-date');
                             const d = ds.length >= 2 ? daysBetween(ds[0].value, ds[1].value) : null;
-                            if (d !== null) { sum += d; any = true; }
+                            if (d !== null) entries.push({ s: ds[0].value, e: ds[1].value, days: d });
                         });
-                        if (!any) return;
+                        if (!entries.length) return;
                         const nameEl = lbl.firstElementChild;
                         let name = (nameEl ? nameEl.textContent : lbl.textContent).replace(/\s+/g, ' ').trim();
-                        addRow(id, name || 'อุปกรณ์', sum);
+                        addRow(id, name || 'อุปกรณ์', entries);
                     });
                 });
-                if (!rows) rows = '<tr><td class="border border-blue-200 p-2 text-gray-400 text-center" colspan="3">— ยังไม่มีข้อมูลวันใส่อุปกรณ์ —</td></tr>';
+                if (!rows) rows = '<tr><td class="border border-blue-200 p-2 text-gray-400 text-center" colspan="5">— ยังไม่มีข้อมูลวันใส่อุปกรณ์ —</td></tr>';
                 devBody.innerHTML = rows;
                 const t = document.getElementById('devTot'); if (t) t.textContent = total;
             }
