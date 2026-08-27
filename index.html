@@ -1285,24 +1285,61 @@
                 }
                 return 'อุปกรณ์';
             }
+            // หา sub-head ที่ใกล้ที่สุดก่อนหน้า element (เพื่อดูว่าอยู่ในหมวด "หัตถการ/อุปกรณ์" หรือไม่)
+            function nearestSubHead(el) {
+                let n = el;
+                while (n && n !== document.body) {
+                    let s = n.previousElementSibling;
+                    while (s) {
+                        if (s.matches && s.matches('.sub-head')) return (s.textContent || '').trim();
+                        s = s.previousElementSibling;
+                    }
+                    n = n.parentElement;
+                }
+                return '';
+            }
+            const devRe = /หัตถการ|อุปกรณ์/;
+            function daysBetween(v1, v2) {
+                if (!v1 || !v2) return null;
+                const a = new Date(v1), b = new Date(v2);
+                const d = Math.round((b - a) / 86400000);
+                return d >= 0 ? d : null;
+            }
             function syncDev() {
                 if (!devBody) return;
                 let rows = '', total = 0;
+                function addRow(id, label, days) {
+                    total += days;
+                    rows += '<tr>' +
+                        '<td class="border border-blue-200 p-2">' + labTabNo[id] + '</td>' +
+                        '<td class="border border-blue-200 p-2">' + sysName[id] + ' — ' + label + '</td>' +
+                        '<td class="border border-blue-200 p-2 text-center"><span class="pv-filled" style="font-weight:700;color:#2563eb">' + days + '</span> วัน</td></tr>';
+                }
                 ids.forEach(function (id) {
                     const tab = document.getElementById('tab-' + id);
                     if (!tab) return;
-                    const groups = tab.querySelectorAll('.dr-group');
-                    groups.forEach(function (g) {
+                    // (ก) ช่วงวันที่ใส่-ถอด แบบ .dr-group
+                    tab.querySelectorAll('.dr-group').forEach(function (g) {
                         let sum = 0, any = false;
                         g.querySelectorAll('.dr-days').forEach(function (d) {
                             const v = parseInt(d.value, 10); if (!isNaN(v)) { sum += v; any = true; }
                         });
+                        if (any) addRow(id, drLabel(g), sum);
+                    });
+                    // (ข) อุปกรณ์ในหมวด "หัตถการ/อุปกรณ์" ที่บันทึกวันที่แบบ checkbox (.cb-date)
+                    tab.querySelectorAll('label').forEach(function (lbl) {
+                        if (!lbl.querySelector('.cb-rows')) return;
+                        if (!devRe.test(nearestSubHead(lbl))) return;
+                        let sum = 0, any = false;
+                        lbl.querySelectorAll('.cb-rrow').forEach(function (r) {
+                            const ds = r.querySelectorAll('.cb-date');
+                            const d = ds.length >= 2 ? daysBetween(ds[0].value, ds[1].value) : null;
+                            if (d !== null) { sum += d; any = true; }
+                        });
                         if (!any) return;
-                        total += sum;
-                        rows += '<tr>' +
-                            '<td class="border border-blue-200 p-2">' + labTabNo[id] + '</td>' +
-                            '<td class="border border-blue-200 p-2">' + sysName[id] + ' — ' + drLabel(g) + '</td>' +
-                            '<td class="border border-blue-200 p-2 text-center"><span class="pv-filled" style="font-weight:700;color:#2563eb">' + sum + '</span> วัน</td></tr>';
+                        const nameEl = lbl.firstElementChild;
+                        let name = (nameEl ? nameEl.textContent : lbl.textContent).replace(/\s+/g, ' ').trim();
+                        addRow(id, name || 'อุปกรณ์', sum);
                     });
                 });
                 if (!rows) rows = '<tr><td class="border border-blue-200 p-2 text-gray-400 text-center" colspan="3">— ยังไม่มีข้อมูลวันใส่อุปกรณ์ —</td></tr>';
