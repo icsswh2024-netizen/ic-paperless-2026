@@ -290,11 +290,16 @@
                                 <label class="block text-sm font-bold text-gray-700 mb-2 sub-head">1.2 สถานะรับเข้าแรกรับ</label>
                                 <div class="flex flex-col gap-3 text-sm comp-indent">
                                     <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" name="admit_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> 
+                                        <input type="checkbox" name="admit_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500">
                                         รับใหม่ ตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-48 px-1">
                                     </label>
+                                    <div class="flex flex-wrap items-center gap-4 ml-6 text-gray-600">
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="admit_new_from" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> OPD</label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="admit_new_from" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> ER</label>
+                                        <label class="flex items-center gap-2 cursor-pointer"><input type="checkbox" name="admit_new_from" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> อื่นๆ ระบุ <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-40 px-1"></label>
+                                    </div>
                                     <label class="flex items-center gap-2 cursor-pointer">
-                                        <input type="checkbox" name="admit_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500"> 
+                                        <input type="checkbox" name="admit_status" class="w-4 h-4 text-red-600 rounded border-gray-300 focus:ring-red-500">
                                         รับ Refer จาก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1"> 
                                         วันที่ <input type="date" class="border-b border-gray-400 bg-transparent focus:outline-none px-1">
                                     </label>
