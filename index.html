@@ -1533,9 +1533,9 @@
             if (withDelete) {
                 const rm = document.createElement('button');
                 rm.type = 'button';
-                rm.textContent = '×';
+                rm.innerHTML = '<i data-feather="trash-2" class="w-4 h-4"></i>';
                 rm.title = 'ลบรายการ';
-                rm.className = 'cb-rrow-del text-gray-400 hover:text-red-500 text-lg leading-none px-1 shrink-0';
+                rm.className = 'cb-rrow-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors';
                 rm.addEventListener('click', function(ev) {
                     ev.preventDefault();
                     ev.stopPropagation();
@@ -1708,9 +1708,9 @@
                 container.appendChild(clone);
                 const rm = document.createElement('button');
                 rm.type = 'button';
-                rm.textContent = '×';
+                rm.innerHTML = '<i data-feather="trash-2" class="w-4 h-4"></i>';
                 rm.title = 'ลบรายการ';
-                rm.className = 'sd-del text-gray-400 hover:text-red-500 text-lg leading-none px-1 shrink-0';
+                rm.className = 'sd-del text-gray-400 hover:text-red-500 p-1 shrink-0 transition-colors';
                 rm.addEventListener('click', function(ev) {
                     ev.preventDefault();
                     ev.stopPropagation();
@@ -1719,6 +1719,7 @@
                 });
                 container.appendChild(rm);
                 unit.parentNode.insertBefore(container, add);
+                feather.replace();
             });
             unit.parentNode.insertBefore(add, unit.nextSibling);
         });
