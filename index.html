@@ -2115,9 +2115,10 @@
             pvArea.appendChild(page);
             let used = 0;
             if (headerEl) { page.appendChild(headerEl); used += headerEl.offsetHeight; }
-            sections.forEach(function(sec) {
+            sections.forEach(function(sec, idx) {
                 page.appendChild(sec);
                 const h = sec.offsetHeight;
+                if (idx === 0) { used += h; return; } // ข้อมูลทั่วไป อยู่หน้า 1 คู่กับหัวเอกสารเสมอ
                 if (used > 0 && used + h > USABLE) {
                     page = document.createElement('div'); page.className = 'pdf-page pv-doc';
                     pvArea.appendChild(page);
