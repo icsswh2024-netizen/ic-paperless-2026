@@ -57,6 +57,7 @@
         .pv-doc th, .pv-doc td { border: 1px solid #6b7280 !important; padding: 2px 5px; }
         .pv-doc thead { background: #f3f4f6 !important; }
         .pv-doc .wg-idx, .pv-doc .dr-index, .pv-doc .cb-idx { color: #6b7280; }
+        .pv-foot { position: absolute; left: 40px; right: 40px; bottom: 16px; display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #6b7280; border-top: 1px solid #d1d5db; padding-top: 4px; }
 
         /* ปุ่มสถานะการวินิจฉัย (เรืองแสง) */
         .hai-btn { font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 9999px; border: 1.5px solid transparent; cursor: pointer; transition: all .25s ease; opacity: .8; }
@@ -2126,20 +2127,48 @@
                     used += h;
                 }
             });
+            // ใส่เลขหน้า + เลขที่แบบฟอร์ม ท้ายทุกหน้า (เอกสารทางการ)
+            const today = new Date().toLocaleDateString('th-TH', { day: '2-digit', month: '2-digit', year: 'numeric' });
+            const pages = pvArea.querySelectorAll('.pdf-page');
+            pages.forEach(function (pg, i) {
+                pg.style.position = 'relative';
+                const f = document.createElement('div');
+                f.className = 'pv-foot';
+                f.innerHTML = '<span>FR-ICC-01_68 · โรงพยาบาลศรีสังวรสุโขทัย</span>' +
+                    '<span>เอกสารเวชระเบียน — ความลับผู้ป่วย</span>' +
+                    '<span>หน้า ' + (i + 1) + ' / ' + pages.length + ' · พิมพ์ ' + today + '</span>';
+                pg.appendChild(f);
+            });
         }
         function buildPreview(mode) {
             if (!pvArea) return;
             pvArea.innerHTML = '';
             const hdr = document.createElement('div');
+            const dash = function (v, n) { return v || Array(n || 12).join('.'); };
             hdr.innerHTML =
-                '<div style="text-align:center;font-weight:700;font-size:1.1rem;margin-bottom:12px;line-height:1.25">แบบเฝ้าระวังการติดเชื้อในโรงพยาบาลศรีสังวรสุโขทัย<br><span style="font-size:.8rem;font-weight:400">FR-ICC-01_68 · ' + (mode === 'brief' ? 'สรุปย่อ (เฉพาะข้อมูลที่บันทึก)' : 'แบบเต็ม') + '</span></div>' +
-                '<div style="display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #9ca3af;padding-bottom:8px;margin-bottom:14px;font-size:.85rem">' +
-                '<div><div>ชื่อ-สกุล: <b>' + (pvGet('ระบุ ชื่อ-สกุลผู้ป่วย') || '.....................') + '</b> &nbsp; อายุ ' + (pvGet('ปี') || '....') + ' ปี</div>' +
-                '<div>หอผู้ป่วย: ' + (pvGet('ระบุหอผู้ป่วย') || '............') + ' &nbsp; เตียง: ' + (pvGet('ระบุเตียง') || '......') + '</div>' +
-                '<div>หน่วยงานที่บันทึก: ' + (pvGet('ระบุหน่วยงาน') || '............') + '</div>' +
-                '<div>โรคประจำตัว: ' + (pvGet('ระบุโรคประจำตัว') || '............') + ' &nbsp; BMI: ' + (pvGet('ระบุ BMI') || '......') + '</div>' +
-                '<div>ดื่มเหล้า: ' + (pvRadio('global-alcohol') || '............') + ' &nbsp; สูบบุหรี่: ' + (pvRadio('global-smoke') || '............') + '</div></div>' +
-                '<div style="text-align:right"><div>HN: ' + (pvGet('ระบุ HN') || '............') + '</div><div>AN: ' + (pvGet('ระบุ AN') || '............') + '</div></div></div>';
+                // หัวกระดาษราชการ
+                '<div style="display:flex;justify-content:space-between;align-items:flex-start;font-size:.72rem;color:#4b5563;margin-bottom:2px">' +
+                '<div style="text-align:left;line-height:1.3">งานป้องกันและควบคุมการติดเชื้อ (IC)<br>โรงพยาบาลศรีสังวรสุโขทัย</div>' +
+                '<div style="text-align:right;line-height:1.3">แบบฟอร์มเลขที่ FR-ICC-01_68<br>' + (mode === 'brief' ? 'ฉบับสรุปย่อ' : 'ฉบับเต็ม') + '</div></div>' +
+                '<div style="text-align:center;font-weight:700;font-size:1.15rem;letter-spacing:.3px;margin:2px 0 1px">แบบเฝ้าระวังการติดเชื้อในโรงพยาบาล</div>' +
+                '<div style="text-align:center;font-size:.78rem;color:#374151;margin-bottom:6px">โรงพยาบาลศรีสังวรสุโขทัย จังหวัดสุโขทัย</div>' +
+                '<div style="border-top:2px solid #111827;border-bottom:1px solid #111827;height:3px;margin-bottom:10px"></div>' +
+                // กล่องข้อมูลผู้ป่วย (มีเส้นกรอบ)
+                '<table style="width:100%;border-collapse:collapse;font-size:.82rem;margin-bottom:14px">' +
+                '<tr>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px" colspan="2">ชื่อ-สกุลผู้ป่วย: <b>' + dash(pvGet('ระบุ ชื่อ-สกุลผู้ป่วย'), 30) + '</b></td>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px">HN: ' + dash(pvGet('ระบุ HN')) + '</td>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px">AN: ' + dash(pvGet('ระบุ AN')) + '</td></tr>' +
+                '<tr>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px">อายุ ' + dash(pvGet('ปี'), 5) + ' ปี</td>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px">หอผู้ป่วย: ' + dash(pvGet('ระบุหอผู้ป่วย')) + '</td>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px">เตียง: ' + dash(pvGet('ระบุเตียง'), 6) + '</td>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px">หน่วยงานที่บันทึก: ' + dash(pvGet('ระบุหน่วยงาน')) + '</td></tr>' +
+                '<tr>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px" colspan="2">โรคประจำตัว: ' + dash(pvGet('ระบุโรคประจำตัว'), 20) + '</td>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px">BMI: ' + dash(pvGet('ระบุ BMI'), 6) + '</td>' +
+                '<td style="border:1px solid #6b7280;padding:4px 8px">ดื่มเหล้า: ' + dash(pvRadio('global-alcohol'), 6) + ' / สูบบุหรี่: ' + dash(pvRadio('global-smoke'), 6) + '</td></tr>' +
+                '</table>';
             const pvSections = [];
 
             PV_SYS.forEach(function(id) {
@@ -2168,6 +2197,16 @@
                 while (clone.firstChild) sec.appendChild(clone.firstChild);
                 pvSections.push(sec);
             }
+            // บล็อกลงนาม (เอกสารทางการ)
+            const sig = document.createElement('div');
+            sig.style.marginTop = '18px';
+            sig.innerHTML =
+                '<div style="display:flex;justify-content:space-around;gap:24px;text-align:center;font-size:.82rem;padding-top:8px">' +
+                '<div style="flex:1"><div style="height:34px"></div><div>ลงชื่อ ....................................................</div><div style="margin-top:4px">( .................................................. )</div><div style="margin-top:3px;color:#4b5563">ผู้บันทึก / ผู้เฝ้าระวัง</div><div style="margin-top:2px;color:#6b7280">วันที่ ......./......./.........</div></div>' +
+                '<div style="flex:1"><div style="height:34px"></div><div>ลงชื่อ ....................................................</div><div style="margin-top:4px">( .................................................. )</div><div style="margin-top:3px;color:#4b5563">พยาบาลควบคุมการติดเชื้อ (ICN)</div><div style="margin-top:2px;color:#6b7280">วันที่ ......./......./.........</div></div>' +
+                '<div style="flex:1"><div style="height:34px"></div><div>ลงชื่อ ....................................................</div><div style="margin-top:4px">( .................................................. )</div><div style="margin-top:3px;color:#4b5563">ประธานคณะกรรมการ IC</div><div style="margin-top:2px;color:#6b7280">วันที่ ......./......./.........</div></div>' +
+                '</div>';
+            pvSections.push(sig);
             pvPaginate(hdr, pvSections);
         }
         function pvSetMode(mode) {
