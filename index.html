@@ -1699,6 +1699,8 @@
                 container.className = 'sd-clone flex items-start gap-1 mt-1';
                 const clone = unit.cloneNode(true);
                 delete clone.dataset.sdDone;
+                clone.style.flex = '1 1 auto';
+                clone.style.minWidth = '0';
                 clone.querySelectorAll('input, textarea').forEach(function(i) {
                     if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
                     else i.value = '';
