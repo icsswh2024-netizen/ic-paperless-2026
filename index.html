@@ -57,6 +57,18 @@
         .pv-doc th, .pv-doc td { border: 1px solid #6b7280 !important; padding: 2px 5px; }
         .pv-doc thead { background: #f3f4f6 !important; }
         .pv-doc .wg-idx, .pv-doc .dr-index, .pv-doc .cb-idx { color: #6b7280; }
+        /* บีบระยะห่างในพรีวิว (คลาส margin/gap ของ Tailwind ทำให้ห่างเกิน) */
+        .pv-doc [class*="mb-"] { margin-bottom: 3px !important; }
+        .pv-doc [class*="mt-"] { margin-top: 3px !important; }
+        .pv-doc [class*="my-"] { margin-top: 3px !important; margin-bottom: 3px !important; }
+        .pv-doc [class*="gap-3"], .pv-doc [class*="gap-4"], .pv-doc [class*="gap-6"] { gap: 4px !important; }
+        .pv-doc [class*="space-y-"] > * + * { margin-top: 3px !important; }
+        .pv-doc [class*="py-"] { padding-top: 1px !important; padding-bottom: 1px !important; }
+        .pv-doc .transfer-row, .pv-doc .dr-row, .pv-doc .cb-rrow { margin: 1px 0 !important; }
+        .pv-doc .sub-head { margin: 8px 0 3px !important; }
+        .pv-doc .minor-head { margin: 5px 0 2px !important; }
+        .pv-doc h3 { margin: 8px 0 5px !important; }
+        .pv-doc h3:first-child, .pv-doc > *:first-child { margin-top: 0 !important; }
         .pv-foot { position: absolute; left: 40px; right: 40px; bottom: 16px; display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #6b7280; border-top: 1px solid #d1d5db; padding-top: 4px; }
 
         /* ปุ่มสถานะการวินิจฉัย (เรืองแสง) */
