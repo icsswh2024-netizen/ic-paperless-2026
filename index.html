@@ -64,6 +64,8 @@
         .pv-doc [class*="gap-3"], .pv-doc [class*="gap-4"], .pv-doc [class*="gap-6"] { gap: 4px !important; }
         .pv-doc [class*="space-y-"] > * + * { margin-top: 3px !important; }
         .pv-doc [class*="py-"] { padding-top: 1px !important; padding-bottom: 1px !important; }
+        /* การ์ดหัวข้อย่อย (bg + p-4) → ตัด padding ให้กระชับ ไม่กินบรรทัด */
+        .pv-doc [class*="bg-gray-50"], .pv-doc [class*="bg-white"], .pv-doc [class*="bg-red-50"], .pv-doc [class*="bg-blue-50"] { padding: 1px 0 !important; }
         .pv-doc .transfer-row, .pv-doc .dr-row, .pv-doc .cb-rrow { margin: 1px 0 !important; }
         .pv-doc .sub-head { margin: 8px 0 3px !important; }
         .pv-doc .minor-head { margin: 5px 0 2px !important; }
