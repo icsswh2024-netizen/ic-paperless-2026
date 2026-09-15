@@ -1348,6 +1348,7 @@
                     label.classList.add('pv-filled');
                 }
             }
+            if (window.__syncSummaries) window.__syncSummaries();
         });
 
         // 0a''. เมนู "สรุปผล": ตารางวินิจฉัยลิงก์ข้อมูลจากสรุปแต่ละระบบ (นับจำนวน) + สรุปจำนวนวันใส่อุปกรณ์
@@ -1370,7 +1371,8 @@
                     '<th class="border border-red-200 p-2 text-center w-14">HAI</th>' +
                     '<th class="border border-red-200 p-2 text-center w-16">NoHAI</th>' +
                     '<th class="border border-red-200 p-2 text-left w-32">เดือนที่พบ</th>' +
-                    '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th></tr></thead>' +
+                    '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th>' +
+                    '<th class="border border-red-200 p-2 text-left w-40">สถานะ</th></tr></thead>' +
                     '<tbody id="dxSumBody"></tbody>' +
                     '<tfoot><tr class="bg-red-50 font-bold"><td class="border border-red-200 p-2" colspan="2">รวม (จำนวน)</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotCI">0</td>' +
@@ -1384,15 +1386,18 @@
                 let rows = '', tCI = 0, tHAI = 0, tNo = 0;
                 ids.forEach(function (id) {
                     const dx = document.querySelector('.dx-summary[data-sys="' + id + '"]');
-                    let ci = false, hai = false, no = false, mo = '', un = '';
+                    let ci = false, hai = false, no = false, mo = '', un = '', st = '', stCls = '';
                     if (dx) {
                         ci = !!(dx.querySelector('.dx-ci') || {}).checked;
                         hai = !!(dx.querySelector('.dx-hai') || {}).checked;
                         no = !!(dx.querySelector('.dx-nohai') || {}).checked;
                         mo = (dx.querySelector('.dx-month') || {}).value || '';
                         un = (dx.querySelector('.dx-unit') || {}).value || '';
+                        const ab = dx.querySelector('.hai-btn.active');
+                        if (ab) { st = ab.getAttribute('data-v') || ''; stCls = ['hai-gray','hai-yellow','hai-green','hai-red'].find(function(c){return ab.classList.contains(c);}); }
                     }
                     if (ci) tCI++; if (hai) tHAI++; if (no) tNo++;
+                    const stHtml = st ? '<span class="pv-filled" style="font-weight:700;color:' + (haiColor[stCls] || '#374151') + '">' + st + '</span>' : '';
                     rows += '<tr>' +
                         '<td class="border border-red-200 p-2">' + labTabNo[id] + '</td>' +
                         '<td class="border border-red-200 p-2 font-medium">' + sysName[id] + '</td>' +
@@ -1400,7 +1405,8 @@
                         '<td class="border border-red-200 p-2 text-center">' + mark(hai) + '</td>' +
                         '<td class="border border-red-200 p-2 text-center">' + mark(no) + '</td>' +
                         '<td class="border border-red-200 p-2">' + fld(mo) + '</td>' +
-                        '<td class="border border-red-200 p-2">' + fld(un) + '</td></tr>';
+                        '<td class="border border-red-200 p-2">' + fld(un) + '</td>' +
+                        '<td class="border border-red-200 p-2">' + stHtml + '</td></tr>';
                 });
                 dxBody.innerHTML = rows;
                 const set = function (i, v) { const e = document.getElementById(i); if (e) e.textContent = v; };
