@@ -71,6 +71,25 @@
         .pv-doc .minor-head { margin: 5px 0 2px !important; }
         .pv-doc h3 { margin: 8px 0 5px !important; }
         .pv-doc h3:first-child, .pv-doc > *:first-child { margin-top: 0 !important; }
+        /* ปฏิทินพรีเมียม (custom date picker) */
+        .dp-pop { position: fixed; z-index: 300; width: 300px; background: #fff; border-radius: 16px; box-shadow: 0 12px 40px rgba(0,0,0,.22); overflow: hidden; font-family: 'Sarabun', sans-serif; user-select: none; }
+        .dp-head { background: linear-gradient(135deg, #02b371, #059669); color: #fff; display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; }
+        .dp-title { font-weight: 700; font-size: 15px; }
+        .dp-nav { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; color: #fff; transition: background .15s; font-size: 18px; line-height: 1; }
+        .dp-nav:hover { background: rgba(255,255,255,.25); }
+        .dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; padding: 12px 12px 4px; }
+        .dp-dow { text-align: center; font-size: 12px; color: #9ca3af; font-weight: 600; padding: 4px 0; }
+        .dp-day { text-align: center; font-size: 14px; color: #374151; padding: 8px 0; border-radius: 50%; cursor: pointer; transition: background .12s, color .12s; }
+        .dp-day:hover { background: #d1fae5; }
+        .dp-day.dp-other { color: #d1d5db; }
+        .dp-day.dp-today { background: #d1fae5; color: #047857; font-weight: 700; }
+        .dp-day.dp-sel { background: #02b371; color: #fff; font-weight: 700; }
+        .dp-foot { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px 14px; border-top: 1px solid #f3f4f6; }
+        .dp-foot button { background: none; border: none; cursor: pointer; font-family: inherit; font-size: 14px; font-weight: 600; }
+        .dp-clear { color: #9ca3af; } .dp-clear:hover { color: #dc2626; }
+        .dp-today-btn { color: #02b371; }
+        .dp-close { color: #6b7280; background: #f3f4f6 !important; padding: 6px 14px !important; border-radius: 8px; }
+        .dp-close:hover { background: #e5e7eb !important; }
         .by-stamp::after { content: attr(data-by); color: #9ca3af; font-size: 10px; margin-left: 6px; white-space: nowrap; font-style: italic; }
         .pv-doc .by-stamp::after { color: #6b7280; }
         .pv-foot { position: absolute; left: 40px; right: 40px; bottom: 16px; display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #6b7280; border-top: 1px solid #d1d5db; padding-top: 4px; }
@@ -2471,6 +2490,90 @@
             if (pvModeBriefBtn) pvModeBriefBtn.addEventListener('click', () => pvSetMode('brief'));
             if (printPreviewBtn) printPreviewBtn.addEventListener('click', () => window.print());
         }
+
+        // ===== ปฏิทินพรีเมียม (custom date picker) แทนปฏิทินเบราว์เซอร์ทุก input[type=date] =====
+        (function () {
+            const MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน','กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+            const DOW = ['อา','จ','อ','พ','พฤ','ศ','ส'];
+            let pop, curInput, viewY, viewM;
+            const pad = function (n) { return (n < 10 ? '0' : '') + n; };
+
+            function build() {
+                pop = document.createElement('div');
+                pop.className = 'dp-pop no-print';
+                pop.innerHTML =
+                    '<div class="dp-head"><div class="dp-nav" data-nav="-1">&#8249;</div><div class="dp-title"></div><div class="dp-nav" data-nav="1">&#8250;</div></div>' +
+                    '<div class="dp-grid"></div>' +
+                    '<div class="dp-foot"><button class="dp-clear">ล้างวันที่</button><button class="dp-today-btn">วันนี้</button><button class="dp-close">ปิด</button></div>';
+                document.body.appendChild(pop);
+                pop.addEventListener('mousedown', function (e) { e.preventDefault(); });
+                pop.querySelectorAll('.dp-nav').forEach(function (b) {
+                    b.addEventListener('click', function () { viewM += parseInt(b.dataset.nav, 10); if (viewM < 0) { viewM = 11; viewY--; } if (viewM > 11) { viewM = 0; viewY++; } render(); });
+                });
+                pop.querySelector('.dp-clear').addEventListener('click', function () { commit(''); });
+                pop.querySelector('.dp-today-btn').addEventListener('click', function () { const t = new Date(); commit(t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate())); });
+                pop.querySelector('.dp-close').addEventListener('click', close);
+            }
+            function render() {
+                pop.querySelector('.dp-title').textContent = MONTHS[viewM] + ' ' + (viewY + 543);
+                const grid = pop.querySelector('.dp-grid');
+                let html = DOW.map(function (d) { return '<div class="dp-dow">' + d + '</div>'; }).join('');
+                const first = new Date(viewY, viewM, 1).getDay();
+                const dim = new Date(viewY, viewM + 1, 0).getDate();
+                const prevDim = new Date(viewY, viewM, 0).getDate();
+                const t = new Date(); const tKey = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+                const sel = curInput && curInput.value ? curInput.value : '';
+                for (let i = 0; i < first; i++) html += '<div class="dp-day dp-other">' + (prevDim - first + 1 + i) + '</div>';
+                for (let d = 1; d <= dim; d++) {
+                    const key = viewY + '-' + pad(viewM + 1) + '-' + pad(d);
+                    let cls = 'dp-day'; if (key === tKey) cls += ' dp-today'; if (key === sel) cls += ' dp-sel';
+                    html += '<div class="' + cls + '" data-k="' + key + '">' + d + '</div>';
+                }
+                grid.innerHTML = html;
+                grid.querySelectorAll('.dp-day[data-k]').forEach(function (c) { c.addEventListener('click', function () { commit(c.dataset.k); }); });
+            }
+            function commit(val) {
+                if (curInput) {
+                    curInput.value = val;
+                    curInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    curInput.dispatchEvent(new Event('change', { bubbles: true }));
+                }
+                close();
+            }
+            function position() {
+                const r = curInput.getBoundingClientRect();
+                const w = 300, h = 360;
+                let left = r.left, top = r.bottom + 6;
+                if (left + w > window.innerWidth - 8) left = window.innerWidth - w - 8;
+                if (left < 8) left = 8;
+                if (top + h > window.innerHeight - 8) top = Math.max(8, r.top - h - 6);
+                pop.style.left = left + 'px'; pop.style.top = top + 'px';
+            }
+            function open(input) {
+                if (!pop) build();
+                curInput = input;
+                let d = new Date();
+                if (input.value) { const p = input.value.split('-'); if (p.length === 3) d = new Date(+p[0], +p[1] - 1, +p[2]); }
+                viewY = d.getFullYear(); viewM = d.getMonth();
+                render(); pop.style.display = 'block'; position();
+            }
+            function close() { if (pop) pop.style.display = 'none'; curInput = null; }
+
+            // ปิดปฏิทินเนทีฟ + เปิดปฏิทินพรีเมียมแทน
+            document.addEventListener('mousedown', function (e) {
+                const inp = e.target.closest && e.target.closest('input[type="date"]');
+                if (inp) { e.preventDefault(); if (curInput === inp && pop && pop.style.display === 'block') { close(); } else { open(inp); } return; }
+                if (pop && pop.style.display === 'block' && !e.target.closest('.dp-pop')) close();
+            });
+            // กัน keyboard เปิดปฏิทินเนทีฟ
+            document.addEventListener('keydown', function (e) {
+                if (e.target && e.target.matches && e.target.matches('input[type="date"]')) {
+                    if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowDown') { e.preventDefault(); open(e.target); }
+                }
+            });
+            window.addEventListener('scroll', function () { if (curInput) position(); }, true);
+            window.addEventListener('resize', close);
+        })();
     </script>
 </body>
 </html>
