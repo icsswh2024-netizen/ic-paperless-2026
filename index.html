@@ -1258,6 +1258,8 @@
         </div>
     </div>
 
+    <button id="btn-test-fill" type="button" title="จำลองข้อมูลทดสอบทุกระบบ" class="no-print" style="position:fixed;top:12px;right:12px;z-index:250;display:flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-weight:700;font-size:13px;font-family:'Sarabun',sans-serif;box-shadow:0 4px 14px rgba(79,70,229,.4);cursor:pointer">🧪 ทดสอบ</button>
+
     <datalist id="wardList">
         <option value="อายุรกรรมชาย"></option>
         <option value="อายุรกรรมหญิง"></option>
@@ -2573,6 +2575,100 @@
             });
             window.addEventListener('scroll', function () { if (curInput) position(); }, true);
             window.addEventListener('resize', close);
+        })();
+
+        // ===== ปุ่มทดสอบ: จำลองข้อมูลครบทุกระบบ/ทุกเงื่อนไข =====
+        (function () {
+            const btn = document.getElementById('btn-test-fill');
+            if (!btn) return;
+            const p2 = function (n) { return (n < 10 ? '0' : '') + n; };
+            function iso(d) { return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate()); }
+            function plus(base, n) { const d = new Date(base); d.setDate(d.getDate() + n); return iso(d); }
+            function inSkip(el) { return el.closest('#preview-modal') || el.closest('#history-modal') || el.closest('.dp-pop') || el.closest('datalist') || el.tagName === 'OPTION'; }
+            btn.addEventListener('click', function () {
+                const base = new Date();
+                const isoBase = iso(base);
+                // 1) หน่วยงาน + ข้อมูลผู้ป่วยหลัก
+                const gu = document.getElementById('global-unit'); if (gu) gu.value = 'ICU อายุรกรรม';
+                const setPh = function (ph, v) { const e = document.querySelector('input[placeholder="' + ph + '"]'); if (e) e.value = v; };
+                setPh('ระบุ ชื่อ-สกุลผู้ป่วย', 'นายทดสอบ ระบบครบถ้วน');
+                setPh('ปี', '68'); setPh('วัน', '15');
+                setPh('ระบุ AN', 'AN690099'); setPh('ระบุ HN', 'HN123456');
+                setPh('ระบุหอผู้ป่วย', 'อายุรกรรมชาย'); setPh('ระบุเตียง', '12');
+                setPh('ระบุหน่วยงาน', 'ICU อายุรกรรม');
+                setPh('ระบุโรคประจำตัว', 'เบาหวาน, ความดันโลหิตสูง'); setPh('ระบุ BMI', '24.5');
+                const gad = document.getElementById('global-admit-date'); if (gad) gad.value = isoBase + 'T08:00';
+
+                // 2) fill ทุก field ในฟอร์ม
+                document.querySelectorAll('input, select, textarea').forEach(function (el) {
+                    if (inSkip(el) || el === btn) return;
+                    const t = (el.type || '').toLowerCase();
+                    if (t === 'checkbox') { el.checked = true; }
+                    else if (t === 'radio') { if (!document.querySelector('input[name="' + el.name + '"]:checked')) el.checked = true; }
+                    else if (t === 'time') { el.value = '08:30'; }
+                    else if (t === 'month') { el.value = base.getFullYear() + '-' + p2(base.getMonth() + 1); }
+                    else if (t === 'number') { if (!el.readOnly && !el.value) el.value = '3'; }
+                    else if (t === 'date' || t === 'datetime-local') { /* จัดการช่วงวันที่ด้านล่าง */ }
+                    else if (el.tagName === 'SELECT') { /* จัดการด้านล่าง (MDR) */ }
+                    else if (t === 'text' || el.tagName === 'TEXTAREA') {
+                        if (el.value) return;
+                        if (el.getAttribute('list') === 'wardList') el.value = 'อายุรกรรมชาย';
+                        else el.value = 'ข้อมูลทดสอบ';
+                    }
+                });
+
+                // 3) MDR: เลือก "ควบคุมพิเศษ" + ชนิดย่อย (ครบเงื่อนไข)
+                document.querySelectorAll('.mdr-main').forEach(function (m) {
+                    m.value = 'MDR ควบคุมพิเศษ';
+                    const sub = m.parentElement.querySelector('.mdr-sub');
+                    if (sub) { sub.hidden = false; sub.value = 'CRE'; }
+                });
+                // select อื่น ๆ (ถ้ามี) เลือกตัวเลือกแรกที่มีค่า
+                document.querySelectorAll('select').forEach(function (s) {
+                    if (inSkip(s) || s.classList.contains('mdr-main') || s.classList.contains('mdr-sub')) return;
+                    if (!s.value) { for (let i = 0; i < s.options.length; i++) { if (s.options[i].value) { s.value = s.options[i].value; break; } } }
+                });
+
+                // 4) วันที่แบบช่วง → ให้คำนวณจำนวนวันได้
+                document.querySelectorAll('.dr-row').forEach(function (r) {
+                    const s = r.querySelector('.dr-start'), e = r.querySelector('.dr-end');
+                    if (s) s.value = isoBase; if (e) e.value = plus(base, 5);
+                });
+                document.querySelectorAll('.cb-rrow').forEach(function (r) {
+                    const ds = r.querySelectorAll('.cb-date');
+                    if (ds[0]) ds[0].value = isoBase; if (ds[1]) ds[1].value = plus(base, 3);
+                });
+                document.querySelectorAll('.transfer-row').forEach(function (r, i) {
+                    const td = r.querySelector('.transfer-date'); if (td) td.value = plus(base, i + 1);
+                });
+                // วันที่เดี่ยวที่เหลือ
+                document.querySelectorAll('input[type="date"]').forEach(function (d) {
+                    if (!inSkip(d) && !d.value) d.value = isoBase;
+                });
+
+                // 5) ยิง event ให้ทุกระบบคำนวณ/สรุป/แสตมป์หน่วยงาน
+                document.querySelectorAll('input, select, textarea').forEach(function (el) {
+                    if (inSkip(el) || el === btn) return;
+                    el.dispatchEvent(new Event('input', { bubbles: true }));
+                    el.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+                if (typeof calculateTransferDays === 'function') calculateTransferDays();
+
+                // 6) สถานะการวินิจฉัยแต่ละระบบ (กดปุ่มเรืองแสง)
+                document.querySelectorAll('.dx-summary').forEach(function (dx, i) {
+                    const btns = dx.querySelectorAll('.hai-btn');
+                    if (btns.length) btns[[1, 2, 3, 3][i % 4]].click();
+                });
+                if (window.__syncSummaries) window.__syncSummaries();
+                if (window.feather) feather.replace();
+
+                // toast
+                const t = document.createElement('div');
+                t.textContent = '✓ จำลองข้อมูลทดสอบครบทุกระบบแล้ว';
+                t.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:400;padding:10px 18px;border-radius:10px;font-weight:600;font-size:14px;color:#fff;background:#4f46e5;box-shadow:0 4px 14px rgba(0,0,0,.2)';
+                document.body.appendChild(t);
+                setTimeout(function () { t.style.transition = 'opacity .4s'; t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 400); }, 1900);
+            });
         })();
     </script>
 </body>
