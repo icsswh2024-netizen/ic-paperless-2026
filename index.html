@@ -1252,6 +1252,26 @@
         </div>
     </div>
 
+    <datalist id="wardList">
+        <option value="อายุรกรรมชาย"></option>
+        <option value="อายุรกรรมหญิง"></option>
+        <option value="ห้องผู้ป่วยหนัก med"></option>
+        <option value="สูติกรรม"></option>
+        <option value="NICU"></option>
+        <option value="กุมารเวชกรรม"></option>
+        <option value="ศัลยกรรมชาย"></option>
+        <option value="ศัลยกรรมหญิง"></option>
+        <option value="stroke unit"></option>
+        <option value="Cohort"></option>
+        <option value="พิเศษ 6/1"></option>
+        <option value="พิเศษ 6/2"></option>
+        <option value="พิเศษ 6/3"></option>
+        <option value="พิเศษ 6/4"></option>
+        <option value="พิเศษ 6/5"></option>
+        <option value="จิตต์โกศล"></option>
+        <option value="ห้องผู้ป่วยหนัก SX"></option>
+    </datalist>
+
     <script>
         // Initialize Feather Icons
         feather.replace();
@@ -1571,6 +1591,23 @@
             document.addEventListener('change', syncAll);
             window.__syncSummaries = syncAll;
             syncAll();
+        })();
+
+        // 0a3. ทำ dropdown (datalist) หอผู้ป่วย ทุกจุดที่มี
+        (function () {
+            function setWard(inp) { if (inp && inp.tagName === 'INPUT') { inp.setAttribute('list', 'wardList'); inp.autocomplete = 'off'; } }
+            // ช่องในส่วนหัวผู้ป่วย
+            setWard(document.querySelector('input[placeholder="ระบุหอผู้ป่วย"]'));
+            // หน่วยงานที่กำลัง Admit (input ถัดจากป้าย)
+            document.querySelectorAll('span').forEach(function (s) {
+                if ((s.textContent || '').indexOf('หน่วยงานที่กำลัง Admit') !== -1) {
+                    const i = s.parentElement && s.parentElement.querySelector('input[type="text"]'); setWard(i);
+                }
+            });
+            // dx-summary: หน่วยงาน / หอผู้ป่วย
+            document.querySelectorAll('.dx-unit').forEach(setWard);
+            // 1.3 รับย้ายจากตึก / ไปตึก (ทุก transfer-row รวมถึง template สำหรับโคลน)
+            document.querySelectorAll('.transfer-row input[type="text"]').forEach(setWard);
         })();
 
         // 0a. รายการ checkbox (อาการ/ผลตรวจ): 3 คอลัมน์ = ข้อความ | ครั้งที่/วันที่..ถึงวันที่.. (กลาง ซ้อนกัน) | เพิ่มสถานะ (ขวา)
