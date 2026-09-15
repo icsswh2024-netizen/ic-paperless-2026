@@ -1358,6 +1358,7 @@
             // (7) ตารางวินิจฉัย: แทนที่ของเดิมด้วยตารางสรุปที่ลิงก์ข้อมูล
             const dxTable = labsTab.querySelector('table');
             if (dxTable) {
+                dxTable.classList.add('no-rowedit');
                 dxTable.innerHTML =
                     '<thead><tr class="bg-red-100 text-gray-700">' +
                     '<th class="border border-red-200 p-2 text-left w-16">ลำดับ</th>' +
@@ -1408,7 +1409,7 @@
             devCard.className = 'bg-blue-50 rounded-xl shadow-sm border border-blue-200 p-5 mt-6';
             devCard.innerHTML =
                 '<h3 class="font-bold text-blue-800 text-sm mb-4">8. สรุปจำนวนวันใส่อุปกรณ์ต่าง ๆ</h3>' +
-                '<div class="overflow-x-auto"><table class="w-full text-sm border-collapse">' +
+                '<div class="overflow-x-auto"><table class="w-full text-sm border-collapse no-rowedit">' +
                 '<thead><tr class="bg-blue-100 text-gray-700">' +
                 '<th class="border border-blue-200 p-2 text-left w-16">ลำดับ</th>' +
                 '<th class="border border-blue-200 p-2 text-left">ระบบ / อุปกรณ์</th>' +
@@ -1636,6 +1637,7 @@
                    '<i data-feather="trash-2" class="w-4 h-4 inline"></i></button></td>';
         }
         document.querySelectorAll('.tab-content table').forEach(function(tbl) {
+            if (tbl.classList.contains('no-rowedit') || tbl.closest('.no-rowedit')) return; // ตารางสรุปอัตโนมัติ ไม่ต้องมีเพิ่มแถว/ลบ
             const wrap = tbl.closest('.overflow-x-auto') || tbl;
             // เพิ่มคอลัมน์หัวตารางสำหรับปุ่มลบ
             const headRow = tbl.querySelector('thead tr');
