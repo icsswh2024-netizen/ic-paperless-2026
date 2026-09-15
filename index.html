@@ -202,7 +202,7 @@
                 </div>
                 <div class="text-left sm:text-right flex items-center gap-2">
                     <span class="text-sm text-gray-500">หน่วยงานที่กำลัง Admit:</span>
-                    <input type="text" placeholder="ระบุหน่วยงาน" class="font-medium text-red-700 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 focus:outline-none focus:border-red-500 w-48 text-sm placeholder:text-red-300">
+                    <input type="text" id="global-unit" placeholder="ระบุหน่วยงาน" class="font-medium text-red-700 bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 focus:outline-none focus:border-red-500 w-48 text-sm placeholder:text-red-300">
                 </div>
             </div>
 
@@ -1167,10 +1167,10 @@
                                 <i data-feather="printer" class="w-4 h-4 text-gray-500"></i> พรีวิว & พิมพ์
                             </button>
 
-                            <button class="flex-1 sm:flex-none px-4 py-2 bg-white border border-red-500 text-red-600 font-bold rounded-xl hover:bg-red-50 transition-colors text-sm sm:text-base shadow-sm">
+                            <button id="btn-save-draft" type="button" class="flex-1 sm:flex-none px-4 py-2 bg-white border border-red-500 text-red-600 font-bold rounded-xl hover:bg-red-50 transition-colors text-sm sm:text-base shadow-sm">
                                 บันทึกแบบร่าง
                             </button>
-                            <button class="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-[#02b371] hover:bg-green-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors text-sm sm:text-base">
+                            <button id="btn-complete" type="button" class="flex-1 sm:flex-none px-4 sm:px-6 py-2 bg-[#02b371] hover:bg-green-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 shadow-sm transition-colors text-sm sm:text-base">
                                 <i data-feather="check-circle" class="w-4 h-4 sm:w-5 sm:h-5"></i> ประเมินเสร็จสิ้น
                             </button>
                         </div>
@@ -1206,23 +1206,8 @@
                 <button id="close-history-btn" class="text-gray-400 hover:text-gray-600 transition-colors"><i data-feather="x" class="w-5 h-5"></i></button>
             </div>
             <div class="p-4 flex flex-col gap-3 max-h-[60vh] overflow-y-auto">
-                <div class="text-sm text-gray-500 mb-2">ระบบจะตัดยอดจำนวนใบเฝ้าระวังแยกตามหน่วยงานทุกวันสิ้นเดือน</div>
-                
-                <div class="border border-blue-200 bg-blue-50 p-3 rounded-lg flex justify-between items-center cursor-pointer hover:bg-blue-100 transition-colors">
-                    <div>
-                        <div class="font-bold text-blue-800 text-sm">ICU อายุรกรรม</div>
-                        <div class="text-xs text-blue-600 mt-1 flex items-center gap-1"><i data-feather="calendar" class="w-3 h-3"></i> ประจำเดือน สิงหาคม 2569</div>
-                    </div>
-                    <span class="bg-blue-600 text-white text-xs px-2 py-1 rounded-md font-medium shadow-sm">จำนวน 1 ใบ (ปัจจุบัน)</span>
-                </div>
-                
-                <div class="border border-gray-200 p-3 rounded-lg flex justify-between items-center opacity-70 bg-gray-50">
-                    <div>
-                        <div class="font-bold text-gray-600 text-sm">ตึกอายุรกรรมหญิง</div>
-                        <div class="text-xs text-gray-500 mt-1 flex items-center gap-1"><i data-feather="calendar" class="w-3 h-3"></i> ประจำเดือน กรกฎาคม 2569</div>
-                    </div>
-                    <span class="bg-gray-200 text-gray-600 text-xs px-2 py-1 rounded-md font-medium">จำนวน 1 ใบ</span>
-                </div>
+                <div class="text-sm text-gray-500 mb-1">บันทึกการลงข้อมูลแต่ละครั้ง พร้อมหน่วยงานที่บันทึกและวันเวลา (เรียงล่าสุดก่อน)</div>
+                <div id="history-log" class="flex flex-col gap-2"></div>
             </div>
         </div>
     </div>
@@ -2122,8 +2107,58 @@
         const historyModal = document.getElementById('history-modal');
         const closeHistoryBtn = document.getElementById('close-history-btn');
 
+        // ===== ระบบบันทึก + สาวกลับได้ว่าลงข้อมูลจากหน่วยงานไหน =====
+        // ทุกครั้งที่กด "บันทึกแบบร่าง"/"ประเมินเสร็จสิ้น" จะเก็บ log {หน่วยงาน, การกระทำ, วันเวลา}
+        // ลง localStorage แยกตาม AN แล้วแสดงใน"ประวัติใบเฝ้าระวัง"
+        function iccAN() { return (document.querySelector('input[placeholder="ระบุ AN"]') || {}).value || '(ไม่ระบุ AN)'; }
+        function iccLogKey() { return 'iccLog:' + iccAN(); }
+        function iccLoadLog() { try { return JSON.parse(localStorage.getItem(iccLogKey()) || '[]'); } catch (e) { return []; } }
+        function iccSaveLog(arr) { try { localStorage.setItem(iccLogKey(), JSON.stringify(arr)); } catch (e) {} }
+        function iccToast(msg, ok) {
+            const t = document.createElement('div');
+            t.textContent = msg;
+            t.style.cssText = 'position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:200;padding:10px 18px;border-radius:10px;font-weight:600;font-size:14px;color:#fff;box-shadow:0 4px 14px rgba(0,0,0,.2);background:' + (ok ? '#16a34a' : '#dc2626');
+            document.body.appendChild(t);
+            setTimeout(function () { t.style.transition = 'opacity .4s'; t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 400); }, 1800);
+        }
+        function renderHistoryLog() {
+            const box = document.getElementById('history-log');
+            if (!box) return;
+            const log = iccLoadLog();
+            if (!log.length) { box.innerHTML = '<div class="text-sm text-gray-400 text-center py-4">— ยังไม่มีประวัติการบันทึก —</div>'; return; }
+            box.innerHTML = log.slice().reverse().map(function (e) {
+                const isDraft = e.action === 'แบบร่าง';
+                const c = isDraft ? { b: '#d97706', bg: '#fffbeb', bd: '#fde68a' } : { b: '#16a34a', bg: '#f0fdf4', bd: '#bbf7d0' };
+                return '<div class="p-3 rounded-lg border" style="border-color:' + c.bd + ';background:' + c.bg + '">' +
+                    '<div class="flex justify-between items-center gap-2">' +
+                    '<div class="font-bold text-sm" style="color:' + c.b + '">' + (e.unit || '(ไม่ระบุหน่วยงาน)') + '</div>' +
+                    '<span class="text-xs px-2 py-0.5 rounded-md font-medium" style="color:#fff;background:' + c.b + '">' + (isDraft ? 'บันทึกแบบร่าง' : 'ประเมินเสร็จสิ้น') + '</span></div>' +
+                    '<div class="text-xs text-gray-500 mt-1">' + e.when + '</div></div>';
+            }).join('');
+        }
+        function iccSaveRecord(action) {
+            const unit = (document.getElementById('global-unit') || {}).value || '';
+            if (!unit.trim()) {
+                iccToast('กรุณาระบุ "หน่วยงานที่กำลัง Admit" ก่อนบันทึก', false);
+                const gu = document.getElementById('global-unit'); if (gu) { gu.focus(); gu.style.borderColor = '#dc2626'; }
+                return;
+            }
+            const now = new Date();
+            const when = now.toLocaleDateString('th-TH', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.';
+            const log = iccLoadLog();
+            log.push({ unit: unit.trim(), action: action, when: when, ts: now.getTime() });
+            iccSaveLog(log);
+            renderHistoryLog();
+            iccToast('บันทึก' + (action === 'แบบร่าง' ? 'แบบร่าง' : 'เสร็จสิ้น') + 'โดยหน่วยงาน: ' + unit.trim(), true);
+        }
+        const btnSaveDraft = document.getElementById('btn-save-draft');
+        const btnComplete = document.getElementById('btn-complete');
+        if (btnSaveDraft) btnSaveDraft.addEventListener('click', function () { iccSaveRecord('แบบร่าง'); });
+        if (btnComplete) btnComplete.addEventListener('click', function () { iccSaveRecord('เสร็จสิ้น'); });
+
         if(historyBtn && historyModal && closeHistoryBtn) {
             historyBtn.addEventListener('click', () => {
+                renderHistoryLog();
                 historyModal.classList.remove('hidden');
                 historyModal.classList.add('flex');
             });
