@@ -1298,14 +1298,14 @@
                                     <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
-                                    <td class="border border-gray-200 p-1"><select class="mdr-main w-full focus:outline-none bg-transparent px-1"><option value=""></option><option>MDR</option><option>MDR ควบคุมพิเศษ</option></select><select class="mdr-sub w-full focus:outline-none bg-transparent px-1 mt-1 text-red-700" hidden><option value=""></option><option>VRE</option><option>CRE</option><option>XDR</option><option>PDR</option><option>VISA</option><option>VRSA</option></select></td>
+                                    <td class="border border-gray-200 p-1"><select class="mdr-main w-full focus:outline-none bg-transparent px-1"><option value=""></option><option>MDR</option><option>MDR ควบคุมพิเศษ</option></select><select class="mdr-sub w-full focus:outline-none bg-red-50 border border-red-300 rounded px-1 mt-1 text-red-700 font-medium" hidden><option value="">— เลือกชนิด —</option><option>VRE</option><option>CRE</option><option>XDR</option><option>PDR</option><option>VISA</option><option>VRSA</option></select></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
                                 </tr>
                                 <tr>
                                     <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
-                                    <td class="border border-gray-200 p-1"><select class="mdr-main w-full focus:outline-none bg-transparent px-1"><option value=""></option><option>MDR</option><option>MDR ควบคุมพิเศษ</option></select><select class="mdr-sub w-full focus:outline-none bg-transparent px-1 mt-1 text-red-700" hidden><option value=""></option><option>VRE</option><option>CRE</option><option>XDR</option><option>PDR</option><option>VISA</option><option>VRSA</option></select></td>
+                                    <td class="border border-gray-200 p-1"><select class="mdr-main w-full focus:outline-none bg-transparent px-1"><option value=""></option><option>MDR</option><option>MDR ควบคุมพิเศษ</option></select><select class="mdr-sub w-full focus:outline-none bg-red-50 border border-red-300 rounded px-1 mt-1 text-red-700 font-medium" hidden><option value="">— เลือกชนิด —</option><option>VRE</option><option>CRE</option><option>XDR</option><option>PDR</option><option>VISA</option><option>VRSA</option></select></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
                                 </tr>
                             </tbody>
@@ -1765,7 +1765,12 @@
                 if (sub) {
                     const special = e.target.value === 'MDR ควบคุมพิเศษ';
                     sub.hidden = !special;
-                    if (!special) sub.selectedIndex = 0;
+                    if (!special) { sub.selectedIndex = 0; }
+                    else {
+                        // เปิดดรอปดาวน์ย่อยทันที กันลืมคลิกต่อ
+                        sub.focus();
+                        try { if (typeof sub.showPicker === 'function') sub.showPicker(); } catch (err) {}
+                    }
                 }
             }
         });
