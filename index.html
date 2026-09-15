@@ -2049,14 +2049,20 @@
                 const container = document.getElementById('transfer-container');
                 const rows = container.querySelectorAll('.transfer-row');
                 const newIndex = rows.length + 1;
-                
+                const unit = (document.getElementById('global-unit') || {}).value || '';
+                // ต่อเนื่องตึก: "รับย้ายจากตึก" = "ไปตึก" ของครั้งก่อนหน้า
+                let prevTo = '';
+                if (rows.length) {
+                    const prevInputs = rows[rows.length - 1].querySelectorAll('input[type="text"]');
+                    if (prevInputs[1]) prevTo = prevInputs[1].value || '';
+                }
                 const newRow = document.createElement('div');
-                newRow.className = 'flex items-center gap-2 flex-wrap transfer-row hover:bg-gray-100 p-1 -ml-1 rounded transition-colors'; 
+                newRow.className = 'flex items-center gap-2 flex-wrap transfer-row hover:bg-gray-100 p-1 -ml-1 rounded transition-colors';
                 newRow.innerHTML = `
-                    <span class="font-medium text-gray-700 transfer-index">ครั้งที่ ${newIndex}</span> 
-                    รับย้ายจากตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1"> 
-                    วันที่ <input type="date" onchange="calculateTransferDays()" class="transfer-date border-b border-gray-400 bg-transparent focus:outline-none px-1"> 
-                    ไปตึก <input type="text" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1">
+                    <span class="font-medium text-gray-700 transfer-index">ครั้งที่ ${newIndex}</span>
+                    รับย้ายจากตึก <input type="text" list="wardList" autocomplete="off" value="${prevTo}" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1">
+                    วันที่ <input type="date" onchange="calculateTransferDays()" class="transfer-date border-b border-gray-400 bg-transparent focus:outline-none px-1">
+                    ไปตึก <input type="text" list="wardList" autocomplete="off" value="${unit}" class="border-b border-gray-400 bg-transparent focus:outline-none w-32 px-1">
                     <span class="ml-1 font-medium text-gray-700">รวมนอน <input type="number" class="transfer-days w-12 border-b border-gray-400 bg-transparent focus:outline-none text-center text-red-600 font-bold" readonly placeholder="-"> วัน</span>
                     <button type="button" class="delete-transfer-btn text-gray-400 hover:text-red-500 p-1 ml-auto shrink-0 transition-colors" title="ลบรายการ">
                         <i data-feather="trash-2" class="w-4 h-4"></i>
@@ -2066,6 +2072,20 @@
                 feather.replace();
             });
         }
+        // เติม "ไปตึก" ของครั้งแรกอัตโนมัติจากหน่วยงานที่กำลัง Admit (ถ้ายังว่าง)
+        (function () {
+            const gu = document.getElementById('global-unit');
+            if (!gu) return;
+            function fillFirstTo() {
+                const first = document.querySelector('.transfer-row');
+                if (!first) return;
+                const tos = first.querySelectorAll('input[type="text"]');
+                const toInput = tos[1];
+                if (toInput && !toInput.value.trim() && gu.value.trim()) toInput.value = gu.value.trim();
+            }
+            gu.addEventListener('input', fillFirstTo);
+            fillFirstTo();
+        })();
 
         // 2. Tab Switching Logic
         function switchTab(tabId) {
