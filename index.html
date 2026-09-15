@@ -71,6 +71,8 @@
         .pv-doc .minor-head { margin: 5px 0 2px !important; }
         .pv-doc h3 { margin: 8px 0 5px !important; }
         .pv-doc h3:first-child, .pv-doc > *:first-child { margin-top: 0 !important; }
+        .by-stamp::after { content: attr(data-by); color: #9ca3af; font-size: 10px; margin-left: 6px; white-space: nowrap; font-style: italic; }
+        .pv-doc .by-stamp::after { color: #6b7280; }
         .pv-foot { position: absolute; left: 40px; right: 40px; bottom: 16px; display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #6b7280; border-top: 1px solid #d1d5db; padding-top: 4px; }
 
         /* ปุ่มสถานะการวินิจฉัย (เรืองแสง) */
@@ -1799,6 +1801,7 @@
                 container.className = 'sd-clone flex items-start gap-1 mt-1';
                 const clone = unit.cloneNode(true);
                 delete clone.dataset.sdDone;
+                delete clone.dataset.by; clone.classList.remove('by-stamp');
                 clone.style.flex = '1 1 auto';
                 clone.style.minWidth = '0';
                 clone.querySelectorAll('input, textarea').forEach(function(i) {
@@ -1862,6 +1865,8 @@
                     if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
                     else i.value = '';
                 });
+                clone.removeAttribute('data-by'); clone.classList.remove('by-stamp');
+                clone.querySelectorAll('.by-stamp').forEach(function(x){ x.removeAttribute('data-by'); x.classList.remove('by-stamp'); });
                 container.appendChild(clone);
                 wgReindex(container);
                 feather.replace();
@@ -2141,6 +2146,19 @@
             document.body.appendChild(t);
             setTimeout(function () { t.style.transition = 'opacity .4s'; t.style.opacity = '0'; setTimeout(function () { t.remove(); }, 400); }, 1800);
         }
+        // ประทับ "หน่วยงานที่บันทึก" ต่อท้ายแต่ละแถวสถานะ ตอนที่กรอกข้อมูลครั้งแรก (สาวกลับได้ว่าตึกไหนลง)
+        function iccStampRow(row) {
+            if (!row || row.dataset.by) return;
+            const unit = (document.getElementById('global-unit') || {}).value || '';
+            if (!unit.trim()) return;
+            row.dataset.by = '· โดย ' + unit.trim();
+            row.classList.add('by-stamp');
+        }
+        document.addEventListener('change', function (e) {
+            const row = e.target.closest && e.target.closest('.dr-row, .cb-rrow, .wg-row, .transfer-row');
+            if (row) iccStampRow(row);
+        });
+
         function renderHistoryLog() {
             const box = document.getElementById('history-log');
             if (!box) return;
@@ -2233,6 +2251,7 @@
                     if (i.type === 'checkbox' || i.type === 'radio') i.checked = false;
                     else i.value = '';
                 });
+                clone.removeAttribute('data-by'); clone.classList.remove('by-stamp');
                 container.appendChild(clone);
                 drReindex(container);
                 feather.replace();
