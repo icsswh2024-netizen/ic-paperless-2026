@@ -1224,6 +1224,7 @@
                                     <th class="border border-gray-200 p-2 w-32">วัน เดือน ปี</th>
                                     <th class="border border-gray-200 p-2">ตัวอย่างที่ส่งตรวจ</th>
                                     <th class="border border-gray-200 p-2">ผล</th>
+                                    <th class="border border-gray-200 p-2 w-44">MDR</th>
                                     <th class="border border-gray-200 p-2">หมายเหตุ</th>
                                 </tr>
                             </thead>
@@ -1232,12 +1233,14 @@
                                     <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                    <td class="border border-gray-200 p-1"><select class="mdr-main w-full focus:outline-none bg-transparent px-1"><option value=""></option><option>MDR</option><option>MDR ควบคุมพิเศษ</option></select><select class="mdr-sub w-full focus:outline-none bg-transparent px-1 mt-1 text-red-700" hidden><option value=""></option><option>VRE</option><option>CRE</option><option>XDR</option><option>PDR</option><option>VISA</option><option>VRSA</option></select></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
                                 </tr>
                                 <tr>
                                     <td class="border border-gray-200 p-1"><input type="date" class="w-full focus:outline-none"></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
+                                    <td class="border border-gray-200 p-1"><select class="mdr-main w-full focus:outline-none bg-transparent px-1"><option value=""></option><option>MDR</option><option>MDR ควบคุมพิเศษ</option></select><select class="mdr-sub w-full focus:outline-none bg-transparent px-1 mt-1 text-red-700" hidden><option value=""></option><option>VRE</option><option>CRE</option><option>XDR</option><option>PDR</option><option>VISA</option><option>VRSA</option></select></td>
                                     <td class="border border-gray-200 p-1"><input type="text" class="w-full focus:outline-none px-1"></td>
                                 </tr>
                             </tbody>
@@ -1659,10 +1662,24 @@
                 const last = tbody.rows[tbody.rows.length - 1];
                 const clone = last.cloneNode(true);
                 clone.querySelectorAll('input').forEach(function(i) { i.value = ''; });
+                clone.querySelectorAll('select').forEach(function(s) { s.selectedIndex = 0; });
+                clone.querySelectorAll('.mdr-sub').forEach(function(s) { s.hidden = true; });
                 tbody.appendChild(clone);
                 feather.replace();
             });
             wrap.parentNode.insertBefore(btn, wrap.nextSibling);
+        });
+
+        // MDR: แสดง sub-dropdown (VRE/CRE/XDR/PDR/VISA/VRSA) เมื่อเลือก "MDR ควบคุมพิเศษ"
+        document.addEventListener('change', function(e) {
+            if (e.target.classList && e.target.classList.contains('mdr-main')) {
+                const sub = e.target.parentElement.querySelector('.mdr-sub');
+                if (sub) {
+                    const special = e.target.value === 'MDR ควบคุมพิเศษ';
+                    sub.hidden = !special;
+                    if (!special) sub.selectedIndex = 0;
+                }
+            }
         });
 
         // ลบแถวตาราง (เด้ง modal ยืนยัน, คงเหลืออย่างน้อย 1 แถว)
