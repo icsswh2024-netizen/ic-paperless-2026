@@ -1394,10 +1394,10 @@
                         mo = (dx.querySelector('.dx-month') || {}).value || '';
                         un = (dx.querySelector('.dx-unit') || {}).value || '';
                         const ab = dx.querySelector('.hai-btn.active');
-                        if (ab) { st = ab.getAttribute('data-v') || ''; stCls = ['hai-gray','hai-yellow','hai-green','hai-red'].find(function(c){return ab.classList.contains(c);}); }
+                        if (ab) { st = (ab.textContent || '').trim(); stCls = ['hai-gray','hai-yellow','hai-green','hai-red'].find(function(c){return ab.classList.contains(c);}); }
                     }
                     if (ci) tCI++; if (hai) tHAI++; if (no) tNo++;
-                    const stHtml = st ? '<span class="pv-filled" style="font-weight:700;color:' + (haiColor[stCls] || '#374151') + '">' + st + '</span>' : '';
+                    const stHtml = st ? '<span class="hai-btn ' + (stCls || 'hai-gray') + ' active pv-filled" style="display:inline-block">' + st + '</span>' : '';
                     rows += '<tr>' +
                         '<td class="border border-red-200 p-2">' + labTabNo[id] + '</td>' +
                         '<td class="border border-red-200 p-2 font-medium">' + sysName[id] + '</td>' +
