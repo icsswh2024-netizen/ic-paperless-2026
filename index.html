@@ -2285,10 +2285,59 @@
                 localStorage.setItem('iccRec:' + rec.an, JSON.stringify(rec));
             } catch (e) {}
         }
+        // ===== เงื่อนไข: ข้อมูลทั่วไป + สรุปผล ต้องกรอก + แถบความคืบหน้า + popup =====
+        function iccReqItems() {
+            const val = function (ph) { const e = document.querySelector('input[placeholder="' + ph + '"]'); return !!(e && e.value.trim()); };
+            const ta = document.querySelector('#tab-general textarea');
+            const gu = document.getElementById('global-unit'), gad = document.getElementById('global-admit-date');
+            return [
+                ['ชื่อ-สกุลผู้ป่วย', function () { return val('ระบุ ชื่อ-สกุลผู้ป่วย'); }],
+                ['HN', function () { return val('ระบุ HN'); }],
+                ['AN', function () { return val('ระบุ AN'); }],
+                ['หอผู้ป่วย', function () { return val('ระบุหอผู้ป่วย'); }],
+                ['หน่วยงานที่กำลัง Admit', function () { return !!(gu && gu.value.trim()); }],
+                ['วันที่ Admit', function () { return !!(gad && gad.value); }],
+                ['การวินิจฉัยแรกรับ (1.1)', function () { return !!(ta && ta.value.trim()); }],
+                ['สถานะรับเข้าแรกรับ (1.2)', function () { return !!document.querySelector('input[name="admit_status"]:checked'); }],
+                ['สรุปผลการวินิจฉัย (CI/HAI/NoHAI)', function () { return !!document.querySelector('.final-dx:checked'); }]
+            ];
+        }
+        function iccMissing() { return iccReqItems().filter(function (x) { return !x[1](); }).map(function (x) { return x[0]; }); }
+        function iccUpdateProgress() {
+            const items = iccReqItems(), done = items.filter(function (x) { return x[1](); }).length, total = items.length;
+            const pct = Math.round(done / total * 100);
+            const bar = document.getElementById('progress-bar'), txt = document.getElementById('progress-text');
+            if (bar) { bar.style.width = pct + '%'; bar.className = 'h-full rounded-full transition-all duration-500 ' + (done === total ? 'bg-green-500' : 'bg-amber-500'); }
+            if (txt) { txt.textContent = 'กรอกแล้ว ' + done + '/' + total + ' (เหลือ ' + (total - done) + ')'; }
+        }
+        function iccRequirePopup(missing, onProceed) {
+            const ov = document.createElement('div');
+            ov.style.cssText = 'position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px)';
+            ov.innerHTML = '<div style="background:#fff;border-radius:16px;max-width:420px;width:90%;padding:22px;box-shadow:0 12px 40px rgba(0,0,0,.25);font-family:\'Sarabun\',sans-serif">' +
+                '<div style="text-align:center;font-size:40px;line-height:1">📋</div>' +
+                '<div style="font-weight:700;color:#b45309;font-size:16px;margin:8px 0 6px;text-align:center">ยังกรอกข้อมูลไม่ครบ (เหลือ ' + missing.length + ' รายการ)</div>' +
+                '<ul style="font-size:14px;color:#374151;line-height:1.7;margin:0 0 14px;padding-left:20px;list-style:disc">' + missing.map(function (m) { return '<li>' + m + '</li>'; }).join('') + '</ul>' +
+                '<div style="display:flex;gap:8px">' +
+                '<button id="icc-req-close" style="flex:1;padding:9px;border:none;border-radius:10px;background:#02b371;color:#fff;font-weight:700;cursor:pointer;font-family:inherit">กรอกให้ครบ</button>' +
+                '<button id="icc-req-force" style="flex:1;padding:9px;border:1px solid #d1d5db;border-radius:10px;background:#fff;color:#6b7280;font-weight:600;cursor:pointer;font-family:inherit">บันทึกทั้งที่ยังไม่ครบ</button>' +
+                '</div></div>';
+            document.body.appendChild(ov);
+            ov.querySelector('#icc-req-close').addEventListener('click', function () { ov.remove(); });
+            ov.querySelector('#icc-req-force').addEventListener('click', function () { ov.remove(); if (onProceed) onProceed(); });
+            ov.addEventListener('click', function (e) { if (e.target === ov) ov.remove(); });
+        }
+        document.addEventListener('input', iccUpdateProgress);
+        document.addEventListener('change', iccUpdateProgress);
+        iccUpdateProgress();
+
         const btnSaveDraft = document.getElementById('btn-save-draft');
         const btnComplete = document.getElementById('btn-complete');
         if (btnSaveDraft) btnSaveDraft.addEventListener('click', function () { iccSaveRecord('แบบร่าง'); });
-        if (btnComplete) btnComplete.addEventListener('click', function () { iccSaveRecord('เสร็จสิ้น'); });
+        if (btnComplete) btnComplete.addEventListener('click', function () {
+            const miss = iccMissing();
+            if (miss.length) { iccRequirePopup(miss, function () { iccSaveRecord('เสร็จสิ้น'); }); return; }
+            iccSaveRecord('เสร็จสิ้น');
+        });
 
         // ===== รายงานการเฝ้าระวังภาพรวม =====
         (function () {
