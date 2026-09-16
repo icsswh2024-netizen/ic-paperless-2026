@@ -2498,6 +2498,69 @@
                 h += '</div>';
                 return h;
             }
+            // ---- เทียบจำนวนจริง vs ใบเฝ้าระวัง ----
+            let cmpGran = 'month', cmpScope = 'hosp';
+            function beDate(ts) { if (!ts) return null; const d = new Date(ts); return isNaN(d) ? null : d; }
+            function periodKey(d, gran) {
+                if (!d) return 'ไม่ระบุ';
+                const y = d.getFullYear() + 543, m = ('0' + (d.getMonth() + 1)).slice(-2), day = ('0' + d.getDate()).slice(-2);
+                if (gran === 'day') return y + '-' + m + '-' + day;
+                if (gran === 'year') return '' + y;
+                return y + '-' + m;
+            }
+            function getActual(k) { try { const v = localStorage.getItem('iccActual:' + k); return v == null ? '' : v; } catch (e) { return ''; } }
+            function compareSection(recs) {
+                const color = '#0369a1';
+                const groups = {}; // key -> {admit, transfer, discharge, unit, period}
+                recs.forEach(function (r) {
+                    const pk = periodKey(beDate(r.ts), cmpGran);
+                    const unit = r.admitUnit || 'ไม่ระบุหน่วย';
+                    const gk = cmpScope === 'unit' ? pk + '||' + unit : pk;
+                    if (!groups[gk]) groups[gk] = { admit: 0, transfer: 0, discharge: 0, unit: cmpScope === 'unit' ? unit : '', period: pk };
+                    groups[gk].admit++;
+                    if ((r.transfers || []).length > 0) groups[gk].transfer++;
+                    if (r.discharged) groups[gk].discharge++;
+                });
+                const keys = Object.keys(groups).sort();
+                const btn = function (label, attr, val, cur) {
+                    return '<button type="button" class="cmp-ctrl" data-' + attr + '="' + val + '" style="font-size:12px;font-weight:700;padding:4px 12px;border-radius:9999px;border:1.5px solid ' + color + '55;cursor:pointer;background:' + (cur === val ? color : '#fff') + ';color:' + (cur === val ? '#fff' : color) + '">' + label + '</button>';
+                };
+                let h = '<div style="border:1px solid ' + color + '33;border-radius:12px;padding:14px;margin-bottom:16px;background:' + color + '08">' +
+                    '<h4 style="font-weight:700;color:' + color + ';margin-bottom:10px;font-size:15px">🔍 เทียบจำนวนจริง กับ ใบเฝ้าระวัง</h4>' +
+                    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:6px"><span style="font-size:12px;color:#4b5563;align-self:center;margin-right:4px">ช่วงเวลา:</span>' +
+                    btn('รายวัน', 'gran', 'day', cmpGran) + btn('รายเดือน', 'gran', 'month', cmpGran) + btn('รายปี', 'gran', 'year', cmpGran) + '</div>' +
+                    '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"><span style="font-size:12px;color:#4b5563;align-self:center;margin-right:4px">มุมมอง:</span>' +
+                    btn('ทั้งโรงพยาบาล', 'scope', 'hosp', cmpScope) + btn('แยกหน่วย', 'scope', 'unit', cmpScope) + '</div>' +
+                    '<div style="font-size:11.5px;color:#6b7280;margin-bottom:8px">กรอก “จริง” = ยอดจริงจากหอผู้ป่วย, “ใบ” = นับจากใบเฝ้าระวัง, “%” = ความครอบคลุม (ใบ ÷ จริง)</div>';
+                if (!keys.length) { h += '<div style="font-size:12px;color:#9ca3af">— ยังไม่มีข้อมูล —</div></div>'; return h; }
+                const bd = '1px solid ' + color + '30', pd = 'padding:5px 7px;border:' + bd, ctr = pd + ';text-align:center';
+                h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
+                    '<thead><tr style="background:' + color + '15;color:#374151">' +
+                    '<th style="' + pd + ';text-align:left">' + (cmpScope === 'unit' ? 'ช่วงเวลา / หน่วย' : 'ช่วงเวลา') + '</th>' +
+                    '<th style="' + ctr + '" colspan="3">Admit</th>' +
+                    '<th style="' + ctr + '" colspan="3">ย้าย</th>' +
+                    '<th style="' + ctr + '" colspan="3">จำหน่าย</th></tr>' +
+                    '<tr style="background:' + color + '10;color:#6b7280;font-size:11px">' +
+                    '<th style="' + pd + '"></th>' +
+                    ['จริง', 'ใบ', '%', 'จริง', 'ใบ', '%', 'จริง', 'ใบ', '%'].map(function (x) { return '<th style="' + ctr + '">' + x + '</th>'; }).join('') +
+                    '</tr></thead><tbody>';
+                const cell = function (gk, metric, formN) {
+                    const ak = cmpGran + ':' + cmpScope + ':' + gk + ':' + metric;
+                    const av = getActual(ak);
+                    const pct = (av && parseFloat(av) > 0) ? Math.round(formN / parseFloat(av) * 100) + '%' : '—';
+                    return '<td style="' + ctr + '"><input type="number" min="0" class="cmp-actual" data-ak="' + ak + '" data-form="' + formN + '" value="' + av + '" style="width:48px;text-align:center;border:1px solid ' + color + '40;border-radius:6px;padding:1px 2px;font-size:12px"></td>' +
+                        '<td style="' + ctr + ';font-weight:700">' + formN + '</td>' +
+                        '<td style="' + ctr + ';color:' + color + ';font-weight:700" class="cmp-pct">' + pct + '</td>';
+                };
+                keys.forEach(function (gk) {
+                    const g = groups[gk];
+                    const rowLabel = cmpScope === 'unit' ? (g.period + ' / ' + g.unit) : g.period;
+                    h += '<tr><td style="' + pd + '">' + rowLabel + '</td>' +
+                        cell(gk, 'admit', g.admit) + cell(gk, 'transfer', g.transfer) + cell(gk, 'discharge', g.discharge) + '</tr>';
+                });
+                h += '</tbody></table></div></div>';
+                return h;
+            }
             function render() {
                 const recs = loadRecords();
                 const admitRecs = recs;                                   // ทุกใบ = 1 admit
@@ -2508,11 +2571,27 @@
                     html += '<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">ยังไม่มีใบเฝ้าระวังที่บันทึก — แสดงเป็นโครงร่างหัวข้อไว้ก่อน ตัวเลขจะอัปเดตเมื่อกด "บันทึกแบบร่าง/ประเมินเสร็จสิ้น"</div>';
                 }
                 html += cumulativeSection(recs);
+                html += compareSection(recs);
                 html += section('1. รายงานการ Admit', '#0d9488', admitRecs, function (r) { return [r.admitUnit]; });
                 html += section('2. รายงานการย้าย', '#2563eb', transferRecs, function (r) { return r.transfers; });
                 html += section('3. รายงานการจำหน่าย', '#7c3aed', dischargeRecs, function (r) { return [r.admitUnit]; });
                 body.innerHTML = html;
             }
+            body.addEventListener('click', function (e) {
+                const c = e.target.closest ? e.target.closest('.cmp-ctrl') : null;
+                if (!c) return;
+                if (c.dataset.gran) cmpGran = c.dataset.gran;
+                if (c.dataset.scope) cmpScope = c.dataset.scope;
+                render();
+            });
+            body.addEventListener('input', function (e) {
+                const inp = e.target.closest ? e.target.closest('.cmp-actual') : null;
+                if (!inp) return;
+                try { localStorage.setItem('iccActual:' + inp.dataset.ak, inp.value); } catch (err) {}
+                const form = parseFloat(inp.dataset.form) || 0, act = parseFloat(inp.value) || 0;
+                const row = inp.closest('td'); const pctCell = row && row.nextElementSibling && row.nextElementSibling.nextElementSibling;
+                if (pctCell && pctCell.classList.contains('cmp-pct')) pctCell.textContent = act > 0 ? Math.round(form / act * 100) + '%' : '—';
+            });
             btn.addEventListener('click', function () { if (window.__syncSummaries) window.__syncSummaries(); render(); modal.classList.remove('hidden'); modal.classList.add('flex'); if (window.feather) feather.replace(); });
             closeBtn.addEventListener('click', function () { modal.classList.add('hidden'); modal.classList.remove('flex'); });
             modal.addEventListener('click', function (e) { if (e.target === modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); } });
