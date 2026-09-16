@@ -1643,7 +1643,7 @@
                 if (!v1 || !v2) return null;
                 const a = new Date(v1), b = new Date(v2);
                 const d = Math.round((b - a) / 86400000);
-                return d >= 0 ? d : null;
+                return d >= 0 ? d + 1 : null; // นับรวมวันตัวเอง
             }
             function fmtD(v) {
                 if (!v) return '?';
@@ -1765,7 +1765,7 @@
             if (ds.length >= 2 && ds[0].value && ds[1].value) {
                 const a = new Date(ds[0].value), b = new Date(ds[1].value);
                 const d = Math.round((b - a) / 86400000);
-                n.textContent = d >= 0 ? d : '-';
+                n.textContent = d >= 0 ? d + 1 : '-'; // นับรวมวันตัวเอง
             } else {
                 n.textContent = '-';
             }
@@ -2090,7 +2090,7 @@
                     if (previousDate) {
                         const diffTime = Math.abs(currentDate - previousDate);
                         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                        daysInput.value = diffDays;
+                        daysInput.value = diffDays + 1; // นับรวมวันตัวเอง
                     }
                     
                     previousDate = currentDate; 
@@ -2676,7 +2676,7 @@
                 const a = new Date(start.value); a.setHours(0,0,0,0);
                 const b = new Date(end.value); b.setHours(0,0,0,0);
                 const diff = Math.round((b - a) / (1000 * 60 * 60 * 24));
-                days.value = diff >= 0 ? diff : '';
+                days.value = diff >= 0 ? diff + 1 : ''; // นับรวมวันตัวเอง
             } else {
                 days.value = '';
             }
