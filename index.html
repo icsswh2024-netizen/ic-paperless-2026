@@ -1495,12 +1495,18 @@
                     '<td class="border border-amber-300 p-2 text-xs text-amber-700" colspan="3">ต้องเลือกก่อน "ย้าย" หรือ "จำหน่าย" ทุกครั้ง</td></tr></tfoot>';
             }
             const dxBody = document.getElementById('dxSumBody');
+            const dxStBtns = [
+                { v: 'ไม่ติดเชื้อ', c: 'hai-gray', t: 'ไม่ติดเชื้อ' },
+                { v: 'สงสัยการติดเชื้อใน รพ.', c: 'hai-yellow', t: 'สงสัยติดเชื้อใน รพ.' },
+                { v: 'รายงาน ICN', c: 'hai-green', t: 'รายงาน ICN' },
+                { v: 'ยืนยันการติดเชื้อในโรงพยาบาล', c: 'hai-red', t: 'ยืนยันติดเชื้อใน รพ.' }
+            ];
             function syncDx() {
                 if (!dxBody) return;
                 let rows = '', tCI = 0, tHAI = 0, tNo = 0;
                 ids.forEach(function (id) {
                     const dx = document.querySelector('.dx-summary[data-sys="' + id + '"]');
-                    let ci = false, hai = false, no = false, mo = '', un = '', st = '', stCls = '';
+                    let ci = false, hai = false, no = false, mo = '', un = '', stV = '';
                     if (dx) {
                         ci = !!(dx.querySelector('.dx-ci') || {}).checked;
                         hai = !!(dx.querySelector('.dx-hai') || {}).checked;
@@ -1508,10 +1514,13 @@
                         mo = (dx.querySelector('.dx-month') || {}).value || '';
                         un = (dx.querySelector('.dx-unit') || {}).value || '';
                         const ab = dx.querySelector('.hai-btn.active');
-                        if (ab) { st = (ab.textContent || '').trim(); stCls = ['hai-gray','hai-yellow','hai-green','hai-red'].find(function(c){return ab.classList.contains(c);}); }
+                        if (ab) { stV = ab.getAttribute('data-v') || ''; }
                     }
                     if (ci) tCI++; if (hai) tHAI++; if (no) tNo++;
-                    const stHtml = st ? '<span class="hai-btn ' + (stCls || 'hai-gray') + ' active pv-filled" style="display:inline-block">' + st + '</span>' : '';
+                    const stHtml = '<div class="flex flex-wrap items-center gap-2">' + dxStBtns.map(function (b) {
+                        const on = stV === b.v;
+                        return '<button type="button" class="dxsum-st hai-btn ' + b.c + (on ? ' active pv-filled' : '') + '" data-sys="' + id + '" data-v="' + b.v + '">' + b.t + '</button>';
+                    }).join('') + '</div>';
                     rows += '<tr>' +
                         '<td class="border border-red-200 p-2">' + labTabNo[id] + '</td>' +
                         '<td class="border border-red-200 p-2 font-medium">' + sysName[id] + '</td>' +
@@ -1542,6 +1551,17 @@
                         const sel = { ci: '.dx-ci', hai: '.dx-hai', nohai: '.dx-nohai' }[cb.dataset.k];
                         const src = dx.querySelector(sel);
                         if (src) src.checked = cb.checked;
+                    }
+                    if (window.__syncSummaries) window.__syncSummaries();
+                });
+                // คลิกปุ่มสถานะในตารางสรุป (7) เพื่อกำหนดสถานะของระบบนั้นโดยตรง (สองทาง)
+                dxBody.addEventListener('click', function (e) {
+                    const b = e.target.closest ? e.target.closest('.dxsum-st') : null;
+                    if (!b) return;
+                    const dx = document.querySelector('.dx-summary[data-sys="' + b.dataset.sys + '"]');
+                    if (dx) {
+                        const src = dx.querySelector('.hai-btn[data-v="' + b.dataset.v + '"]');
+                        if (src) { src.click(); return; } // ใช้ logic ปุ่มเดิม (toggle + sync)
                     }
                     if (window.__syncSummaries) window.__syncSummaries();
                 });
