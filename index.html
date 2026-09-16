@@ -2403,7 +2403,7 @@
                 const admitRecs = recs;                                   // ทุกใบ = 1 admit
                 const transferRecs = recs.filter(function (r) { return (r.transfers || []).length > 0; });
                 const dischargeRecs = recs.filter(function (r) { return r.discharged; });
-                let html = '<div class="text-xs text-gray-500 mb-3">รายงานจากใบเฝ้าระวังที่บันทึกในเครื่องนี้ ทั้งหมด <b>' + recs.length + '</b> ราย (localStorage)</div>';
+                let html = '<div class="text-xs text-gray-500 mb-3">รายงานภาพรวมจากใบเฝ้าระวังที่บันทึกไว้ทั้งระบบ ทั้งหมด <b>' + recs.length + '</b> ราย</div>';
                 if (!recs.length) {
                     html += '<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">ยังไม่มีใบเฝ้าระวังที่บันทึก — แสดงเป็นโครงร่างหัวข้อไว้ก่อน ตัวเลขจะอัปเดตเมื่อกด "บันทึกแบบร่าง/ประเมินเสร็จสิ้น"</div>';
                 }
