@@ -2437,6 +2437,48 @@
                 h += '</div>';
                 return h;
             }
+            function cumulativeSection(recs) {
+                const color = '#b45309';
+                let ci = 0, hai = 0, no = 0; const byMonth = {};
+                recs.forEach(function (r) {
+                    if (r.ci) ci++; if (r.hai) hai++; if (r.nohai) no++;
+                    let mk = 'ไม่ระบุเดือน';
+                    if (r.ts) { const d = new Date(r.ts); if (!isNaN(d)) mk = (d.getFullYear() + 543) + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
+                    if (!byMonth[mk]) byMonth[mk] = { n: 0, ci: 0, hai: 0, no: 0 };
+                    byMonth[mk].n++; if (r.ci) byMonth[mk].ci++; if (r.hai) byMonth[mk].hai++; if (r.nohai) byMonth[mk].no++;
+                });
+                const rate = recs.length ? (hai / recs.length * 100).toFixed(1) : '0.0';
+                let h = '<div style="border:1px solid ' + color + '33;border-radius:12px;padding:14px;margin-bottom:16px;background:' + color + '08">' +
+                    '<h4 style="font-weight:700;color:' + color + ';margin-bottom:10px;font-size:15px">📊 รายงานการเฝ้าระวังสะสม (ทั้งระบบ)</h4>' +
+                    '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">' +
+                    tile('ใบเฝ้าระวังสะสม (ราย)', recs.length, color) +
+                    tile('CI สะสม', ci, '#6b7280') +
+                    tile('HAI สะสม', hai, '#dc2626') +
+                    tile('NoHAI สะสม', no, '#0d9488') +
+                    tile('อัตรา HAI (%)', rate, '#b45309') + '</div>';
+                const months = Object.keys(byMonth).sort();
+                h += '<div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:6px">สรุปรายเดือน</div>';
+                if (months.length) {
+                    h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">' +
+                        '<thead><tr style="background:' + color + '15;color:#374151">' +
+                        '<th style="border:1px solid ' + color + '30;padding:5px 8px;text-align:left">เดือน (พ.ศ.)</th>' +
+                        '<th style="border:1px solid ' + color + '30;padding:5px 8px">จำนวน</th>' +
+                        '<th style="border:1px solid ' + color + '30;padding:5px 8px">CI</th>' +
+                        '<th style="border:1px solid ' + color + '30;padding:5px 8px">HAI</th>' +
+                        '<th style="border:1px solid ' + color + '30;padding:5px 8px">NoHAI</th></tr></thead><tbody>' +
+                        months.map(function (m) { const v = byMonth[m]; return '<tr>' +
+                            '<td style="border:1px solid ' + color + '30;padding:5px 8px">' + m + '</td>' +
+                            '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center">' + v.n + '</td>' +
+                            '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center">' + v.ci + '</td>' +
+                            '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center;color:#dc2626;font-weight:700">' + v.hai + '</td>' +
+                            '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center">' + v.no + '</td></tr>'; }).join('') +
+                        '</tbody></table></div>';
+                } else {
+                    h += '<div style="font-size:12px;color:#9ca3af">—</div>';
+                }
+                h += '</div>';
+                return h;
+            }
             function render() {
                 const recs = loadRecords();
                 const admitRecs = recs;                                   // ทุกใบ = 1 admit
@@ -2446,6 +2488,7 @@
                 if (!recs.length) {
                     html += '<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">ยังไม่มีใบเฝ้าระวังที่บันทึก — แสดงเป็นโครงร่างหัวข้อไว้ก่อน ตัวเลขจะอัปเดตเมื่อกด "บันทึกแบบร่าง/ประเมินเสร็จสิ้น"</div>';
                 }
+                html += cumulativeSection(recs);
                 html += section('1. รายงานการ Admit', '#0d9488', admitRecs, function (r) { return [r.admitUnit]; });
                 html += section('2. รายงานการย้าย', '#2563eb', transferRecs, function (r) { return r.transfers; });
                 html += section('3. รายงานการจำหน่าย', '#7c3aed', dischargeRecs, function (r) { return [r.admitUnit]; });
