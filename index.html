@@ -2369,6 +2369,24 @@
         }
         function iccReqItems() { return iccGeneralItems().concat(iccSummaryItems()); }
         function iccMissing() { return iccReqItems().filter(function (x) { return !x[1](); }).map(function (x) { return x[0]; }); }
+        // เงื่อนไขตามการกระทำ: Admit / ย้าย / จำหน่าย (ข้อ 1.1–1.5 = index 0–4)
+        function iccCurrentAction() {
+            if (document.querySelector('input[name="dc_status"]:checked')) return 'discharge';
+            const tc = document.getElementById('transfer-container');
+            const hasTf = tc && Array.prototype.some.call(tc.querySelectorAll('input[type="text"], input[type="date"]'), function (e) { return (e.value || '').trim(); });
+            if (hasTf) return 'transfer';
+            return 'admit';
+        }
+        function iccMissingFor(action) {
+            const g = iccGeneralItems(), s = iccSummaryItems();
+            let genIdx;
+            if (action === 'admit') genIdx = [0, 1, 4];          // 1.1, 1.2, 1.5 (ยกเว้น 1.3, 1.4)
+            else if (action === 'transfer') genIdx = [2];         // 1.3 (ใช้ของเดิม 1.1,1.2,1.4,1.5)
+            else genIdx = [0, 1, 2, 3, 4];                        // จำหน่าย: ครบทุกข้อ
+            const items = genIdx.map(function (i) { return g[i]; });
+            if (action !== 'admit') items.push.apply(items, s);   // ย้าย/จำหน่าย ต้องสรุปผลด้วย
+            return items.filter(function (x) { return !x[1](); }).map(function (x) { return x[0]; });
+        }
         function iccSetGroup(prefix, items) {
             const done = items.filter(function (x) { return x[1](); }).length, total = items.length;
             const badge = document.getElementById(prefix + '-badge');
@@ -2407,7 +2425,7 @@
         const btnComplete = document.getElementById('btn-complete');
         if (btnSaveDraft) btnSaveDraft.addEventListener('click', function () { iccSaveRecord('แบบร่าง'); });
         if (btnComplete) btnComplete.addEventListener('click', function () {
-            const miss = iccMissing();
+            const miss = iccMissingFor(iccCurrentAction());
             if (miss.length) { iccRequirePopup(miss, function () { iccSaveRecord('เสร็จสิ้น'); }); return; }
             iccSaveRecord('เสร็จสิ้น');
         });
