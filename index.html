@@ -1430,7 +1430,8 @@
                 '<td class="border border-red-200 p-1"><div class="flex flex-wrap items-center gap-3">' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-ci w-4 h-4 rounded border-gray-300"> CI</label>' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-hai w-4 h-4 rounded border-gray-300"> HAI</label>' +
-                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-nohai w-4 h-4 rounded border-gray-300"> NoHAI</label></div></td>' +
+                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-nohai w-4 h-4 rounded border-gray-300"> NoHAI</label>' +
+                '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-mdr w-4 h-4 rounded border-gray-300"> MDR</label></div></td>' +
                 '<td class="border border-red-200 p-1"><input type="month" class="dx-month w-full bg-transparent focus:outline-none px-1"></td>' +
                 '<td class="border border-red-200 p-1"><input type="text" class="dx-unit w-full bg-transparent focus:outline-none px-1"></td>' +
                 '<td class="border border-red-200 p-1 dx-status-cell"><div class="hai-group flex flex-wrap items-center gap-2">' +
@@ -1492,6 +1493,7 @@
                     '<th class="border border-red-200 p-2 text-center w-14">CI</th>' +
                     '<th class="border border-red-200 p-2 text-center w-14">HAI</th>' +
                     '<th class="border border-red-200 p-2 text-center w-16">NoHAI</th>' +
+                    '<th class="border border-red-200 p-2 text-center w-14">MDR</th>' +
                     '<th class="border border-red-200 p-2 text-left w-32">เดือนที่พบ</th>' +
                     '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th>' +
                     '<th class="border border-red-200 p-2 text-left w-40">สถานะ</th>' +
@@ -1501,6 +1503,7 @@
                     '<td class="border border-red-200 p-2 text-center" id="dxTotCI">0</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotHAI">0</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotNoHAI">0</td>' +
+                    '<td class="border border-red-200 p-2 text-center" id="dxTotMDR">0</td>' +
                     '<td class="border border-red-200 p-2" colspan="4"></td></tr></tfoot>';
             }
             const dxBody = document.getElementById('dxSumBody');
@@ -1515,14 +1518,15 @@
             ];
             function syncDx() {
                 if (!dxBody) return;
-                let rows = '', tCI = 0, tHAI = 0, tNo = 0;
+                let rows = '', tCI = 0, tHAI = 0, tNo = 0, tMDR = 0;
                 ids.forEach(function (id) {
                     const dx = document.querySelector('.dx-summary[data-sys="' + id + '"]');
-                    let ci = false, hai = false, no = false, mo = '', un = '', stV = '', icnV = '';
+                    let ci = false, hai = false, no = false, mdr = false, mo = '', un = '', stV = '', icnV = '';
                     if (dx) {
                         ci = !!(dx.querySelector('.dx-ci') || {}).checked;
                         hai = !!(dx.querySelector('.dx-hai') || {}).checked;
                         no = !!(dx.querySelector('.dx-nohai') || {}).checked;
+                        mdr = !!(dx.querySelector('.dx-mdr') || {}).checked;
                         mo = (dx.querySelector('.dx-month') || {}).value || '';
                         un = (dx.querySelector('.dx-unit') || {}).value || '';
                         const ab = dx.querySelector('.dx-status-cell .hai-btn.active');
@@ -1530,7 +1534,7 @@
                         const ic = dx.querySelector('.dx-icn-cell .icn-btn.active');
                         if (ic) { icnV = ic.getAttribute('data-v') || ''; }
                     }
-                    if (ci) tCI++; if (hai) tHAI++; if (no) tNo++;
+                    if (ci) tCI++; if (hai) tHAI++; if (no) tNo++; if (mdr) tMDR++;
                     const stHtml = '<div class="flex flex-wrap items-center gap-2">' + dxStBtns.map(function (b) {
                         const on = stV === b.v;
                         return '<button type="button" class="dxsum-st hai-btn ' + b.c + (on ? ' active pv-filled' : '') + '" data-sys="' + id + '" data-v="' + b.v + '">' + b.t + '</button>';
@@ -1545,6 +1549,7 @@
                         '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="ci"' + (ci ? ' checked' : '') + '></td>' +
                         '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="hai"' + (hai ? ' checked' : '') + '></td>' +
                         '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="nohai"' + (no ? ' checked' : '') + '></td>' +
+                        '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="mdr"' + (mdr ? ' checked' : '') + '></td>' +
                         '<td class="border border-red-200 p-1"><input type="month" class="dxsum-fld w-full bg-transparent focus:outline-none px-1" data-sys="' + id + '" data-f="month" value="' + mo + '"></td>' +
                         '<td class="border border-red-200 p-1"><input type="text" class="dxsum-fld w-full bg-transparent focus:outline-none px-1" data-sys="' + id + '" data-f="unit" value="' + un.replace(/"/g, '&quot;') + '"></td>' +
                         '<td class="border border-red-200 p-2">' + stHtml + '</td>' +
@@ -1552,8 +1557,8 @@
                 });
                 dxBody.innerHTML = rows;
                 const set = function (i, v) { const e = document.getElementById(i); if (e) e.textContent = v; };
-                set('dxTotCI', tCI); set('dxTotHAI', tHAI); set('dxTotNoHAI', tNo);
-                window.__dxTotals = { ci: tCI, hai: tHAI, nohai: tNo };
+                set('dxTotCI', tCI); set('dxTotHAI', tHAI); set('dxTotNoHAI', tNo); set('dxTotMDR', tMDR);
+                window.__dxTotals = { ci: tCI, hai: tHAI, nohai: tNo, mdr: tMDR };
             }
 
             // คลิกเช็คบล๊อกในตารางสรุป (7) เพื่อกำหนดผลวินิจฉัยของระบบนั้นโดยตรง (สองทาง)
@@ -1563,7 +1568,7 @@
                     if (cb) {
                         const dx = document.querySelector('.dx-summary[data-sys="' + cb.dataset.sys + '"]');
                         if (dx) {
-                            const sel = { ci: '.dx-ci', hai: '.dx-hai', nohai: '.dx-nohai' }[cb.dataset.k];
+                            const sel = { ci: '.dx-ci', hai: '.dx-hai', nohai: '.dx-nohai', mdr: '.dx-mdr' }[cb.dataset.k];
                             const src = dx.querySelector(sel);
                             if (src) src.checked = cb.checked;
                         }
