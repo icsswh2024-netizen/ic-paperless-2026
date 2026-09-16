@@ -1152,16 +1152,6 @@
                     <div id="tab-labs" class="tab-content hidden flex-1 flex flex-col lg:h-full lg:overflow-y-auto p-6 bg-gray-50">
                         <h3 class="font-bold text-gray-800 text-lg border-b pb-2 mb-4">สรุปผล</h3>
 
-                        <div class="bg-amber-50 rounded-xl shadow-sm border border-amber-300 p-5 mb-4">
-                            <h3 class="font-bold text-amber-800 text-sm mb-3">สรุปผลการวินิจฉัย (ภาพรวมทั้งใบ) <span class="text-red-600">*จำเป็น</span></h3>
-                            <div class="flex flex-wrap items-center gap-6 text-sm">
-                                <label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"> CI</label>
-                                <label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"> HAI</label>
-                                <label class="flex items-center gap-2 cursor-pointer font-medium"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"> NoHAI</label>
-                            </div>
-                            <div class="text-xs text-amber-700 mt-2">ต้องเลือกก่อน "ย้าย" หรือ "จำหน่าย" ผู้ป่วยทุกครั้ง</div>
-                        </div>
-
                         <div class="bg-red-50 rounded-xl shadow-sm border border-red-200 p-5 mt-auto">
                             <h3 class="font-bold text-red-800 text-sm mb-4">7. การวินิจฉัยโรคติดเชื้อในโรงพยาบาล (สรุปแต่ละระบบ)</h3>
                             <div class="overflow-x-auto">
@@ -1265,6 +1255,16 @@
     </div>
 
     <!-- Preview Modal (พรีวิวแบบ 2 หน้า A4) -->
+    <div id="report-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] backdrop-blur-sm transition-opacity no-print">
+        <div class="bg-white rounded-xl max-w-3xl w-full mx-4 shadow-xl flex flex-col max-h-[90vh] overflow-hidden">
+            <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gradient-to-r from-teal-600 to-teal-500 text-white">
+                <h3 class="font-bold flex items-center gap-2"><i data-feather="bar-chart-2" class="w-5 h-5"></i> รายงานการเฝ้าระวังภาพรวม</h3>
+                <button id="close-report-btn" class="text-white/80 hover:text-white transition-colors"><i data-feather="x" class="w-5 h-5"></i></button>
+            </div>
+            <div id="report-body" class="p-5 overflow-y-auto"></div>
+        </div>
+    </div>
+
     <div id="preview-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl w-full max-w-5xl h-[90vh] mx-4 shadow-xl flex flex-col overflow-hidden">
             <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
@@ -1290,6 +1290,7 @@
     </div>
 
     <div class="no-print" style="position:fixed;top:12px;right:12px;z-index:250;display:flex;align-items:center;gap:8px">
+        <button id="btn-report" type="button" title="รายงานการเฝ้าระวังภาพรวม" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:9999px;background:linear-gradient(135deg,#0f766e,#0d9488);color:#fff;font-weight:700;font-size:13px;font-family:'Sarabun',sans-serif;box-shadow:0 4px 14px rgba(13,148,136,.4);cursor:pointer">📊 รายงานภาพรวม</button>
         <button id="btn-test-fill" type="button" title="จำลองข้อมูลทดสอบทุกระบบ" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:9999px;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:#fff;font-weight:700;font-size:13px;font-family:'Sarabun',sans-serif;box-shadow:0 4px 14px rgba(79,70,229,.4);cursor:pointer">🧪 ทดสอบ</button>
         <button id="btn-clear-all" type="button" title="ล้างข้อมูลทั้งหมด" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:9999px;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;font-weight:700;font-size:13px;font-family:'Sarabun',sans-serif;box-shadow:0 4px 14px rgba(220,38,38,.4);cursor:pointer">🧹 เคลียร์</button>
         <button id="btn-print-web" type="button" title="พิมพ์หน้าเว็บ (ฟอร์มตามที่แสดง)" style="display:flex;align-items:center;gap:6px;padding:8px 14px;border:none;border-radius:9999px;background:linear-gradient(135deg,#0ea5e9,#0284c7);color:#fff;font-weight:700;font-size:13px;font-family:'Sarabun',sans-serif;box-shadow:0 4px 14px rgba(2,132,199,.4);cursor:pointer">🖨️ พิมพ์หน้าเว็บ</button>
@@ -1486,7 +1487,12 @@
                     '<td class="border border-red-200 p-2 text-center" id="dxTotCI">0</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotHAI">0</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotNoHAI">0</td>' +
-                    '<td class="border border-red-200 p-2" colspan="2"></td></tr></tfoot>';
+                    '<td class="border border-red-200 p-2" colspan="3"></td></tr>' +
+                    '<tr class="bg-amber-50 font-bold"><td class="border border-amber-300 p-2" colspan="2">สรุปภาพรวมทั้งใบ <span class="text-red-600 font-normal">*จำเป็น</span></td>' +
+                    '<td class="border border-amber-300 p-2 text-center"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"></td>' +
+                    '<td class="border border-amber-300 p-2 text-center"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"></td>' +
+                    '<td class="border border-amber-300 p-2 text-center"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"></td>' +
+                    '<td class="border border-amber-300 p-2 text-xs text-amber-700" colspan="3">ต้องเลือกก่อน "ย้าย" หรือ "จำหน่าย" ทุกครั้ง</td></tr></tfoot>';
             }
             const dxBody = document.getElementById('dxSumBody');
             function syncDx() {
@@ -2252,6 +2258,78 @@
         const btnComplete = document.getElementById('btn-complete');
         if (btnSaveDraft) btnSaveDraft.addEventListener('click', function () { iccSaveRecord('แบบร่าง'); });
         if (btnComplete) btnComplete.addEventListener('click', function () { iccSaveRecord('เสร็จสิ้น'); });
+
+        // ===== รายงานการเฝ้าระวังภาพรวม =====
+        (function () {
+            const btn = document.getElementById('btn-report');
+            const modal = document.getElementById('report-modal');
+            const closeBtn = document.getElementById('close-report-btn');
+            const body = document.getElementById('report-body');
+            if (!btn || !modal || !body) return;
+            const SYS = { pneumonia:'Pneumonia', uti:'UTI', bsi:'BSI', surgery:'SSI', endometritis:'Endometritis', episiotomy:'Episiotomy', skin:'Skin', bedsore:'Bedsore', omphalitis:'Omphalitis', eye:'Eye', other:'ระบบอื่น' };
+            function tile(label, val, color) {
+                return '<div style="flex:1;min-width:120px;background:' + color + '11;border:1px solid ' + color + '33;border-radius:12px;padding:12px 14px">' +
+                    '<div style="font-size:24px;font-weight:800;color:' + color + '">' + val + '</div>' +
+                    '<div style="font-size:12px;color:#4b5563;margin-top:2px">' + label + '</div></div>';
+            }
+            function render() {
+                // 1) รวมจาก audit log ทุก AN ใน localStorage
+                let totalSaves = 0, units = {}, ans = {};
+                try {
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const k = localStorage.key(i);
+                        if (k && k.indexOf('iccLog:') === 0) {
+                            const an = k.slice(7); ans[an] = true;
+                            const arr = JSON.parse(localStorage.getItem(k) || '[]');
+                            arr.forEach(function (e) { totalSaves++; const u = e.unit || '(ไม่ระบุ)'; units[u] = (units[u] || 0) + 1; });
+                        }
+                    }
+                } catch (e) {}
+                // 2) สรุปผลใบปัจจุบัน
+                let ci = 0, hai = 0, no = 0, statusCount = {};
+                Object.keys(SYS).forEach(function (id) {
+                    const dx = document.querySelector('.dx-summary[data-sys="' + id + '"]');
+                    if (!dx) return;
+                    if ((dx.querySelector('.dx-ci') || {}).checked) ci++;
+                    if ((dx.querySelector('.dx-hai') || {}).checked) hai++;
+                    if ((dx.querySelector('.dx-nohai') || {}).checked) no++;
+                    const ab = dx.querySelector('.hai-btn.active');
+                    if (ab) { const v = ab.textContent.trim(); statusCount[v] = (statusCount[v] || 0) + 1; }
+                });
+                const devTot = (document.getElementById('devTot') || {}).textContent || '0';
+                const curUnit = (document.getElementById('global-unit') || {}).value || '(ยังไม่ระบุ)';
+
+                let html = '<div class="text-xs text-gray-500 mb-3">ข้อมูลสรุปจากใบที่บันทึกในเครื่องนี้ (localStorage) + ใบที่กำลังกรอก · หน่วยงานปัจจุบัน: <b>' + curUnit + '</b></div>';
+                html += '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">' +
+                    tile('จำนวนใบ (AN)', Object.keys(ans).length, '#0d9488') +
+                    tile('การบันทึกทั้งหมด', totalSaves, '#2563eb') +
+                    tile('หน่วยงานที่บันทึก', Object.keys(units).length, '#7c3aed') +
+                    tile('วันใส่อุปกรณ์ (ใบนี้)', devTot, '#ea580c') + '</div>';
+
+                html += '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:16px">' +
+                    tile('CI (ใบนี้)', ci, '#6b7280') + tile('HAI (ใบนี้)', hai, '#dc2626') + tile('NoHAI (ใบนี้)', no, '#16a34a') + '</div>';
+
+                // ตารางหน่วยงาน
+                const uKeys = Object.keys(units).sort(function (a, b) { return units[b] - units[a]; });
+                html += '<h4 class="font-bold text-gray-700 text-sm mb-2">จำนวนการบันทึกแยกตามหน่วยงาน</h4>';
+                if (uKeys.length) {
+                    html += '<table class="w-full text-sm border-collapse mb-4"><thead><tr class="bg-gray-100 text-gray-700"><th class="border border-gray-200 p-2 text-left">หน่วยงาน</th><th class="border border-gray-200 p-2 text-center w-32">จำนวนบันทึก</th></tr></thead><tbody>';
+                    uKeys.forEach(function (u) { html += '<tr><td class="border border-gray-200 p-2">' + u + '</td><td class="border border-gray-200 p-2 text-center font-bold text-teal-700">' + units[u] + '</td></tr>'; });
+                    html += '</tbody></table>';
+                } else { html += '<div class="text-sm text-gray-400 mb-4">— ยังไม่มีประวัติการบันทึก —</div>'; }
+
+                // สถานะการวินิจฉัยใบปัจจุบัน
+                const sKeys = Object.keys(statusCount);
+                html += '<h4 class="font-bold text-gray-700 text-sm mb-2">สถานะการวินิจฉัย (ใบปัจจุบัน)</h4>';
+                if (sKeys.length) {
+                    html += '<div class="flex flex-wrap gap-2">' + sKeys.map(function (s) { return '<span class="text-xs px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 font-medium">' + s + ' × ' + statusCount[s] + '</span>'; }).join('') + '</div>';
+                } else { html += '<div class="text-sm text-gray-400">— ยังไม่ได้เลือกสถานะ —</div>'; }
+                body.innerHTML = html;
+            }
+            btn.addEventListener('click', function () { if (window.__syncSummaries) window.__syncSummaries(); render(); modal.classList.remove('hidden'); modal.classList.add('flex'); if (window.feather) feather.replace(); });
+            closeBtn.addEventListener('click', function () { modal.classList.add('hidden'); modal.classList.remove('flex'); });
+            modal.addEventListener('click', function (e) { if (e.target === modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); } });
+        })();
 
         // ===== เตือน popup: ต้องสรุปผลการวินิจฉัย (CI/HAI/NoHAI) ก่อนย้าย/จำหน่าย =====
         function finalDxDone() { return !!document.querySelector('.final-dx:checked'); }
