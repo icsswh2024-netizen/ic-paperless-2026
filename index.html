@@ -140,11 +140,16 @@
         @media print {
             body * { visibility: hidden; }
             #preview-print-area, #preview-print-area * { visibility: visible; }
-            #preview-print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; display: block; }
+            /* ให้ modal ไม่บัง/ไม่ตัดเนื้อหาเวลาพิมพ์ */
+            #preview-modal { position: static !important; inset: auto !important; background: transparent !important; backdrop-filter: none !important; display: block !important; overflow: visible !important; }
+            #preview-modal > div { max-width: none !important; width: auto !important; height: auto !important; max-height: none !important; box-shadow: none !important; overflow: visible !important; display: block !important; border-radius: 0 !important; }
+            #preview-modal > div > div { overflow: visible !important; height: auto !important; max-height: none !important; }
+            #preview-print-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; background: white; display: block !important; overflow: visible !important; gap: 0 !important; }
             .a4-page { box-shadow: none !important; margin: 0 !important; page-break-after: always; break-after: page; }
             .pdf-page { box-shadow: none !important; margin: 0 !important; page-break-after: always; break-after: page; }
             .no-print { display: none !important; }
         }
+        @page { size: A4; margin: 0; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 h-screen flex overflow-hidden">
@@ -1234,7 +1239,7 @@
     </div>
 
     <!-- Preview Modal (พรีวิวแบบ 2 หน้า A4) -->
-    <div id="preview-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] backdrop-blur-sm transition-opacity no-print">
+    <div id="preview-modal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-[100] backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-xl w-full max-w-5xl h-[90vh] mx-4 shadow-xl flex flex-col overflow-hidden">
             <div class="p-4 border-b border-gray-200 flex justify-between items-center bg-gray-50 shrink-0">
                 <h3 class="font-bold text-gray-800 flex items-center gap-2"><i data-feather="printer" class="w-5 h-5 text-gray-600"></i> ตัวอย่างก่อนพิมพ์</h3>
