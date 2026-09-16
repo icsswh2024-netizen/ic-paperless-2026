@@ -156,9 +156,14 @@
             }
             body.print-web { display: block !important; }
             body.print-web #preview-modal, body.print-web #history-modal, body.print-web #confirm-modal { display: none !important; }
-            body.print-web .tab-content.hidden { display: none !important; }
+            /* พิมพ์หน้าเว็บ = รวมทุกระบบ: แสดงทุกแท็บ (ไม่สนใจ .hidden) แยกหน้า */
+            body.print-web .tab-content { display: block !important; }
+            body.print-web .tab-content { break-before: page; page-break-before: always; }
+            body.print-web .tab-content:first-of-type { break-before: auto; page-break-before: auto; }
+            body.print-web #side-nav { display: none !important; }
+            body.print-web .lg\:w-3\/4 { width: 100% !important; }
             /* เว้นขอบเนื้อหาเองในโหมดพิมพ์หน้าเว็บ (เพราะ @page margin:0 เพื่อตัด URL หัว/ท้ายกระดาษ) */
-            body.print-web .flex-1 { padding: 10mm !important; }
+            body.print-web .flex-1 { padding: 8mm !important; }
         }
         @page { size: A4; margin: 0; }
     </style>
@@ -247,7 +252,7 @@
             <div class="flex flex-col lg:flex-row gap-4 lg:h-[calc(100%-100px)] lg:min-h-[700px]">
                 
                 <!-- Left Nav Index (แบ่งตามระบบ 13 แท็บ) -->
-                <div class="w-full lg:w-1/4 bg-white border border-gray-200 rounded-xl p-2 flex flex-col gap-1 shadow-sm lg:h-full lg:overflow-y-auto hide-scrollbar shrink-0">
+                <div id="side-nav" class="w-full lg:w-1/4 bg-white border border-gray-200 rounded-xl p-2 flex flex-col gap-1 shadow-sm lg:h-full lg:overflow-y-auto hide-scrollbar shrink-0">
                     <div class="p-2 text-sm font-bold text-gray-500 border-b border-gray-100 mb-2 uppercase tracking-wide">เลือกระบบเฝ้าระวัง</div>
                     
                     <button onclick="switchTab('general')" id="nav-general" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-red-50 border-red-200 text-red-700">
