@@ -258,6 +258,7 @@
                     
                     <button onclick="switchTab('general')" id="nav-general" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-red-50 border-red-200 text-red-700">
                         <div class="flex items-center gap-3"><i data-feather="file-text" class="w-4 h-4 icon-color text-red-500"></i><span class="font-medium text-sm font-bold nav-label">ข้อมูลทั่วไป</span></div>
+                        <span id="chk-general-badge" class="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 shrink-0" title="">0/5</span>
                     </button>
                     <button onclick="switchTab('pneumonia')" id="nav-pneumonia" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
                         <div class="flex items-center gap-3"><i data-feather="wind" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">1. Pneumonia</span></div>
@@ -294,6 +295,7 @@
                     </button>
                     <button onclick="switchTab('labs')" id="nav-labs" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
                         <div class="flex items-center gap-3"><i data-feather="file-plus" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">สรุปผล</span></div>
+                        <span id="chk-summary-badge" class="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 shrink-0" title="">0/2</span>
                     </button>
                 </div>
 
@@ -1192,21 +1194,7 @@
 
                     <!-- Bottom Action Bar -->
                     <div class="border-t border-gray-200 p-4 bg-white sm:bg-gray-50 rounded-b-xl flex flex-col sm:flex-row items-center justify-between gap-4 mt-auto shrink-0 z-10 no-print">
-                        <div class="flex flex-col gap-1.5 w-full sm:w-auto sm:min-w-[300px]">
-                            <div class="text-[11px] font-bold text-gray-500 flex items-center gap-1"><i data-feather="check-square" class="w-3.5 h-3.5"></i> การตรวจสอบ</div>
-                            <div class="flex flex-col sm:flex-row gap-2">
-                                <div class="flex items-center gap-2 flex-1" id="chk-general" title="">
-                                    <span class="text-xs font-medium text-gray-600 whitespace-nowrap w-24 shrink-0">ข้อมูลทั่วไป</span>
-                                    <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden min-w-[40px]"><div class="bg-amber-500 h-full rounded-full transition-all duration-500" id="chk-general-bar" style="width:0%"></div></div>
-                                    <span class="text-xs font-bold text-gray-500 whitespace-nowrap" id="chk-general-txt">0/5</span>
-                                </div>
-                                <div class="flex items-center gap-2 flex-1" id="chk-summary" title="">
-                                    <span class="text-xs font-medium text-gray-600 whitespace-nowrap w-16 shrink-0">สรุปผล</span>
-                                    <div class="flex-1 bg-gray-200 rounded-full h-2 overflow-hidden min-w-[40px]"><div class="bg-amber-500 h-full rounded-full transition-all duration-500" id="chk-summary-bar" style="width:0%"></div></div>
-                                    <span class="text-xs font-bold text-gray-500 whitespace-nowrap" id="chk-summary-txt">0/2</span>
-                                </div>
-                            </div>
-                        </div>
+                        <div class="hidden sm:block"></div>
                         <div class="flex flex-wrap items-center justify-between sm:justify-end gap-2 sm:gap-3 w-full flex-1">
                             
                             <!-- ปุ่มจำนวนใบเฝ้าระวัง -->
@@ -2364,11 +2352,13 @@
         function iccMissing() { return iccReqItems().filter(function (x) { return !x[1](); }).map(function (x) { return x[0]; }); }
         function iccSetGroup(prefix, items) {
             const done = items.filter(function (x) { return x[1](); }).length, total = items.length;
-            const bar = document.getElementById(prefix + '-bar'), txt = document.getElementById(prefix + '-txt');
-            if (bar) { bar.style.width = Math.round(done / total * 100) + '%'; bar.className = 'h-full rounded-full transition-all duration-500 ' + (done === total ? 'bg-green-500' : 'bg-amber-500'); }
-            if (txt) { txt.textContent = done + '/' + total; txt.className = 'text-xs font-bold whitespace-nowrap ' + (done === total ? 'text-green-600' : 'text-amber-600'); }
-            const w = document.getElementById(prefix.indexOf('general') > -1 ? 'chk-general' : 'chk-summary');
-            if (w) { const miss = items.filter(function (x) { return !x[1](); }).map(function (x) { return x[0]; }); w.title = miss.length ? 'ยังเหลือ: ' + miss.join(', ') : 'ครบแล้ว'; }
+            const badge = document.getElementById(prefix + '-badge');
+            if (badge) {
+                badge.textContent = done + '/' + total;
+                badge.className = 'text-[11px] font-bold px-1.5 py-0.5 rounded-full shrink-0 ' + (done === total ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700');
+                const miss = items.filter(function (x) { return !x[1](); }).map(function (x) { return x[0]; });
+                badge.title = miss.length ? 'ยังเหลือ: ' + miss.join(', ') : 'ครบแล้ว';
+            }
         }
         function iccUpdateProgress() {
             iccSetGroup('chk-general', iccGeneralItems());
