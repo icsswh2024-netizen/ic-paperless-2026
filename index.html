@@ -157,8 +157,10 @@
             body.print-web { display: block !important; }
             body.print-web #preview-modal, body.print-web #history-modal, body.print-web #confirm-modal { display: none !important; }
             body.print-web .tab-content.hidden { display: none !important; }
+            /* เว้นขอบเนื้อหาเองในโหมดพิมพ์หน้าเว็บ (เพราะ @page margin:0 เพื่อตัด URL หัว/ท้ายกระดาษ) */
+            body.print-web .flex-1 { padding: 10mm !important; }
         }
-        @page { size: A4; margin: 8mm; }
+        @page { size: A4; margin: 0; }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800 h-screen flex overflow-hidden">
