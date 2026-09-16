@@ -2336,8 +2336,7 @@
                 const dischargeRecs = recs.filter(function (r) { return r.discharged; });
                 let html = '<div class="text-xs text-gray-500 mb-3">รายงานจากใบเฝ้าระวังที่บันทึกในเครื่องนี้ ทั้งหมด <b>' + recs.length + '</b> ราย (localStorage)</div>';
                 if (!recs.length) {
-                    html += '<div class="text-sm text-gray-400 py-6 text-center">ยังไม่มีใบเฝ้าระวังที่บันทึก — กด "บันทึกแบบร่าง/ประเมินเสร็จสิ้น" เพื่อเก็บข้อมูล</div>';
-                    body.innerHTML = html; return;
+                    html += '<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">ยังไม่มีใบเฝ้าระวังที่บันทึก — แสดงเป็นโครงร่างหัวข้อไว้ก่อน ตัวเลขจะอัปเดตเมื่อกด "บันทึกแบบร่าง/ประเมินเสร็จสิ้น"</div>';
                 }
                 html += section('1. รายงานการ Admit', '#0d9488', admitRecs, function (r) { return [r.admitUnit]; });
                 html += section('2. รายงานการย้าย', '#2563eb', transferRecs, function (r) { return r.transfers; });
