@@ -1496,12 +1496,7 @@
                     '<td class="border border-red-200 p-2 text-center" id="dxTotCI">0</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotHAI">0</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotNoHAI">0</td>' +
-                    '<td class="border border-red-200 p-2" colspan="3"></td></tr>' +
-                    '<tr class="bg-amber-50 font-bold"><td class="border border-amber-300 p-2" colspan="2">สรุปภาพรวมทั้งใบ <span class="text-red-600 font-normal">*จำเป็น</span></td>' +
-                    '<td class="border border-amber-300 p-2 text-center"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"></td>' +
-                    '<td class="border border-amber-300 p-2 text-center"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"></td>' +
-                    '<td class="border border-amber-300 p-2 text-center"><input type="checkbox" name="final_dx" class="final-dx w-5 h-5 rounded border-gray-300"></td>' +
-                    '<td class="border border-amber-300 p-2 text-xs text-amber-700" colspan="3">ต้องเลือกก่อน "ย้าย" หรือ "จำหน่าย" ทุกครั้ง</td></tr></tfoot>';
+                    '<td class="border border-red-200 p-2" colspan="3"></td></tr></tfoot>';
             }
             const dxBody = document.getElementById('dxSumBody');
             const dxStBtns = [
@@ -1543,11 +1538,7 @@
                 dxBody.innerHTML = rows;
                 const set = function (i, v) { const e = document.getElementById(i); if (e) e.textContent = v; };
                 set('dxTotCI', tCI); set('dxTotHAI', tHAI); set('dxTotNoHAI', tNo);
-                // สรุปภาพรวมทั้งใบ: ติ๊กอัตโนมัติเมื่อมีระบบใดเป็นผลนั้น (แหล่งจากระบบย่อย) — ยังคลิกเองที่หน้านี้ได้
-                const fdx = document.querySelectorAll('.final-dx');
-                if (fdx[0] && tCI > 0) fdx[0].checked = true;
-                if (fdx[1] && tHAI > 0) fdx[1].checked = true;
-                if (fdx[2] && tNo > 0) fdx[2].checked = true;
+                window.__dxTotals = { ci: tCI, hai: tHAI, nohai: tNo };
             }
 
             // คลิกเช็คบล๊อกในตารางสรุป (7) เพื่อกำหนดผลวินิจฉัยของระบบนั้นโดยตรง (สองทาง)
@@ -2333,9 +2324,9 @@
                 const rec = {
                     an: iccAN(), name: gv('ระบุ ชื่อ-สกุลผู้ป่วย'), admitUnit: unit,
                     transfers: transfers, discharged: discharged, dcType: dcType,
-                    ci: !!document.querySelectorAll('.final-dx')[0] && document.querySelectorAll('.final-dx')[0].checked,
-                    hai: !!document.querySelectorAll('.final-dx')[1] && document.querySelectorAll('.final-dx')[1].checked,
-                    nohai: !!document.querySelectorAll('.final-dx')[2] && document.querySelectorAll('.final-dx')[2].checked,
+                    ci: !!(window.__dxTotals && window.__dxTotals.ci > 0),
+                    hai: !!(window.__dxTotals && window.__dxTotals.hai > 0),
+                    nohai: !!(window.__dxTotals && window.__dxTotals.nohai > 0),
                     action: action, ts: ts
                 };
                 localStorage.setItem('iccRec:' + rec.an, JSON.stringify(rec));
@@ -2476,7 +2467,10 @@
         })();
 
         // ===== เตือน popup: ต้องสรุปผลการวินิจฉัย (CI/HAI/NoHAI) ก่อนย้าย/จำหน่าย =====
-        function finalDxDone() { return !!document.querySelector('.final-dx:checked'); }
+        function finalDxDone() {
+            return !!document.querySelector('.dx-summary .dx-ci:checked, .dx-summary .dx-hai:checked, .dx-summary .dx-nohai:checked') ||
+                !!document.querySelector('.dx-summary .hai-btn.active');
+        }
         function iccWarnPopup(msg) {
             const ov = document.createElement('div');
             ov.style.cssText = 'position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.45);backdrop-filter:blur(2px)';
