@@ -1525,6 +1525,11 @@
                 dxBody.innerHTML = rows;
                 const set = function (i, v) { const e = document.getElementById(i); if (e) e.textContent = v; };
                 set('dxTotCI', tCI); set('dxTotHAI', tHAI); set('dxTotNoHAI', tNo);
+                // สรุปภาพรวมทั้งใบ: ติ๊กอัตโนมัติเมื่อมีระบบใดเป็นผลนั้น (แหล่งจากระบบย่อย) — ยังคลิกเองที่หน้านี้ได้
+                const fdx = document.querySelectorAll('.final-dx');
+                if (fdx[0] && tCI > 0) fdx[0].checked = true;
+                if (fdx[1] && tHAI > 0) fdx[1].checked = true;
+                if (fdx[2] && tNo > 0) fdx[2].checked = true;
             }
 
             // (8) ตารางสรุปจำนวนวันใส่อุปกรณ์: รวมจาก .dr-days ในแต่ละระบบ
