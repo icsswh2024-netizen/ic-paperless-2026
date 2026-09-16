@@ -1534,7 +1534,7 @@
 
             // คลิกเช็คบล๊อกในตารางสรุป (7) เพื่อกำหนดผลวินิจฉัยของระบบนั้นโดยตรง (สองทาง)
             if (dxBody) {
-                dxBody.addEventListener('change', function (e) {
+                dxBody.addEventListener('input', function (e) {
                     const cb = e.target.closest('.dxsum-cb');
                     if (!cb) return;
                     const dx = document.querySelector('.dx-summary[data-sys="' + cb.dataset.sys + '"]');
