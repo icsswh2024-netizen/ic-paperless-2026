@@ -1515,9 +1515,9 @@
                     rows += '<tr>' +
                         '<td class="border border-red-200 p-2">' + labTabNo[id] + '</td>' +
                         '<td class="border border-red-200 p-2 font-medium">' + sysName[id] + '</td>' +
-                        '<td class="border border-red-200 p-2 text-center">' + mark(ci) + '</td>' +
-                        '<td class="border border-red-200 p-2 text-center">' + mark(hai) + '</td>' +
-                        '<td class="border border-red-200 p-2 text-center">' + mark(no) + '</td>' +
+                        '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="ci"' + (ci ? ' checked' : '') + '></td>' +
+                        '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="hai"' + (hai ? ' checked' : '') + '></td>' +
+                        '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="nohai"' + (no ? ' checked' : '') + '></td>' +
                         '<td class="border border-red-200 p-2">' + fld(mo) + '</td>' +
                         '<td class="border border-red-200 p-2">' + fld(un) + '</td>' +
                         '<td class="border border-red-200 p-2">' + stHtml + '</td></tr>';
@@ -1530,6 +1530,21 @@
                 if (fdx[0] && tCI > 0) fdx[0].checked = true;
                 if (fdx[1] && tHAI > 0) fdx[1].checked = true;
                 if (fdx[2] && tNo > 0) fdx[2].checked = true;
+            }
+
+            // คลิกเช็คบล๊อกในตารางสรุป (7) เพื่อกำหนดผลวินิจฉัยของระบบนั้นโดยตรง (สองทาง)
+            if (dxBody) {
+                dxBody.addEventListener('change', function (e) {
+                    const cb = e.target.closest('.dxsum-cb');
+                    if (!cb) return;
+                    const dx = document.querySelector('.dx-summary[data-sys="' + cb.dataset.sys + '"]');
+                    if (dx) {
+                        const sel = { ci: '.dx-ci', hai: '.dx-hai', nohai: '.dx-nohai' }[cb.dataset.k];
+                        const src = dx.querySelector(sel);
+                        if (src) src.checked = cb.checked;
+                    }
+                    if (window.__syncSummaries) window.__syncSummaries();
+                });
             }
 
             // (8) ตารางสรุปจำนวนวันใส่อุปกรณ์: รวมจาก .dr-days ในแต่ละระบบ
