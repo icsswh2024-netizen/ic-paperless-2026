@@ -258,7 +258,7 @@
                     
                     <button onclick="switchTab('general')" id="nav-general" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-red-50 border-red-200 text-red-700">
                         <div class="flex items-center gap-3"><i data-feather="file-text" class="w-4 h-4 icon-color text-red-500"></i><span class="font-medium text-sm font-bold nav-label">ข้อมูลทั่วไป</span></div>
-                        <span id="chk-general-badge" class="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 shrink-0" title="">0/5</span>
+                        <span id="chk-general-badge" class="text-[11px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700 shrink-0" title="">0/6</span>
                     </button>
                     <button onclick="switchTab('pneumonia')" id="nav-pneumonia" class="nav-btn w-full text-left flex items-center justify-between p-2.5 rounded-lg cursor-pointer transition-colors border bg-white border-transparent text-gray-600 hover:bg-gray-50">
                         <div class="flex items-center gap-3"><i data-feather="wind" class="w-4 h-4 icon-color text-gray-400"></i><span class="font-medium text-sm nav-label">1. Pneumonia</span></div>
@@ -439,8 +439,12 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="mt-4 pt-3 border-t border-blue-200 flex flex-col gap-3 text-sm">
-                                    <span class="font-medium text-gray-700">ขณะแรกรับมีการติดเชื้อ:</span>
+                            </div>
+
+                            <!-- 1.6 ขณะแรกรับมีการติดเชื้อ -->
+                            <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                <label class="block text-sm font-bold text-gray-700 mb-2 sub-head">1.6 ขณะแรกรับมีการติดเชื้อ</label>
+                                <div class="flex flex-col gap-3 text-sm comp-indent">
                                     <label class="flex items-center gap-2 ml-4 cursor-pointer">
                                         <input type="checkbox" name="infect_admit" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"> ไม่มี
                                     </label>
@@ -2350,7 +2354,8 @@
                 ['1.2 สถานะรับเข้าแรกรับ', function () { return !!document.querySelector('input[name="admit_status"]:checked'); }],
                 ['1.3 สถานะรับเข้า-รับย้ายระหว่าง Admit', function () { return anyFilled(document.getElementById('transfer-container'), 'input[type="text"], input[type="date"]'); }],
                 ['1.4 สถานะจำหน่าย', function () { return !!document.querySelector('input[name="dc_status"]:checked'); }],
-                ['1.5 ประวัติ 6 เดือน / การติดเชื้อแรกรับ', function () { return !!document.querySelector('input[name="history6m"]:checked') && !!document.querySelector('input[name="infect_admit"]:checked'); }]
+                ['1.5 ประวัติ 6 เดือนที่ผ่านมา', function () { return !!document.querySelector('input[name="history6m"]:checked'); }],
+                ['1.6 ขณะแรกรับมีการติดเชื้อ', function () { return !!document.querySelector('input[name="infect_admit"]:checked'); }]
             ];
         }
         // กลุ่ม "สรุปผล" = 2 ข้อ (ต้องมีทั้งคู่)
@@ -2380,9 +2385,9 @@
         function iccMissingFor(action) {
             const g = iccGeneralItems(), s = iccSummaryItems();
             let genIdx;
-            if (action === 'admit') genIdx = [0, 1, 4];          // 1.1, 1.2, 1.5 (ยกเว้น 1.3, 1.4)
-            else if (action === 'transfer') genIdx = [2];         // 1.3 (ใช้ของเดิม 1.1,1.2,1.4,1.5)
-            else genIdx = [0, 1, 2, 3, 4];                        // จำหน่าย: ครบทุกข้อ
+            if (action === 'admit') genIdx = [0, 1, 4, 5];        // 1.1,1.2,1.5,1.6 (ยกเว้น 1.3,1.4)
+            else if (action === 'transfer') genIdx = [2];         // 1.3 (ใช้ของเดิม)
+            else genIdx = [0, 1, 2, 3, 4, 5];                     // จำหน่าย: ครบทุกข้อ
             const items = genIdx.map(function (i) { return g[i]; });
             if (action !== 'admit') items.push.apply(items, s);   // ย้าย/จำหน่าย ต้องสรุปผลด้วย
             return items.filter(function (x) { return !x[1](); }).map(function (x) { return x[0]; });
