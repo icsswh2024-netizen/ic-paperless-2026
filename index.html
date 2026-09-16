@@ -1527,8 +1527,8 @@
                         '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="ci"' + (ci ? ' checked' : '') + '></td>' +
                         '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="hai"' + (hai ? ' checked' : '') + '></td>' +
                         '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="nohai"' + (no ? ' checked' : '') + '></td>' +
-                        '<td class="border border-red-200 p-2">' + fld(mo) + '</td>' +
-                        '<td class="border border-red-200 p-2">' + fld(un) + '</td>' +
+                        '<td class="border border-red-200 p-1"><input type="month" class="dxsum-fld w-full bg-transparent focus:outline-none px-1" data-sys="' + id + '" data-f="month" value="' + mo + '"></td>' +
+                        '<td class="border border-red-200 p-1"><input type="text" class="dxsum-fld w-full bg-transparent focus:outline-none px-1" data-sys="' + id + '" data-f="unit" value="' + un.replace(/"/g, '&quot;') + '"></td>' +
                         '<td class="border border-red-200 p-2">' + stHtml + '</td></tr>';
                 });
                 dxBody.innerHTML = rows;
@@ -1545,14 +1545,26 @@
             if (dxBody) {
                 dxBody.addEventListener('input', function (e) {
                     const cb = e.target.closest('.dxsum-cb');
-                    if (!cb) return;
-                    const dx = document.querySelector('.dx-summary[data-sys="' + cb.dataset.sys + '"]');
-                    if (dx) {
-                        const sel = { ci: '.dx-ci', hai: '.dx-hai', nohai: '.dx-nohai' }[cb.dataset.k];
-                        const src = dx.querySelector(sel);
-                        if (src) src.checked = cb.checked;
+                    if (cb) {
+                        const dx = document.querySelector('.dx-summary[data-sys="' + cb.dataset.sys + '"]');
+                        if (dx) {
+                            const sel = { ci: '.dx-ci', hai: '.dx-hai', nohai: '.dx-nohai' }[cb.dataset.k];
+                            const src = dx.querySelector(sel);
+                            if (src) src.checked = cb.checked;
+                        }
+                        if (window.__syncSummaries) window.__syncSummaries();
+                        return;
                     }
-                    if (window.__syncSummaries) window.__syncSummaries();
+                    // ช่องเดือนที่พบ / หน่วยงาน: อัปเดตไปยังระบบย่อยแบบทันที โดยไม่ rebuild ตาราง (คงโฟกัสขณะพิมพ์)
+                    const f = e.target.closest('.dxsum-fld');
+                    if (f) {
+                        const dx = document.querySelector('.dx-summary[data-sys="' + f.dataset.sys + '"]');
+                        if (dx) {
+                            const src = dx.querySelector(f.dataset.f === 'month' ? '.dx-month' : '.dx-unit');
+                            if (src) src.value = f.value;
+                        }
+                        e.stopPropagation(); // กัน document listener rebuild ตารางระหว่างพิมพ์
+                    }
                 });
                 // คลิกปุ่มสถานะในตารางสรุป (7) เพื่อกำหนดสถานะของระบบนั้นโดยตรง (สองทาง)
                 dxBody.addEventListener('click', function (e) {
