@@ -2343,8 +2343,8 @@
                         !!document.querySelector('.dx-summary .hai-btn.active');
                 }],
                 ['สรุปจำนวนวันใส่อุปกรณ์ต่าง ๆ', function () {
-                    const dv = document.getElementById('devBody');
-                    return !!(dv && dv.querySelector('tr'));
+                    const t = document.getElementById('devTot');
+                    return !!(t && parseInt(t.textContent, 10) > 0);
                 }]
             ];
         }
