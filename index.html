@@ -95,22 +95,22 @@
         .pv-foot { position: absolute; left: 40px; right: 40px; bottom: 16px; display: flex; justify-content: space-between; gap: 8px; font-size: 10px; color: #6b7280; border-top: 1px solid #d1d5db; padding-top: 4px; }
 
         /* ปุ่มสถานะการวินิจฉัย (เรืองแสง) */
-        .hai-btn { font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 9999px; border: 1.5px solid transparent; cursor: pointer; transition: all .25s ease; opacity: .8; }
-        .hai-gray   { background: #e5e7eb; color: #374151; border-color: #cbd5e1; }
-        .hai-yellow { background: #fef9c3; color: #854d0e; border-color: #fde047; }
-        .hai-green  { background: #dcfce7; color: #166534; border-color: #86efac; }
-        .hai-red    { background: #fee2e2; color: #991b1b; border-color: #fca5a5; }
+        .hai-btn { display: inline-flex; align-items: center; justify-content: center; text-align: center; min-width: 150px; box-sizing: border-box; font-size: 12px; font-weight: 700; padding: 6px 16px; border-radius: 9999px; border: 1.5px solid transparent; cursor: pointer; transition: all .2s ease; opacity: .92; }
+        .hai-gray   { background: #f1f5f9; color: #334155; border-color: #94a3b8; }
+        .hai-yellow { background: #fef08a; color: #713f12; border-color: #eab308; }
+        .hai-green  { background: #bbf7d0; color: #14532d; border-color: #22c55e; }
+        .hai-red    { background: #fecaca; color: #7f1d1d; border-color: #ef4444; }
         .hai-btn:hover { opacity: 1; transform: translateY(-1px); }
-        .hai-btn.active { opacity: 1; color: #fff; }
-        .hai-gray.active   { background: #6b7280; border-color: #cbd5e1; animation: glowGr 1.6s ease-in-out infinite; }
-        .hai-yellow.active { background: #eab308; border-color: #fde047; animation: glowY 1.6s ease-in-out infinite; }
-        .hai-green.active  { background: #22c55e; border-color: #86efac; animation: glowG 1.6s ease-in-out infinite; }
-        .hai-red.active    { background: #ef4444; border-color: #fca5a5; animation: glowR 1.6s ease-in-out infinite; }
+        .hai-btn.active { opacity: 1; color: #fff; border-color: transparent; }
+        .hai-gray.active   { background: #64748b; animation: glowGr 1.6s ease-in-out infinite; }
+        .hai-yellow.active { background: #f59e0b; animation: glowY 1.6s ease-in-out infinite; }
+        .hai-green.active  { background: #16a34a; animation: glowG 1.6s ease-in-out infinite; }
+        .hai-red.active    { background: #dc2626; animation: glowR 1.6s ease-in-out infinite; }
         @keyframes glowGr { 0%,100% { box-shadow: 0 0 5px #6b728099; } 50% { box-shadow: 0 0 14px #6b7280, 0 0 22px #9ca3afaa; } }
         @keyframes glowY { 0%,100% { box-shadow: 0 0 5px #eab30899; } 50% { box-shadow: 0 0 16px #eab308, 0 0 26px #facc15aa; } }
         @keyframes glowG { 0%,100% { box-shadow: 0 0 5px #22c55e99; } 50% { box-shadow: 0 0 16px #22c55e, 0 0 26px #4ade80aa; } }
         @keyframes glowR { 0%,100% { box-shadow: 0 0 5px #ef444499; } 50% { box-shadow: 0 0 16px #ef4444, 0 0 26px #f87171aa; } }
-        .pv-doc .hai-btn { animation: none !important; box-shadow: none !important; padding: 2px 8px !important; font-size: 10.5px !important; white-space: normal !important; display: inline-block; border-radius: 8px; line-height: 1.3; }
+        .pv-doc .hai-btn { animation: none !important; box-shadow: none !important; padding: 2px 8px !important; font-size: 10.5px !important; min-width: 0 !important; white-space: normal !important; display: inline-block; border-radius: 8px; line-height: 1.3; }
 
         /* หน้า A4 สำหรับพรีวิว/พิมพ์ */
         .pdf-page {
