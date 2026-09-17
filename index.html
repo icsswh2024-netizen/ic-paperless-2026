@@ -2626,26 +2626,48 @@
                     btn('รายวัน', 'gran', 'day', cmpGran) + btn('รายเดือน', 'gran', 'month', cmpGran) + btn('รายปี', 'gran', 'year', cmpGran) + '</div>' +
                     '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px"><span style="font-size:12px;color:#4b5563;align-self:center;margin-right:4px">มุมมอง:</span>' +
                     btn('ทั้งโรงพยาบาล', 'scope', 'hosp', cmpScope) + btn('แยกหน่วย', 'scope', 'unit', cmpScope) + '</div>' +
-                    '<div style="font-size:11.5px;color:#6b7280;margin-bottom:8px">กรอก “จริง” = ยอดจริงจากหอผู้ป่วย, “ใบ” = นับจากใบเฝ้าระวัง, “%” = ความครอบคลุม (ใบ ÷ จริง)</div>';
+                    '<div style="font-size:11.5px;color:#6b7280;margin-bottom:8px">กรอก “จริง” = ยอดจริงจากหอผู้ป่วย, “ใบ” = นับจากใบเฝ้าระวัง, “%” = ความครอบคลุม (ใบ÷จริง), “ขาด” = ยังไม่ได้ทำ (จริง−ใบ)</div>';
                 if (!keys.length) { h += '<div style="font-size:12px;color:#9ca3af">— ยังไม่มีข้อมูล —</div></div>'; return h; }
+                // สรุปยอด "ยังไม่ได้ทำ" รวม + จุดที่ขาด (หน่วย/ช่วงเวลา)
+                const gapTot = { admit: 0, transfer: 0, discharge: 0 }; const gapWhere = {};
+                keys.forEach(function (gk) {
+                    const g = groups[gk];
+                    ['admit', 'transfer', 'discharge'].forEach(function (m) {
+                        const av = parseFloat(getActual(cmpGran + ':' + cmpScope + ':' + gk + ':' + m));
+                        if (!isNaN(av) && av > g[m]) {
+                            const miss = av - g[m]; gapTot[m] += miss;
+                            const w = cmpScope === 'unit' ? (g.period + ' / ' + g.unit) : g.period;
+                            gapWhere[w] = (gapWhere[w] || 0) + miss;
+                        }
+                    });
+                });
+                const totalGap = gapTot.admit + gapTot.transfer + gapTot.discharge;
+                h += '<div style="background:' + (totalGap ? '#fef2f2' : '#f0fdf4') + ';border:1px solid ' + (totalGap ? '#fecaca' : '#bbf7d0') + ';border-radius:10px;padding:10px 12px;margin-bottom:10px;font-size:12.5px">' +
+                    '<b style="color:' + (totalGap ? '#b91c1c' : '#15803d') + '">รวมยังไม่ได้ทำ: ' + totalGap + ' ใบ</b> ' +
+                    '<span style="color:#4b5563">(Admit ' + gapTot.admit + ' / ย้าย ' + gapTot.transfer + ' / จำหน่าย ' + gapTot.discharge + ')</span>' +
+                    (totalGap ? '<div style="margin-top:4px;color:#7f1d1d">จุดที่ขาด: ' + Object.keys(gapWhere).map(function (w) { return w + ' (' + gapWhere[w] + ')'; }).join(', ') + '</div>' : '<div style="margin-top:4px;color:#15803d">ครบทุกจุด ✓</div>') +
+                    '</div>';
                 const bd = '1px solid ' + color + '30', pd = 'padding:5px 7px;border:' + bd, ctr = pd + ';text-align:center';
                 h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">' +
                     '<thead><tr style="background:' + color + '15;color:#374151">' +
                     '<th style="' + pd + ';text-align:left">' + (cmpScope === 'unit' ? 'ช่วงเวลา / หน่วย' : 'ช่วงเวลา') + '</th>' +
-                    '<th style="' + ctr + '" colspan="3">Admit</th>' +
-                    '<th style="' + ctr + '" colspan="3">ย้าย</th>' +
-                    '<th style="' + ctr + '" colspan="3">จำหน่าย</th></tr>' +
+                    '<th style="' + ctr + '" colspan="4">Admit</th>' +
+                    '<th style="' + ctr + '" colspan="4">ย้าย</th>' +
+                    '<th style="' + ctr + '" colspan="4">จำหน่าย</th></tr>' +
                     '<tr style="background:' + color + '10;color:#6b7280;font-size:11px">' +
                     '<th style="' + pd + '"></th>' +
-                    ['จริง', 'ใบ', '%', 'จริง', 'ใบ', '%', 'จริง', 'ใบ', '%'].map(function (x) { return '<th style="' + ctr + '">' + x + '</th>'; }).join('') +
+                    ['จริง', 'ใบ', '%', 'ขาด', 'จริง', 'ใบ', '%', 'ขาด', 'จริง', 'ใบ', '%', 'ขาด'].map(function (x) { return '<th style="' + ctr + '">' + x + '</th>'; }).join('') +
                     '</tr></thead><tbody>';
                 const cell = function (gk, metric, formN) {
                     const ak = cmpGran + ':' + cmpScope + ':' + gk + ':' + metric;
                     const av = getActual(ak);
-                    const pct = (av && parseFloat(av) > 0) ? Math.round(formN / parseFloat(av) * 100) + '%' : '—';
+                    const avn = parseFloat(av);
+                    const pct = (av && avn > 0) ? Math.round(formN / avn * 100) + '%' : '—';
+                    const gap = (!isNaN(avn) && avn > formN) ? (avn - formN) : 0;
                     return '<td style="' + ctr + '"><input type="number" min="0" class="cmp-actual" data-ak="' + ak + '" data-form="' + formN + '" value="' + av + '" style="width:48px;text-align:center;border:1px solid ' + color + '40;border-radius:6px;padding:1px 2px;font-size:12px"></td>' +
                         '<td style="' + ctr + ';font-weight:700">' + formN + '</td>' +
-                        '<td style="' + ctr + ';color:' + color + ';font-weight:700" class="cmp-pct">' + pct + '</td>';
+                        '<td style="' + ctr + ';color:' + color + ';font-weight:700" class="cmp-pct">' + pct + '</td>' +
+                        '<td style="' + ctr + ';font-weight:700;color:' + (gap ? '#dc2626' : '#9ca3af') + '" class="cmp-gap">' + (gap || '–') + '</td>';
                 };
                 keys.forEach(function (gk) {
                     const g = groups[gk];
@@ -2684,8 +2706,19 @@
                 if (!inp) return;
                 try { localStorage.setItem('iccActual:' + inp.dataset.ak, inp.value); } catch (err) {}
                 const form = parseFloat(inp.dataset.form) || 0, act = parseFloat(inp.value) || 0;
-                const row = inp.closest('td'); const pctCell = row && row.nextElementSibling && row.nextElementSibling.nextElementSibling;
+                const td = inp.closest('td');
+                const pctCell = td && td.nextElementSibling && td.nextElementSibling.nextElementSibling;
                 if (pctCell && pctCell.classList.contains('cmp-pct')) pctCell.textContent = act > 0 ? Math.round(form / act * 100) + '%' : '—';
+                const gapCell = pctCell && pctCell.nextElementSibling;
+                if (gapCell && gapCell.classList.contains('cmp-gap')) {
+                    const gap = act > form ? act - form : 0;
+                    gapCell.textContent = gap || '–';
+                    gapCell.style.color = gap ? '#dc2626' : '#9ca3af';
+                }
+            });
+            // อัปเดตสรุป "ยังไม่ได้ทำ" เมื่อกรอกเสร็จ (blur)
+            body.addEventListener('change', function (e) {
+                if (e.target.closest && e.target.closest('.cmp-actual')) render();
             });
             btn.addEventListener('click', function () { if (window.__syncSummaries) window.__syncSummaries(); render(); modal.classList.remove('hidden'); modal.classList.add('flex'); if (window.feather) feather.replace(); });
             closeBtn.addEventListener('click', function () { modal.classList.add('hidden'); modal.classList.remove('flex'); });
