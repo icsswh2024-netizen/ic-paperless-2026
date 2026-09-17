@@ -1424,8 +1424,6 @@
                 '<th class="border border-red-200 p-2 text-left w-56">ผลการวินิจฉัย</th>' +
                 '<th class="border border-red-200 p-2 text-left w-40">เดือนที่พบ</th>' +
                 '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th>' +
-                '<th class="border border-red-200 p-2 text-center w-24">วันนอน</th>' +
-                '<th class="border border-red-200 p-2 text-left w-56">ช่วงเวลา (แสตมป์หน่วย)</th>' +
                 '<th class="border border-red-200 p-2 text-center">สถานะ</th>' +
                 '<th class="border border-red-200 p-2 text-center">การยืนยันโดย ICN</th></tr></thead>' +
                 '<tbody><tr>' +
@@ -1436,8 +1434,6 @@
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-mdr w-4 h-4 rounded border-gray-300"> MDR</label></div></td>' +
                 '<td class="border border-red-200 p-1"><input type="month" class="dx-month w-full bg-transparent focus:outline-none px-1"></td>' +
                 '<td class="border border-red-200 p-1"><input type="text" class="dx-unit w-full bg-transparent focus:outline-none px-1"></td>' +
-                '<td class="border border-red-200 p-1 text-center"><input type="number" min="0" class="dx-los w-16 text-center bg-transparent focus:outline-none px-1"> <span class="text-xs text-gray-500">วัน</span></td>' +
-                '<td class="border border-red-200 p-1"><input type="text" class="dx-period w-full bg-transparent focus:outline-none px-1" placeholder="เช่น ICU 1-5 ก.ย. / CCU 6-8 ก.ย."></td>' +
                 '<td class="border border-red-200 p-1 dx-status-cell"><div class="hai-group flex flex-wrap items-center gap-2">' +
                 '<button type="button" class="hai-btn hai-gray" data-v="ไม่ติดเชื้อ">ไม่ติดเชื้อ</button>' +
                 '<button type="button" class="hai-btn hai-yellow" data-v="สงสัยการติดเชื้อใน รพ.">สงสัยติดเชื้อใน รพ.</button>' +
@@ -1500,8 +1496,6 @@
                     '<th class="border border-red-200 p-2 text-center w-14">MDR</th>' +
                     '<th class="border border-red-200 p-2 text-left w-32">เดือนที่พบ</th>' +
                     '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th>' +
-                    '<th class="border border-red-200 p-2 text-center w-24">วันนอน</th>' +
-                    '<th class="border border-red-200 p-2 text-left w-48">ช่วงเวลา (แสตมป์หน่วย)</th>' +
                     '<th class="border border-red-200 p-2 text-left w-40">สถานะ</th>' +
                     '<th class="border border-red-200 p-2 text-left w-40">การยืนยันโดย ICN</th></tr></thead>' +
                     '<tbody id="dxSumBody"></tbody>' +
@@ -1510,7 +1504,7 @@
                     '<td class="border border-red-200 p-2 text-center" id="dxTotHAI">0</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotNoHAI">0</td>' +
                     '<td class="border border-red-200 p-2 text-center" id="dxTotMDR">0</td>' +
-                    '<td class="border border-red-200 p-2" colspan="6"></td></tr></tfoot>';
+                    '<td class="border border-red-200 p-2" colspan="4"></td></tr></tfoot>';
             }
             const dxBody = document.getElementById('dxSumBody');
             const dxStBtns = [
@@ -1527,7 +1521,7 @@
                 let rows = '', tCI = 0, tHAI = 0, tNo = 0, tMDR = 0;
                 ids.forEach(function (id) {
                     const dx = document.querySelector('.dx-summary[data-sys="' + id + '"]');
-                    let ci = false, hai = false, no = false, mdr = false, mo = '', un = '', los = '', per = '', stV = '', icnV = '';
+                    let ci = false, hai = false, no = false, mdr = false, mo = '', un = '', stV = '', icnV = '';
                     if (dx) {
                         ci = !!(dx.querySelector('.dx-ci') || {}).checked;
                         hai = !!(dx.querySelector('.dx-hai') || {}).checked;
@@ -1535,8 +1529,6 @@
                         mdr = !!(dx.querySelector('.dx-mdr') || {}).checked;
                         mo = (dx.querySelector('.dx-month') || {}).value || '';
                         un = (dx.querySelector('.dx-unit') || {}).value || '';
-                        los = (dx.querySelector('.dx-los') || {}).value || '';
-                        per = (dx.querySelector('.dx-period') || {}).value || '';
                         const ab = dx.querySelector('.dx-status-cell .hai-btn.active');
                         if (ab) { stV = ab.getAttribute('data-v') || ''; }
                         const ic = dx.querySelector('.dx-icn-cell .icn-btn.active');
@@ -1560,8 +1552,6 @@
                         '<td class="border border-red-200 p-2 text-center"><input type="checkbox" class="dxsum-cb w-4 h-4 accent-red-600 align-middle" data-sys="' + id + '" data-k="mdr"' + (mdr ? ' checked' : '') + '></td>' +
                         '<td class="border border-red-200 p-1"><input type="month" class="dxsum-fld w-full bg-transparent focus:outline-none px-1" data-sys="' + id + '" data-f="month" value="' + mo + '"></td>' +
                         '<td class="border border-red-200 p-1"><input type="text" class="dxsum-fld w-full bg-transparent focus:outline-none px-1" data-sys="' + id + '" data-f="unit" value="' + un.replace(/"/g, '&quot;') + '"></td>' +
-                        '<td class="border border-red-200 p-1 text-center"><input type="number" min="0" class="dxsum-fld w-16 text-center bg-transparent focus:outline-none px-1" data-sys="' + id + '" data-f="los" value="' + los + '"></td>' +
-                        '<td class="border border-red-200 p-1"><input type="text" class="dxsum-fld w-full bg-transparent focus:outline-none px-1" data-sys="' + id + '" data-f="period" value="' + per.replace(/"/g, '&quot;') + '"></td>' +
                         '<td class="border border-red-200 p-2">' + stHtml + '</td>' +
                         '<td class="border border-red-200 p-2">' + icnHtml + '</td></tr>';
                 });
@@ -1590,7 +1580,7 @@
                     if (f) {
                         const dx = document.querySelector('.dx-summary[data-sys="' + f.dataset.sys + '"]');
                         if (dx) {
-                            const fsel = { month: '.dx-month', unit: '.dx-unit', los: '.dx-los', period: '.dx-period' }[f.dataset.f];
+                            const fsel = { month: '.dx-month', unit: '.dx-unit' }[f.dataset.f];
                             const src = dx.querySelector(fsel);
                             if (src) src.value = f.value;
                         }
@@ -1625,7 +1615,11 @@
                 '<th class="border border-blue-200 p-2 text-center w-28">จำนวนวัน (รวม)</th></tr></thead>' +
                 '<tbody id="devBody"></tbody>' +
                 '<tfoot><tr class="bg-blue-50 font-bold"><td class="border border-blue-200 p-2" colspan="4">รวมทั้งหมด</td>' +
-                '<td class="border border-blue-200 p-2 text-center" id="devTot">0</td></tr></tfoot></table></div>';
+                '<td class="border border-blue-200 p-2 text-center" id="devTot">0</td></tr></tfoot></table></div>' +
+                '<div class="mt-4 pt-3 border-t border-blue-200 flex flex-col sm:flex-row sm:items-center gap-3 text-sm">' +
+                '<label class="flex items-center gap-2 font-medium text-gray-700">วันนอนทั้งหมด (Admit): <input type="number" min="0" id="dev-los" class="w-20 text-center border-b border-blue-400 bg-transparent focus:outline-none text-red-600 font-bold"> วัน</label>' +
+                '<label class="flex items-center gap-2 flex-1 font-medium text-gray-700">ช่วงเวลา (แสตมป์หน่วย): <input type="text" id="dev-period" class="flex-1 border-b border-blue-400 bg-transparent focus:outline-none px-1" placeholder="เช่น ICU 1-5 ก.ย. / CCU 6-8 ก.ย."></label>' +
+                '</div>';
             labsTab.appendChild(devCard);
             const devBody = document.getElementById('devBody');
 
