@@ -1613,9 +1613,10 @@
                 '<th class="border border-blue-200 p-2 text-left">ระบบ / อุปกรณ์</th>' +
                 '<th class="border border-blue-200 p-2 text-center w-16">ครั้ง</th>' +
                 '<th class="border border-blue-200 p-2 text-left w-72">ช่วงเวลา</th>' +
+                '<th class="border border-blue-200 p-2 text-left w-40">หน่วย</th>' +
                 '<th class="border border-blue-200 p-2 text-center w-28">จำนวนวัน (รวม)</th></tr></thead>' +
                 '<tbody id="devBody"></tbody>' +
-                '<tfoot><tr class="bg-blue-50 font-bold"><td class="border border-blue-200 p-2" colspan="4">รวมทั้งหมด</td>' +
+                '<tfoot><tr class="bg-blue-50 font-bold"><td class="border border-blue-200 p-2" colspan="5">รวมทั้งหมด</td>' +
                 '<td class="border border-blue-200 p-2 text-center" id="devTot">0</td></tr></tfoot></table></div>' +
                 '<div class="mt-4 pt-3 border-t border-blue-200 flex flex-col sm:flex-row sm:items-center gap-3 text-sm">' +
                 '<label class="flex items-center gap-2 font-medium text-gray-700">วันนอนทั้งหมด (Admit): <input type="number" min="0" id="dev-los" readonly class="w-20 text-center border-b border-blue-400 bg-transparent focus:outline-none text-red-600 font-bold" placeholder="-"> วัน</label>' +
@@ -1666,15 +1667,45 @@
                 if (!v) return '?';
                 const p = v.split('-'); return p.length === 3 ? p[2] + '/' + p[1] + '/' + p[0] : v;
             }
+            // หน่วยที่ผู้ป่วยอยู่ ณ วันที่กำหนด (จากไทม์ไลน์การย้าย 1.3)
+            function wardForDate(dStr) {
+                if (!dStr) return '';
+                const d = new Date(dStr); d.setHours(0, 0, 0, 0);
+                const segs = [];
+                const gad = document.getElementById('global-admit-date');
+                let admitWard = (document.querySelector('input[placeholder="ระบุหอผู้ป่วย"]') || {}).value || '';
+                let prevDate = gad && gad.value ? new Date(gad.value) : null;
+                if (prevDate) prevDate.setHours(0, 0, 0, 0);
+                let prevWard = admitWard;
+                document.querySelectorAll('.transfer-row').forEach(function (r) {
+                    const texts = r.querySelectorAll('input[type="text"]');
+                    const from = texts[0] ? (texts[0].value || '').trim() : '';
+                    const to = texts[1] ? (texts[1].value || '').trim() : '';
+                    const tv = (r.querySelector('.transfer-date') || {}).value;
+                    if (!tv) return;
+                    const td = new Date(tv); td.setHours(0, 0, 0, 0);
+                    segs.push({ start: prevDate, end: td, ward: prevWard || from });
+                    prevDate = td; prevWard = to || from;
+                });
+                segs.push({ start: prevDate, end: null, ward: prevWard });
+                for (let i = 0; i < segs.length; i++) {
+                    const s = segs[i];
+                    if (!s.ward) continue;
+                    if ((!s.start || d >= s.start) && (!s.end || d <= s.end)) return s.ward;
+                }
+                return prevWard || admitWard || '';
+            }
             function syncDev() {
                 if (!devBody) return;
                 let rows = '', total = 0;
                 // entries = [{s,e,days}]
                 function addRow(id, label, entries) {
-                    let sum = 0;
+                    let sum = 0; const wardSet = [];
                     const spans = entries.map(function (en) {
                         sum += en.days;
-                        return '<span class="pv-filled">' + fmtD(en.s) + ' – ' + fmtD(en.e) + ' (' + en.days + ' วัน)</span>';
+                        const w = wardForDate(en.s);
+                        if (w && wardSet.indexOf(w) === -1) wardSet.push(w);
+                        return '<span class="pv-filled">' + fmtD(en.s) + ' – ' + fmtD(en.e) + ' (' + en.days + ' วัน)' + (w ? ' · ' + w : '') + '</span>';
                     });
                     total += sum;
                     rows += '<tr>' +
@@ -1682,6 +1713,7 @@
                         '<td class="border border-blue-200 p-2 align-top">' + sysName[id] + ' — ' + label + '</td>' +
                         '<td class="border border-blue-200 p-2 text-center align-top"><span class="pv-filled">' + entries.length + '</span></td>' +
                         '<td class="border border-blue-200 p-2 align-top">' + spans.join('<br>') + '</td>' +
+                        '<td class="border border-blue-200 p-2 align-top">' + (wardSet.length ? '<span class="pv-filled">' + wardSet.join(', ') + '</span>' : '<span class="text-gray-300">–</span>') + '</td>' +
                         '<td class="border border-blue-200 p-2 text-center align-top"><span class="pv-filled" style="font-weight:700;color:#2563eb">' + sum + '</span> วัน</td></tr>';
                 }
                 ids.forEach(function (id) {
@@ -3121,14 +3153,16 @@
                     if (!s.value) { for (let i = 0; i < s.options.length; i++) { if (s.options[i].value) { s.value = s.options[i].value; break; } } }
                 });
 
-                // 4) วันที่แบบช่วง → ให้คำนวณจำนวนวันได้
-                document.querySelectorAll('.dr-row').forEach(function (r) {
+                // 4) วันที่แบบช่วง → ให้คำนวณจำนวนวันได้ (กระจายให้ตกคนละช่วงการย้าย เพื่อเห็นหลายหน่วย)
+                document.querySelectorAll('.dr-row').forEach(function (r, i) {
+                    const off = (i % 4) * 3; // 0,3,6,9 → ตรงกับช่วงการย้ายแต่ละตึก
                     const s = r.querySelector('.dr-start'), e = r.querySelector('.dr-end');
-                    if (s) s.value = isoBase; if (e) e.value = plus(base, 5);
+                    if (s) s.value = plus(base, off); if (e) e.value = plus(base, off + 2);
                 });
-                document.querySelectorAll('.cb-rrow').forEach(function (r) {
+                document.querySelectorAll('.cb-rrow').forEach(function (r, i) {
+                    const off = (i % 4) * 3;
                     const ds = r.querySelectorAll('.cb-date');
-                    if (ds[0]) ds[0].value = isoBase; if (ds[1]) ds[1].value = plus(base, 3);
+                    if (ds[0]) ds[0].value = plus(base, off); if (ds[1]) ds[1].value = plus(base, off + 2);
                 });
                 // 1.3 รับย้าย: ใส่ตึกเป็นสายย้ายจริง (หลากหลาย) + วันที่ห่างช่วงละ ~3 วัน
                 var tfWards = ['ER', 'ICU', 'อายุรกรรมชาย', 'พิเศษ', 'ศัลยกรรมชาย', 'อายุรกรรมหญิง'];
