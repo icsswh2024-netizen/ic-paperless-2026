@@ -3261,6 +3261,17 @@
                         };
                         localStorage.setItem('iccRec:' + rec.an, JSON.stringify(rec));
                     });
+                    // ประวัติใบเฝ้าระวัง (iccLog) ของ AN ปัจจุบัน — จำลองการบันทึกจากหลายหน่วย
+                    if (typeof iccSaveLog === 'function') {
+                        const uNow = (document.getElementById('global-unit') || {}).value || 'ICU อายุรกรรม';
+                        const fmtWhen = function (d) { return d.toLocaleString('th-TH'); };
+                        const t0 = new Date(base); t0.setDate(t0.getDate() - 2);
+                        const t1 = new Date(base);
+                        iccSaveLog([
+                            { unit: 'ER', action: 'แบบร่าง', when: fmtWhen(t0), ts: t0.getTime() },
+                            { unit: uNow, action: 'เสร็จสิ้น', when: fmtWhen(t1), ts: t1.getTime() }
+                        ]);
+                    }
                 } catch (e) {}
 
                 // toast
