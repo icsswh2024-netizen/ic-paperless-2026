@@ -1427,8 +1427,9 @@
                 '<th class="border border-red-200 p-2 text-left">หน่วยงาน / หอผู้ป่วย</th>' +
                 '<th class="border border-red-200 p-2 text-center">สถานะ</th>' +
                 '<th class="border border-red-200 p-2 text-center">การยืนยันโดย ICN</th></tr></thead>' +
-                '<tbody><tr>' +
+                '<tbody class="dx-tbody"><tr class="dx-erow">' +
                 '<td class="border border-red-200 p-1"><div class="flex flex-wrap items-center gap-3">' +
+                '<button type="button" class="dxrow-del text-gray-400 hover:text-red-500 shrink-0" title="ลบแถวนี้"><i data-feather="trash-2" class="w-4 h-4"></i></button>' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-ci w-4 h-4 rounded border-gray-300"> CI</label>' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-hai w-4 h-4 rounded border-gray-300"> HAI</label>' +
                 '<label class="flex items-center gap-1 cursor-pointer"><input type="checkbox" class="dx-nohai w-4 h-4 rounded border-gray-300"> NoHAI</label>' +
@@ -1444,8 +1445,40 @@
                 '<button type="button" class="icn-btn hai-red" data-v="ยืนยันการติดเชื้อในโรงพยาบาล">ยืนยันติดเชื้อใน รพ.</button>' +
                 '<button type="button" class="icn-btn hai-green" data-v="ไม่ใช่การติดเชื้อในโรงพยาบาล">ไม่ใช่ติดเชื้อใน รพ.</button>' +
                 '</div></td>' +
-                '</tr></tbody></table></div></div>';
+                '</tr></tbody></table></div>' +
+                '<button type="button" class="dxrow-add mt-2 text-xs flex items-center gap-1 bg-red-100 text-red-700 px-2 py-1 rounded hover:bg-red-200 transition-colors font-medium"><i data-feather="plus" class="w-3 h-3"></i> เพิ่มสถานะทั้งตาราง</button>' +
+                '</div>';
             tab.insertAdjacentHTML('beforeend', html);
+        });
+
+        // เพิ่ม/ลบ แถวสถานะในตารางสรุปการวินิจฉัยแต่ละระบบ (โคลนทั้งแถว)
+        document.addEventListener('click', function (e) {
+            const addB = e.target.closest ? e.target.closest('.dxrow-add') : null;
+            if (addB) {
+                const dx = addB.closest('.dx-summary'); const tb = dx && dx.querySelector('.dx-tbody');
+                if (!tb) return;
+                const rows = tb.querySelectorAll('.dx-erow');
+                const clone = rows[rows.length - 1].cloneNode(true);
+                clone.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+                clone.querySelectorAll('input[type="month"], input[type="text"]').forEach(function (i) { i.value = ''; });
+                clone.querySelectorAll('.hai-btn.active, .icn-btn.active').forEach(function (b) { b.classList.remove('active'); });
+                tb.appendChild(clone);
+                if (window.feather) feather.replace();
+                if (window.__syncSummaries) window.__syncSummaries();
+                return;
+            }
+            const delB = e.target.closest ? e.target.closest('.dxrow-del') : null;
+            if (delB) {
+                const tb = delB.closest('.dx-tbody'); const row = delB.closest('.dx-erow');
+                if (!tb || !row) return;
+                if (tb.querySelectorAll('.dx-erow').length > 1) { row.remove(); }
+                else {
+                    row.querySelectorAll('input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+                    row.querySelectorAll('input[type="month"], input[type="text"]').forEach(function (i) { i.value = ''; });
+                    row.querySelectorAll('.hai-btn.active, .icn-btn.active').forEach(function (b) { b.classList.remove('active'); });
+                }
+                if (window.__syncSummaries) window.__syncSummaries();
+            }
         });
 
         // ปุ่มสถานะการวินิจฉัย: คลิกเพื่อเลือก (เลือกได้ทีละสถานะ / คลิกซ้ำเพื่อยกเลิก)
@@ -1524,10 +1557,10 @@
                     const dx = document.querySelector('.dx-summary[data-sys="' + id + '"]');
                     let ci = false, hai = false, no = false, mdr = false, mo = '', un = '', stV = '', icnV = '';
                     if (dx) {
-                        ci = !!(dx.querySelector('.dx-ci') || {}).checked;
-                        hai = !!(dx.querySelector('.dx-hai') || {}).checked;
-                        no = !!(dx.querySelector('.dx-nohai') || {}).checked;
-                        mdr = !!(dx.querySelector('.dx-mdr') || {}).checked;
+                        ci = !!dx.querySelector('.dx-ci:checked');
+                        hai = !!dx.querySelector('.dx-hai:checked');
+                        no = !!dx.querySelector('.dx-nohai:checked');
+                        mdr = !!dx.querySelector('.dx-mdr:checked');
                         mo = (dx.querySelector('.dx-month') || {}).value || '';
                         un = (dx.querySelector('.dx-unit') || {}).value || '';
                         const ab = dx.querySelector('.dx-status-cell .hai-btn.active');
