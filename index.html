@@ -3121,11 +3121,16 @@
                 });
                 if (typeof calculateTransferDays === 'function') calculateTransferDays();
 
-                // 6) สถานะการวินิจฉัยแต่ละระบบ (กดปุ่มเรืองแสง)
+                // 6) สถานะการวินิจฉัยแต่ละระบบ (กดปุ่มเรืองแสง) + การยืนยันโดย ICN
                 document.querySelectorAll('.dx-summary').forEach(function (dx, i) {
-                    const btns = dx.querySelectorAll('.hai-btn');
-                    if (btns.length) btns[[1, 2, 3, 3][i % 4]].click();
+                    const st = dx.querySelectorAll('.dx-status-cell .hai-btn');
+                    if (st.length) st[i % st.length].click();
+                    const ic = dx.querySelectorAll('.dx-icn-cell .icn-btn');
+                    if (ic.length) ic[i % ic.length].click();
                 });
+                // วันนอน/ช่วงเวลา (แสตมป์หน่วย) ในสรุปจำนวนวันใส่อุปกรณ์
+                const dLos = document.getElementById('dev-los'); if (dLos) dLos.value = '6';
+                const dPer = document.getElementById('dev-period'); if (dPer) dPer.value = 'ICU 1-5 ก.ย. / CCU 6 ก.ย.';
                 if (window.__syncSummaries) window.__syncSummaries();
                 if (window.feather) feather.replace();
 
