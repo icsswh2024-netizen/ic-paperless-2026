@@ -2561,17 +2561,9 @@
                     if (!byMonth[mk]) byMonth[mk] = { n: 0, ci: 0, hai: 0, no: 0 };
                     byMonth[mk].n++; if (r.ci) byMonth[mk].ci++; if (r.hai) byMonth[mk].hai++; if (r.nohai) byMonth[mk].no++;
                 });
-                const rate = recs.length ? (hai / recs.length * 100).toFixed(1) : '0.0';
-                let h = '<div style="border:1px solid ' + color + '33;border-radius:12px;padding:14px;margin-bottom:16px;background:' + color + '08">' +
-                    '<h4 style="font-weight:700;color:' + color + ';margin-bottom:10px;font-size:15px">📊 รายงานการเฝ้าระวังสะสม (ทั้งระบบ)</h4>' +
-                    '<div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:12px">' +
-                    tile('ใบเฝ้าระวังสะสม (ราย)', recs.length, color) +
-                    tile('CI สะสม', ci, '#6b7280') +
-                    tile('HAI สะสม', hai, '#dc2626') +
-                    tile('NoHAI สะสม', no, '#0d9488') +
-                    tile('อัตรา HAI (%)', rate, '#b45309') + '</div>';
+                let h = '<div style="border:1px solid ' + color + '33;border-radius:12px;padding:14px;margin-bottom:16px;background:' + color + '08">';
                 const months = Object.keys(byMonth).sort();
-                h += '<div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:6px">สรุปรายเดือน</div>';
+                h += '<div style="font-size:13px;color:#374151;font-weight:600;margin-bottom:6px">จำนวนใบ / CI / HAI / NoHAI แต่ละเดือน</div>';
                 if (months.length) {
                     h += '<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12.5px">' +
                         '<thead><tr style="background:' + color + '15;color:#374151">' +
@@ -2683,15 +2675,28 @@
                 const admitRecs = recs;                                   // ทุกใบ = 1 admit
                 const transferRecs = recs.filter(function (r) { return (r.transfers || []).length > 0; });
                 const dischargeRecs = recs.filter(function (r) { return r.discharged; });
-                let html = '<div class="text-xs text-gray-500 mb-3">รายงานภาพรวมจากใบเฝ้าระวังที่บันทึกไว้ทั้งระบบ ทั้งหมด <b>' + recs.length + '</b> ราย</div>';
+                // ---- แถบ KPI + คำอธิบายสิ่งที่รายงานตอบ ----
+                let tCI = 0, tHAI = 0; recs.forEach(function (r) { if (r.ci) tCI++; if (r.hai) tHAI++; });
+                const rateH = recs.length ? (tHAI / recs.length * 100).toFixed(1) : '0.0';
+                let html = '<div style="margin-bottom:14px">' +
+                    '<div style="font-size:12.5px;color:#4b5563;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.6">' +
+                    'รายงานนี้ตอบ 3 คำถาม: <b>① ทำครบไหม</b> (ใบเฝ้าระวัง vs จำนวนจริง — ดูข้อ 2) · <b>② ที่ไหน/หน่วยไหนยังขาด</b> (เลือก “แยกหน่วย”) · <b>③ ผลติดเชื้อเป็นอย่างไร</b> (CI/HAI — ดูข้อ 1,3)</div>' +
+                    '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
+                    tile('ใบเฝ้าระวังทั้งหมด', recs.length, '#0369a1') +
+                    tile('ผล CI', tCI, '#6b7280') +
+                    tile('ผล HAI', tHAI, '#dc2626') +
+                    tile('อัตรา HAI (%)', rateH, '#b45309') + '</div></div>';
                 if (!recs.length) {
-                    html += '<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">ยังไม่มีใบเฝ้าระวังที่บันทึก — แสดงเป็นโครงร่างหัวข้อไว้ก่อน ตัวเลขจะอัปเดตเมื่อกด "บันทึกแบบร่าง/ประเมินเสร็จสิ้น"</div>';
+                    html += '<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">ยังไม่มีใบเฝ้าระวังที่บันทึก — แสดงโครงร่างหัวข้อไว้ก่อน ตัวเลขจะอัปเดตเมื่อกด “บันทึกแบบร่าง/ประเมินเสร็จสิ้น”</div>';
                 }
-                html += cumulativeSection(recs);
+                html += '<h3 style="font-size:14px;font-weight:800;color:#0369a1;margin:6px 0 8px">ข้อ 1 · ความครบถ้วน (ทำแล้ว/ยังไม่ทำ · แยกหน่วย · วัน-เดือน-ปี)</h3>';
                 html += compareSection(recs);
-                html += section('1. รายงานการ Admit', '#0d9488', admitRecs, function (r) { return [r.admitUnit]; });
-                html += section('2. รายงานการย้าย', '#2563eb', transferRecs, function (r) { return r.transfers; });
-                html += section('3. รายงานการจำหน่าย', '#7c3aed', dischargeRecs, function (r) { return [r.admitUnit]; });
+                html += '<h3 style="font-size:14px;font-weight:800;color:#b45309;margin:14px 0 8px">ข้อ 2 · แนวโน้มผลติดเชื้อรายเดือน (สะสม)</h3>';
+                html += cumulativeSection(recs);
+                html += '<h3 style="font-size:14px;font-weight:800;color:#374151;margin:14px 0 8px">ข้อ 3 · รายละเอียดตามกิจกรรม (หน่วยที่บันทึก / ยังไม่บันทึก)</h3>';
+                html += section('3.1 การ Admit', '#0d9488', admitRecs, function (r) { return [r.admitUnit]; });
+                html += section('3.2 การย้าย', '#2563eb', transferRecs, function (r) { return r.transfers; });
+                html += section('3.3 การจำหน่าย', '#7c3aed', dischargeRecs, function (r) { return [r.admitUnit]; });
                 body.innerHTML = html;
             }
             body.addEventListener('click', function (e) {
