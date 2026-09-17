@@ -2410,6 +2410,7 @@
                     ci: !!(window.__dxTotals && window.__dxTotals.ci > 0),
                     hai: !!(window.__dxTotals && window.__dxTotals.hai > 0),
                     nohai: !!(window.__dxTotals && window.__dxTotals.nohai > 0),
+                    los: parseInt((document.getElementById('dev-los') || {}).value, 10) || 0,
                     action: action, ts: ts
                 };
                 localStorage.setItem('iccRec:' + rec.an, JSON.stringify(rec));
@@ -2558,8 +2559,9 @@
                     if (r.ci) ci++; if (r.hai) hai++; if (r.nohai) no++;
                     let mk = 'ไม่ระบุเดือน';
                     if (r.ts) { const d = new Date(r.ts); if (!isNaN(d)) mk = (d.getFullYear() + 543) + '-' + ('0' + (d.getMonth() + 1)).slice(-2); }
-                    if (!byMonth[mk]) byMonth[mk] = { n: 0, ci: 0, hai: 0, no: 0 };
+                    if (!byMonth[mk]) byMonth[mk] = { n: 0, ci: 0, hai: 0, no: 0, los: 0 };
                     byMonth[mk].n++; if (r.ci) byMonth[mk].ci++; if (r.hai) byMonth[mk].hai++; if (r.nohai) byMonth[mk].no++;
+                    byMonth[mk].los += (parseInt(r.los, 10) || 0);
                 });
                 let h = '<div style="border:1px solid ' + color + '33;border-radius:12px;padding:14px;margin-bottom:16px;background:' + color + '08">';
                 const months = Object.keys(byMonth).sort();
@@ -2571,13 +2573,17 @@
                         '<th style="border:1px solid ' + color + '30;padding:5px 8px">จำนวน</th>' +
                         '<th style="border:1px solid ' + color + '30;padding:5px 8px">CI</th>' +
                         '<th style="border:1px solid ' + color + '30;padding:5px 8px">HAI</th>' +
-                        '<th style="border:1px solid ' + color + '30;padding:5px 8px">NoHAI</th></tr></thead><tbody>' +
-                        months.map(function (m) { const v = byMonth[m]; return '<tr>' +
+                        '<th style="border:1px solid ' + color + '30;padding:5px 8px">NoHAI</th>' +
+                        '<th style="border:1px solid ' + color + '30;padding:5px 8px">วันนอน</th>' +
+                        '<th style="border:1px solid ' + color + '30;padding:5px 8px">HAI/1000 วันนอน</th></tr></thead><tbody>' +
+                        months.map(function (m) { const v = byMonth[m]; const rt = v.los > 0 ? (v.hai / v.los * 1000).toFixed(2) : '—'; return '<tr>' +
                             '<td style="border:1px solid ' + color + '30;padding:5px 8px">' + m + '</td>' +
                             '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center">' + v.n + '</td>' +
                             '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center">' + v.ci + '</td>' +
                             '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center;color:#dc2626;font-weight:700">' + v.hai + '</td>' +
-                            '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center">' + v.no + '</td></tr>'; }).join('') +
+                            '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center">' + v.no + '</td>' +
+                            '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center">' + v.los + '</td>' +
+                            '<td style="border:1px solid ' + color + '30;padding:5px 8px;text-align:center;color:#b45309;font-weight:700">' + rt + '</td></tr>'; }).join('') +
                         '</tbody></table></div>';
                 } else {
                     h += '<div style="font-size:12px;color:#9ca3af">—</div>';
@@ -2676,8 +2682,8 @@
                 const transferRecs = recs.filter(function (r) { return (r.transfers || []).length > 0; });
                 const dischargeRecs = recs.filter(function (r) { return r.discharged; });
                 // ---- แถบ KPI + คำอธิบายสิ่งที่รายงานตอบ ----
-                let tCI = 0, tHAI = 0; recs.forEach(function (r) { if (r.ci) tCI++; if (r.hai) tHAI++; });
-                const rateH = recs.length ? (tHAI / recs.length * 100).toFixed(1) : '0.0';
+                let tCI = 0, tHAI = 0, tLOS = 0; recs.forEach(function (r) { if (r.ci) tCI++; if (r.hai) tHAI++; tLOS += (parseInt(r.los, 10) || 0); });
+                const rateH = tLOS > 0 ? (tHAI / tLOS * 1000).toFixed(2) : '0.00';
                 let html = '<div style="margin-bottom:14px">' +
                     '<div style="font-size:12.5px;color:#4b5563;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.6">' +
                     'รายงานนี้ตอบ 3 คำถาม: <b>① ทำครบไหม</b> (ใบเฝ้าระวัง vs จำนวนจริง — ดูข้อ 2) · <b>② ที่ไหน/หน่วยไหนยังขาด</b> (เลือก “แยกหน่วย”) · <b>③ ผลติดเชื้อเป็นอย่างไร</b> (CI/HAI — ดูข้อ 1,3)</div>' +
@@ -2685,7 +2691,8 @@
                     tile('ใบเฝ้าระวังทั้งหมด', recs.length, '#0369a1') +
                     tile('ผล CI', tCI, '#6b7280') +
                     tile('ผล HAI', tHAI, '#dc2626') +
-                    tile('อัตรา HAI (%)', rateH, '#b45309') + '</div></div>';
+                    tile('วันนอนรวม (วัน)', tLOS, '#0d9488') +
+                    tile('อัตรา HAI (ต่อ 1000 วันนอน)', rateH, '#b45309') + '</div></div>';
                 if (!recs.length) {
                     html += '<div class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2 mb-3">ยังไม่มีใบเฝ้าระวังที่บันทึก — แสดงโครงร่างหัวข้อไว้ก่อน ตัวเลขจะอัปเดตเมื่อกด “บันทึกแบบร่าง/ประเมินเสร็จสิ้น”</div>';
                 }
