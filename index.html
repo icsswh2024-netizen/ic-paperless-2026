@@ -2698,12 +2698,10 @@
                 }
                 html += '<h3 style="font-size:14px;font-weight:800;color:#0369a1;margin:6px 0 8px">ข้อ 1 · ความครบถ้วน (ทำแล้ว/ยังไม่ทำ · แยกหน่วย · วัน-เดือน-ปี)</h3>';
                 html += compareSection(recs);
-                html += '<h3 style="font-size:14px;font-weight:800;color:#b45309;margin:14px 0 8px">ข้อ 2 · แนวโน้มผลติดเชื้อรายเดือน (สะสม)</h3>';
-                html += cumulativeSection(recs);
-                html += '<h3 style="font-size:14px;font-weight:800;color:#374151;margin:14px 0 8px">ข้อ 3 · รายละเอียดตามกิจกรรม (หน่วยที่บันทึก / ยังไม่บันทึก)</h3>';
-                html += section('3.1 การ Admit', '#0d9488', admitRecs, function (r) { return [r.admitUnit]; });
-                html += section('3.2 การย้าย', '#2563eb', transferRecs, function (r) { return r.transfers; });
-                html += section('3.3 การจำหน่าย', '#7c3aed', dischargeRecs, function (r) { return [r.admitUnit]; });
+                html += '<h3 style="font-size:14px;font-weight:800;color:#374151;margin:14px 0 8px">ข้อ 2 · รายละเอียดตามกิจกรรม (หน่วยที่บันทึก / ยังไม่บันทึก)</h3>';
+                html += section('2.1 การ Admit', '#0d9488', admitRecs, function (r) { return [r.admitUnit]; });
+                html += section('2.2 การย้าย', '#2563eb', transferRecs, function (r) { return r.transfers; });
+                html += section('2.3 การจำหน่าย', '#7c3aed', dischargeRecs, function (r) { return [r.admitUnit]; });
                 body.innerHTML = html;
             }
             body.addEventListener('click', function (e) {
@@ -3241,6 +3239,29 @@
                 if (typeof deriveAdmitStay === 'function') deriveAdmitStay();
                 if (window.__syncSummaries) window.__syncSummaries();
                 if (window.feather) feather.replace();
+
+                // 7) จำลองข้อมูล "รายงานการเฝ้าระวังภาพรวม" (iccRec) หลายราย/หลายหน่วย/หลายเดือน
+                try {
+                    const units = ['ICU อายุรกรรม', 'อายุรกรรมชาย', 'อายุรกรรมหญิง', 'ศัลยกรรมชาย', 'กุมารเวชกรรม'];
+                    const y = base.getFullYear();
+                    const demo = [
+                        { m: base.getMonth(),     u: 0, ci: 1, hai: 1, no: 0, los: 12, tf: 2, dc: 1 },
+                        { m: base.getMonth(),     u: 1, ci: 1, hai: 0, no: 1, los: 7,  tf: 1, dc: 1 },
+                        { m: base.getMonth(),     u: 2, ci: 0, hai: 0, no: 0, los: 4,  tf: 0, dc: 0 },
+                        { m: base.getMonth() - 1, u: 0, ci: 1, hai: 1, no: 0, los: 20, tf: 3, dc: 1 },
+                        { m: base.getMonth() - 1, u: 3, ci: 1, hai: 0, no: 0, los: 9,  tf: 1, dc: 1 },
+                        { m: base.getMonth() - 1, u: 4, ci: 0, hai: 0, no: 1, los: 5,  tf: 0, dc: 0 }
+                    ];
+                    demo.forEach(function (d, i) {
+                        const dt = new Date(y, d.m, 5 + i);
+                        const rec = {
+                            an: 'DEMO' + (i + 1), name: 'ผู้ป่วยทดสอบ ' + (i + 1), admitUnit: units[d.u],
+                            transfers: d.tf ? units.slice(1, 1 + d.tf) : [], discharged: !!d.dc, dcType: d.dc ? 'กลับบ้าน' : '',
+                            ci: !!d.ci, hai: !!d.hai, nohai: !!d.no, los: d.los, action: 'เสร็จสิ้น', ts: dt.getTime()
+                        };
+                        localStorage.setItem('iccRec:' + rec.an, JSON.stringify(rec));
+                    });
+                } catch (e) {}
 
                 // toast
                 const t = document.createElement('div');
