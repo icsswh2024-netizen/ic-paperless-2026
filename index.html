@@ -2718,8 +2718,6 @@
                 let tCI = 0, tHAI = 0, tLOS = 0; recs.forEach(function (r) { if (r.ci) tCI++; if (r.hai) tHAI++; tLOS += (parseInt(r.los, 10) || 0); });
                 const rateH = tLOS > 0 ? (tHAI / tLOS * 1000).toFixed(2) : '0.00';
                 let html = '<div style="margin-bottom:14px">' +
-                    '<div style="font-size:12.5px;color:#4b5563;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;padding:10px 12px;margin-bottom:12px;line-height:1.6">' +
-                    'รายงานนี้ตอบ 3 คำถาม: <b>① ทำครบไหม</b> (ใบเฝ้าระวัง vs จำนวนจริง — ดูข้อ 2) · <b>② ที่ไหน/หน่วยไหนยังขาด</b> (เลือก “แยกหน่วย”) · <b>③ ผลติดเชื้อเป็นอย่างไร</b> (CI/HAI — ดูข้อ 1,3)</div>' +
                     '<div style="display:flex;flex-wrap:wrap;gap:10px">' +
                     tile('ใบเฝ้าระวังทั้งหมด', recs.length, '#0369a1') +
                     tile('ผล CI', tCI, '#6b7280') +
