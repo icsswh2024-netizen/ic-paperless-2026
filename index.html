@@ -1406,7 +1406,7 @@
 
         // 0a'. ตารางสรุปการวินิจฉัยเฉพาะระบบ ต่อท้ายแต่ละระบบ 1-11
         const sysName = { pneumonia:'Pneumonia', uti:'UTI', bsi:'BSI', surgery:'Surgical Site (SSI)', endometritis:'Endometritis', episiotomy:'Episiotomy', skin:'Skin & Soft Tissue', bedsore:'Bedsore (แผลกดทับ)', omphalitis:'Omphalitis', eye:'Eye (ตา)', other:'ระบบอื่น ๆ' };
-        const icnReportOpts = ['', 'รายงาน MDR', 'MDR ควบคุมพิเศษ', 'C.Diff', 'เชื้อวัวบ้า', 'Covid-19', 'Flu A', 'Flu AB', 'ไข้หวัดนก'];
+        const icnReportOpts = ['', 'รายงาน MDR', 'MDR ควบคุมพิเศษ', 'C.Diff', 'เชื้อวัวบ้า', 'Covid-19', 'Flu A', 'Flu AB', 'ไข้หวัดนก', 'อื่นๆ (ระบุ)'];
         function icnReportOptHTML(sel) {
             return icnReportOpts.map(function (o) {
                 return '<option value="' + o + '"' + (sel === o ? ' selected' : '') + '>' + (o || '— เลือก —') + '</option>';
@@ -2334,7 +2334,7 @@
             const rowHTML =
                 '<tr>' +
                 '<td class="border border-red-200 p-1"><input type="date" class="w-full bg-transparent focus:outline-none px-1"></td>' +
-                '<td class="border border-red-200 p-1"><select class="w-full bg-transparent focus:outline-none px-1 text-sm">' + optHTML + '</select></td>' +
+                '<td class="border border-red-200 p-1"><select class="icnr-type w-full bg-transparent focus:outline-none px-1 text-sm">' + optHTML + '</select><input type="text" class="icnr-other w-full bg-transparent focus:outline-none px-1 mt-1 border-b border-red-300 text-red-700" placeholder="ระบุประเภท…" hidden></td>' +
                 '<td class="border border-red-200 p-1"><div class="flex items-center gap-1"><input type="text" class="flex-1 bg-transparent focus:outline-none px-1" placeholder="รายละเอียด/การดำเนินการ"><button type="button" class="icnr-del text-gray-400 hover:text-red-500 shrink-0" title="ลบแถว"><i data-feather="trash-2" class="w-4 h-4"></i></button></div></td>' +
                 '</tr>';
             tabLabs.insertAdjacentHTML('afterend',
@@ -2375,6 +2375,12 @@
                         else tr.querySelectorAll('input, select').forEach(function (i) { if (i.tagName === 'SELECT') i.selectedIndex = 0; else i.value = ''; });
                     }
                 }
+            });
+            document.addEventListener('change', function (e) {
+                const sel = e.target.closest ? e.target.closest('.icnr-type') : null;
+                if (!sel) return;
+                const other = sel.parentElement.querySelector('.icnr-other');
+                if (other) { other.hidden = sel.value !== 'อื่นๆ (ระบุ)'; if (!other.hidden) other.focus(); else other.value = ''; }
             });
             if (window.feather) feather.replace();
             if (window.__icnrUpdateInfo) window.__icnrUpdateInfo();
